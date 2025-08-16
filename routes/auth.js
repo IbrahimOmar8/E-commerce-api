@@ -107,8 +107,8 @@ router.post('/create-admin', async (req, res) => {
   }
 });
 
-// Middleware to verify JWT token
-const verifyToken = (req, res, next) => {
+// Verify token endpoint
+router.get('/verify', (req, res) => {
   const token = req.header('Authorization')?.replace('Bearer ', '');
 
   if (!token) {
@@ -120,22 +120,16 @@ const verifyToken = (req, res, next) => {
 
   try {
     const decoded = jwt.verify(token, process.env.JWT_SECRET || 'your-secret-key');
-    req.admin = decoded;
-    next();
+    res.json({
+      success: true,
+      admin: decoded
+    });
   } catch (error) {
     res.status(401).json({
       success: false,
       message: 'Invalid token'
     });
   }
-};
-
-// Verify token endpoint
-router.get('/verify', verifyToken, (req, res) => {
-  res.json({
-    success: true,
-    admin: req.admin
-  });
 });
 
-module.exports = { router, verifyToken };
+module.exports = router;

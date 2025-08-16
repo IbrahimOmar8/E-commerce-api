@@ -1,7 +1,9 @@
 const express = require('express');
 const Product = require('../models/Product');
 const Category = require('../models/Category');
-const { verifyToken } = require('./auth');
+//const verifyToken = require('../middleware/auth');
+
+const verifyToken = require('../Middleware/auth'); // Ensure you have this middleware for authentication
 
 const router = express.Router();
 

@@ -1,7 +1,6 @@
 const express = require('express');
-const Category = require('../models/Category');
-const { verifyToken } = require('./auth');
-
+const Category = require('../models/Category');  
+const verifyToken = require('../Middleware/auth'); // Ensure you have this middleware for authentication
 const router = express.Router();
 
 // Get all categories (public)
