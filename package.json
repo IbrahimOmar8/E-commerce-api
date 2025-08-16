@@ -6,6 +6,7 @@
   "scripts": {
     "start": "node server.js",
     "dev": "nodemon server.js",
+    "build": "npm install --omit=dev",
     "seed": "node scripts/seed.js"
   },
   "keywords": [
@@ -15,7 +16,7 @@
     "express",
     "mongodb"
   ],
-  "author": "Your Name",
+  "author": "Ibrahim omar",
   "license": "MIT",
   "dependencies": {
     "bcryptjs": "^2.4.3",
