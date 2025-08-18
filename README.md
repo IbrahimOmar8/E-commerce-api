@@ -64,6 +64,191 @@ The API will be available at `http://localhost:5000`
 
 ## API Documentation
 
+# API Documentation
+
+## Base URL
+- **Development:** `http://localhost:5000/api`
+- **Production:** `your-deployed-url/api`
+
+## Authentication
+Admin routes require a JWT token in the `Authorization` header:
+```
+Authorization: Bearer <your-jwt-token>
+```
+
+---
+
+## Endpoints
+
+### Authentication
+- **`POST /auth/login`** - Admin login
+  - **Request Body:**
+    ```json
+    {
+      "username": "admin",
+      "password": "admin123"
+    }
+    ```
+  - **Response:**
+    ```json
+    {
+      "success": true,
+      "token": "jwt-token-here"
+    }
+    ```
+
+- **`GET /auth/verify`** - Verify token
+- **`POST /auth/create-admin`** - Create first admin (only if no admin exists)
+
+---
+
+### Categories
+- **`GET /categories`** - Get all active categories (public)
+- **`GET /categories/admin`** - Get all categories (admin)
+- **`GET /categories/:id`** - Get single category
+- **`POST /categories`** - Create category (admin)
+  - **Request Body:**
+    ```json
+    {
+      "name": "Category Name",
+      "description": "Optional description for the category",
+      "image": "Optional image URL"
+    }
+    ```
+  - **Response:**
+    ```json
+    {
+      "success": true,
+      "message": "Category created successfully",
+      "data": {
+        "_id": "category_id_here",
+        "name": "Category Name",
+        "description": "Optional description for the category",
+        "image": "Optional image URL",
+        "isActive": true
+      }
+    }
+    ```
+- **`PUT /categories/:id`** - Update category (admin)
+- **`DELETE /categories/:id`** - Delete category (admin)
+
+---
+
+### Products
+- **`GET /products`** - Get products with filtering/search (public)
+  - **Query Parameters:**
+    - `page` - Page number (default: 1)
+    - `limit` - Items per page (default: 12)
+    - `category` - Filter by category ID
+    - `search` - Search in name and description
+    - `minPrice` - Minimum price filter
+    - `maxPrice` - Maximum price filter
+    - `sort` - Sort field (default: -createdAt)
+    - `featured` - Filter featured products (true/false)
+
+- **`GET /products/admin`** - Get all products (admin)
+- **`GET /products/:id`** - Get single product
+- **`GET /products/category/:categoryId`** - Get products by category
+- **`POST /products`** - Create product (admin)
+  - **Request Body:**
+    ```json
+    {
+      "name": "New Product",
+      "description": "Product description",
+      "price": 99.99,
+      "category": "category_id_here",
+      "images": ["image_url_1", "image_url_2"],
+      "stock": 50,
+      "featured": true
+    }
+    ```
+- **`PUT /products/:id`** - Update product (admin)
+- **`DELETE /products/:id`** - Delete product (admin)
+- **`PATCH /products/:id/stock`** - Update product stock (admin)
+
+---
+
+### Orders
+- **`POST /orders`** - Create order (public)
+  - **Request Body:**
+    ```json
+    {
+      "customerInfo": {
+        "name": "John Doe",
+        "email": "john@example.com",
+        "phone": "+1234567890",
+        "address": {
+          "street": "123 Main St",
+          "city": "New York",
+          "state": "NY",
+          "zipCode": "10001",
+          "country": "USA"
+        }
+      },
+      "items": [
+        {
+          "product": "product_id_here",
+          "quantity": 2
+        }
+      ],
+      "notes": "Please deliver after 5 PM"
+    }
+    ```
+
+- **`GET /orders`** - Get all orders (admin)
+  - **Query Parameters:**
+    - `page` - Page number (default: 1)
+    - `limit` - Items per page (default: 20)
+    - `status` - Filter by order status
+    - `search` - Search by customer name, email, or order number
+    - `startDate` - Filter orders from date
+    - `endDate` - Filter orders to date
+    - `sort` - Sort field (default: -createdAt)
+
+- **`GET /orders/:id`** - Get single order (admin)
+- **`GET /orders/track/:orderNumber`** - Track order (public)
+- **`PATCH /orders/:id/status`** - Update order status (admin)
+  - **Request Body:**
+    ```json
+    {
+      "status": "confirmed"
+    }
+    ```
+- **`PUT /orders/:id`** - Update order (admin)
+- **`DELETE /orders/:id`** - Delete order (admin)
+- **`GET /orders/admin/stats`** - Get order statistics (admin)
+
+---
+
+## Error Handling
+All endpoints return consistent error responses:
+```json
+{
+  "success": false,
+  "message": "Error description"
+}
+```
+
+---
+
+## Success Responses
+All successful responses include:
+```json
+{
+  "success": true,
+  "data": {...}, // Response data
+  "message": "Success message" // Optional
+}
+```
+
+---
+
+## Default Admin Credentials
+After running the seed script:
+- **Username:** admin
+- **Password:** admin123
+
+
 ### Base URL
 - Development: `http://localhost:5000/api`
 - Production: `your-deployed-url/api`

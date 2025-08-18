@@ -7,6 +7,101 @@ const verifyToken = require('../Middleware/auth'); // Ensure you have this middl
 
 const router = express.Router();
 
+/**
+ * @swagger
+ * tags:
+ *   name: Products
+ *   description: API for managing products
+ */
+
+/**
+ * @swagger
+ * /products:
+ *   get:
+ *     summary: Get all products with filtering and search
+ *     tags: [Products]
+ *     parameters:
+ *       - in: query
+ *         name: page
+ *         schema:
+ *           type: integer
+ *           example: 1
+ *         description: Page number
+ *       - in: query
+ *         name: limit
+ *         schema:
+ *           type: integer
+ *           example: 12
+ *         description: Number of items per page
+ *       - in: query
+ *         name: category
+ *         schema:
+ *           type: string
+ *           example: 64b7f3c2e4b0f5a1c2d3e4f5
+ *         description: Filter by category ID
+ *       - in: query
+ *         name: search
+ *         schema:
+ *           type: string
+ *           example: Laptop
+ *         description: Search by product name or description
+ *       - in: query
+ *         name: minPrice
+ *         schema:
+ *           type: number
+ *           example: 100
+ *         description: Minimum price filter
+ *       - in: query
+ *         name: maxPrice
+ *         schema:
+ *           type: number
+ *           example: 1000
+ *         description: Maximum price filter
+ *       - in: query
+ *         name: sort
+ *         schema:
+ *           type: string
+ *           example: -createdAt
+ *         description: Sort field
+ *     responses:
+ *       200:
+ *         description: List of products
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 data:
+ *                   type: array
+ *                   items:
+ *                     type: object
+ *                     properties:
+ *                       _id:
+ *                         type: string
+ *                         example: 64b7f3c2e4b0f5a1c2d3e4f5
+ *                       name:
+ *                         type: string
+ *                         example: Laptop
+ *                       price:
+ *                         type: number
+ *                         example: 999.99
+ *                       category:
+ *                         type: object
+ *                         properties:
+ *                           _id:
+ *                             type: string
+ *                             example: 64b7f3c2e4b0f5a1c2d3e4f5
+ *                           name:
+ *                             type: string
+ *                             example: Electronics
+ *       500:
+ *         description: Internal server error
+ */
+
+
 // Get all products with filtering and search (public)
 router.get('/', async (req, res) => {
   try {

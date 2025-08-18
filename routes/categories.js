@@ -203,4 +203,70 @@ router.delete('/:id', verifyToken, async (req, res) => {
   }
 });
 
+/**
+ * @swagger
+ * /categories:
+ *   post:
+ *     summary: Create a new category
+ *     tags: [Categories]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               name:
+ *                 type: string
+ *                 description: Name of the category
+ *                 example: Electronics
+ *               description:
+ *                 type: string
+ *                 description: Optional description of the category
+ *                 example: Devices and gadgets
+ *               image:
+ *                 type: string
+ *                 description: Optional image URL for the category
+ *                 example: https://example.com/image.jpg
+ *     responses:
+ *       201:
+ *         description: Category created successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 message:
+ *                   type: string
+ *                   example: Category created successfully
+ *                 data:
+ *                   type: object
+ *                   properties:
+ *                     _id:
+ *                       type: string
+ *                       example: 64b7f3c2e4b0f5a1c2d3e4f5
+ *                     name:
+ *                       type: string
+ *                       example: Electronics
+ *                     description:
+ *                       type: string
+ *                       example: Devices and gadgets
+ *                     image:
+ *                       type: string
+ *                       example: https://example.com/image.jpg
+ *                     isActive:
+ *                       type: boolean
+ *                       example: true
+ *       400:
+ *         description: Bad request
+ *       500:
+ *         description: Internal server error
+ */
+
+
 module.exports = router;

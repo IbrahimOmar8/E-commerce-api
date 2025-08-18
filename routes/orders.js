@@ -5,6 +5,98 @@ const Product = require('../models/Product');
 const verifyToken = require('../Middleware/auth'); // Ensure you have this middleware for authentication
 
 const router = express.Router();
+/**
+ * @swagger
+ * tags:
+ *   name: Orders
+ *   description: API for managing orders
+ */
+
+/**
+ * @swagger
+ * /orders:
+ *   post:
+ *     summary: Create a new order
+ *     tags: [Orders]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               customerInfo:
+ *                 type: object
+ *                 properties:
+ *                   name:
+ *                     type: string
+ *                     example: John Doe
+ *                   email:
+ *                     type: string
+ *                     example: john@example.com
+ *                   phone:
+ *                     type: string
+ *                     example: +1234567890
+ *                   address:
+ *                     type: object
+ *                     properties:
+ *                       street:
+ *                         type: string
+ *                         example: 123 Main St
+ *                       city:
+ *                         type: string
+ *                         example: New York
+ *                       state:
+ *                         type: string
+ *                         example: NY
+ *                       zipCode:
+ *                         type: string
+ *                         example: 10001
+ *                       country:
+ *                         type: string
+ *                         example: USA
+ *               items:
+ *                 type: array
+ *                 items:
+ *                   type: object
+ *                   properties:
+ *                     product:
+ *                       type: string
+ *                       example: 64b7f3c2e4b0f5a1c2d3e4f5
+ *                     quantity:
+ *                       type: integer
+ *                       example: 2
+ *               notes:
+ *                 type: string
+ *                 example: Please deliver after 5 PM
+ *     responses:
+ *       201:
+ *         description: Order created successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 message:
+ *                   type: string
+ *                   example: Order created successfully
+ *                 data:
+ *                   type: object
+ *                   properties:
+ *                     orderNumber:
+ *                       type: string
+ *                       example: ORD123456
+ *                     totalAmount:
+ *                       type: number
+ *                       example: 199.98
+ *       400:
+ *         description: Bad request
+ *       500:
+ *         description: Internal server error
+ */
 
 // Create order (public - from frontend)
 router.post('/', async (req, res) => {

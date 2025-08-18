@@ -2,6 +2,10 @@ const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
 const dotenv = require('dotenv');
+const swaggerUi = require('swagger-ui-express');
+const swaggerJsdoc = require('swagger-jsdoc');
+
+
 
 // Import routes
 const categoryRoutes = require('./routes/categories');
@@ -25,7 +29,55 @@ app.use(cors({
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-console.log('Trying to connect to:', process.env.MONGODB_URI || 'mongodb://localhost:27017/ecommerce');
+//console.log('Trying to connect to:', process.env.MONGODB_URI || 'mongodb://localhost:27017/ecommerce');
+
+
+// Swagger configuration
+const swaggerOptions = {
+  definition: {
+    openapi: '3.0.0',
+    info: {
+      title: 'My Express API',
+      version: '1.0.0',
+      description: 'A simple Express API with Swagger documentation',
+      contact: {
+        name: 'API Support',
+        email: 'support@myapi.com'
+      },
+    },
+    servers: [
+      {
+        url: 'http://localhost:3000',
+        description: 'Development server',
+      },
+      {
+        url: 'https://api.myapp.com',
+        description: 'Production server',
+      },
+    ],
+    components: {
+      securitySchemes: {
+        bearerAuth: {
+          type: 'http',
+          scheme: 'bearer',
+          bearerFormat: 'JWT',
+        },
+      },
+    },
+    security: [{
+      bearerAuth: []
+    }],
+  },
+  apis: ['./routes/*.js', './app.js'], // paths to files containing OpenAPI definitions
+};
+
+const specs = swaggerJsdoc(swaggerOptions);
+
+// Swagger UI setup
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(specs, {
+  customCss: '.swagger-ui .topbar { display: none }',
+  customSiteTitle: 'My API Documentation',
+}));
 
 
 // MongoDB Connection
