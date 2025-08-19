@@ -15,6 +15,51 @@ const router = express.Router();
 /**
  * @swagger
  * /orders:
+ *   get:
+ *     summary: Get all orders (admin)
+ *     tags: [Orders]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: query
+ *         name: page
+ *         schema:
+ *           type: integer
+ *           example: 1
+ *       - in: query
+ *         name: limit
+ *         schema:
+ *           type: integer
+ *           example: 20
+ *       - in: query
+ *         name: status
+ *         schema:
+ *           type: string
+ *         description: Filter by order status
+ *       - in: query
+ *         name: search
+ *         schema:
+ *           type: string
+ *         description: Search by customer name, email, or order number
+ *       - in: query
+ *         name: startDate
+ *         schema:
+ *           type: string
+ *           format: date
+ *       - in: query
+ *         name: endDate
+ *         schema:
+ *           type: string
+ *           format: date
+ *       - in: query
+ *         name: sort
+ *         schema:
+ *           type: string
+ *           example: -createdAt
+ *     responses:
+ *       200:
+ *         description: List of orders
+ *
  *   post:
  *     summary: Create a new order
  *     tags: [Orders]
@@ -96,6 +141,108 @@ const router = express.Router();
  *         description: Bad request
  *       500:
  *         description: Internal server error
+ */
+
+/**
+ * @swagger
+ * /orders/{id}:
+ *   get:
+ *     summary: Get single order
+ *     tags: [Orders]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Order object
+ *       404:
+ *         description: Not found
+ *
+ *   put:
+ *     summary: Update order (admin)
+ *     tags: [Orders]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *
+ *   delete:
+ *     summary: Delete order (admin)
+ *     tags: [Orders]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ */
+
+/**
+ * @swagger
+ * /orders/track/{orderNumber}:
+ *   get:
+ *     summary: Track order by order number (public)
+ *     tags: [Orders]
+ *     parameters:
+ *       - in: path
+ *         name: orderNumber
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Order status
+ */
+
+/**
+ * @swagger
+ * /orders/{id}/status:
+ *   patch:
+ *     summary: Update order status (admin)
+ *     tags: [Orders]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               status:
+ *                 type: string
+ *                 example: confirmed
+ *     responses:
+ *       200:
+ *         description: Status updated
+ */
+
+/**
+ * @swagger
+ * /orders/admin/stats:
+ *   get:
+ *     summary: Get order statistics (admin)
+ *     tags: [Orders]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Statistics object
  */
 
 // Create order (public - from frontend)

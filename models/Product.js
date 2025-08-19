@@ -15,10 +15,11 @@ const productSchema = new mongoose.Schema({
     required: [true, 'Product price is required'],
     min: [0, 'Price cannot be negative']
   },
-  category: {
+  // Product references only a subcategory (required)
+  subcategory: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Category',
-    required: [true, 'Product category is required']
+    required: [true, 'Product subcategory is required']
   },
   images: [{
     type: String

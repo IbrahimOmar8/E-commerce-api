@@ -37,48 +37,59 @@ const swaggerOptions = {
   definition: {
     openapi: '3.0.0',
     info: {
-      title: 'My Express API',
+      title: 'E-Commerce API',
       version: '1.0.0',
-      description: 'A simple Express API with Swagger documentation',
+      description: 'API documentation for the E-Commerce platform',
       contact: {
         name: 'API Support',
         email: 'support@myapi.com'
-      },
+      }
     },
     servers: [
       {
-        url: 'http://localhost:3000',
-        description: 'Development server',
-      },
-      {
-        url: 'https://api.myapp.com',
-        description: 'Production server',
-      },
+        url: 'http://localhost:5000/api',
+        description: 'Development server'
+      }
     ],
     components: {
       securitySchemes: {
         bearerAuth: {
           type: 'http',
           scheme: 'bearer',
-          bearerFormat: 'JWT',
-        },
-      },
+          bearerFormat: 'JWT'
+        }
+      }
     },
-    security: [{
-      bearerAuth: []
-    }],
+    security: [{ bearerAuth: [] }]
   },
-  apis: ['./routes/*.js', './app.js'], // paths to files containing OpenAPI definitions
+  apis: ['./routes/*.js'] // only route files
 };
 
-const specs = swaggerJsdoc(swaggerOptions);
+let specs;
+try {
+  specs = swaggerJsdoc(swaggerOptions);
+} catch (err) {
+  console.error('Swagger JSDoc generation error:', err);
+  specs = {
+    openapi: '3.0.0',
+    info: { title: 'E-Commerce API (docs generation failed)', version: '1.0.0', description: 'Swagger docs could not be generated. Check server logs.' },
+    paths: {},
+    components: {}
+  };
+}
 
-// Swagger UI setup
-app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(specs, {
+// Swagger UI setup - safe
+app.use('/api-docs', swaggerUi.serve, (req, res, next) => {
+  // If specs.paths is empty, show a simple message instead of failing
+  if (!specs || Object.keys(specs.paths || {}).length === 0) {
+    res.setHeader('Content-Type', 'text/html');
+    return res.send('<h1>API documentation is unavailable</h1><p>Check server logs for Swagger generation errors.</p>');
+  }
+  next();
+}, swaggerUi.setup(specs, {
   customCss: '.swagger-ui .topbar { display: none }',
-  customSiteTitle: 'My API Documentation',
+  customSiteTitle: 'E-Commerce API Documentation'
 }));
-
 
 // MongoDB Connection
 mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/ecommerce', {
@@ -89,10 +100,25 @@ mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/ecommerce
 .catch((err) => console.error('MongoDB connection error:', err));
 
 // Routes
-app.use('/api/auth', authRoutes);
-app.use('/api/categories', categoryRoutes);
-app.use('/api/products', productRoutes);
-app.use('/api/orders', orderRoutes);
+
+// Helper to resolve a router export whether it's a function, .router, or .default
+function resolveRouter(mod) {
+  if (!mod) return null;
+  if (typeof mod === 'function') return mod;
+  if (mod.router && typeof mod.router === 'function') return mod.router;
+  if (mod.default && typeof mod.default === 'function') return mod.default;
+  return null;
+}
+
+const authRouter = resolveRouter(authRoutes);
+const categoryRouter = resolveRouter(categoryRoutes);
+const productRouter = resolveRouter(productRoutes);
+const orderRouter = resolveRouter(orderRoutes);
+
+if (authRouter) app.use('/api/auth', authRouter); else console.error('Invalid router exported from ./routes/auth');
+if (categoryRouter) app.use('/api/categories', categoryRouter); else console.error('Invalid router exported from ./routes/categories');
+if (productRouter) app.use('/api/products', productRouter); else console.error('Invalid router exported from ./routes/products');
+if (orderRouter) app.use('/api/orders', orderRouter); else console.error('Invalid router exported from ./routes/orders');
 
 // Health check endpoint
 app.get('/api/health', (req, res) => {
