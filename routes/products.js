@@ -51,9 +51,32 @@ const router = express.Router();
  *         name: sort
  *         schema:
  *           type: string
+ *       - in: query
+ *         name: productType
+ *         schema:
+ *           type: string
+ *           enum: [normal, featured, bestSeller, specialOffer]
+ *         description: Filter by product type
+ *       - in: query
+ *         name: featured
+ *         schema:
+ *           type: boolean
+ *         description: Filter featured products
  *     responses:
  *       200:
  *         description: List of products
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 data:
+ *                   type: array
+ *                   items:
+ *                     $ref: '#/components/schemas/Product'
  *   post:
  *     summary: Create a new product (admin only)
  *     tags: [Products]
@@ -61,6 +84,126 @@ const router = express.Router();
  *       - bearerAuth: []
  *     requestBody:
  *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               name:
+ *                 type: string
+ *                 example: New Product
+ *               description:
+ *                 type: string
+ *                 example: Product description
+ *               price:
+ *                 type: number
+ *                 example: 99.99
+ *               subcategory:
+ *                 type: string
+ *                 example: 64b7f3c2e4b0f5a1c2d3e4f5
+ *               images:
+ *                 type: array
+ *                 items:
+ *                   type: string
+ *               stock:
+ *                 type: integer
+ *                 example: 50
+ *               productType:
+ *                 type: string
+ *                 enum: [normal, featured, bestSeller, specialOffer]
+ *                 example: normal
+ *               featured:
+ *                 type: boolean
+ *                 example: false
+ *               bestSeller:
+ *                 type: boolean
+ *                 example: false
+ *               specialOffer:
+ *                 type: boolean
+ *                 example: false
+ *               discount:
+ *                 type: number
+ *                 example: 10
+ *               priceAfterDiscount:
+ *                 type: number
+ *                 example: 89.99
+ *     responses:
+ *       201:
+ *         description: Product created successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 data:
+ *                   $ref: '#/components/schemas/Product'
+ *       400:
+ *         description: Bad request
+ *       401:
+ *         description: Unauthorized
+ */
+
+/**
+ * @swagger
+ * /products/admin:
+ *   get:
+ *     summary: Get all products (admin)
+ *     tags: [Products]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: query
+ *         name: page
+ *         schema:
+ *           type: integer
+ *           example: 1
+ *       - in: query
+ *         name: limit
+ *         schema:
+ *           type: integer
+ *           example: 20
+ *       - in: query
+ *         name: subcategory
+ *         schema:
+ *           type: string
+ *         description: Filter by subcategory
+ *       - in: query
+ *         name: productType
+ *         schema:
+ *           type: string
+ *           enum: [normal, featured, bestSeller, specialOffer]
+ *         description: Filter by product type
+ *     responses:
+ *       200:
+ *         description: List of products
+ */
+
+/**
+ * @swagger
+ * /products/{id}:
+ *   get:
+ *     summary: Get single product
+ *     tags: [Products]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Product object
+ *       404:
+ *         description: Not found
+ *   put:
+ *     summary: Update product (admin)
+ *     tags: [Products]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
  *       content:
  *         application/json:
  *           schema:
@@ -80,40 +223,31 @@ const router = express.Router();
  *                   type: string
  *               stock:
  *                 type: integer
+ *               productType:
+ *                 type: string
+ *                 enum: [normal, featured, bestSeller, specialOffer]
  *               featured:
  *                 type: boolean
- *     responses:
- *       201:
- *         description: Product created
- *
- * /products/admin:
- *   get:
- *     summary: Get all products (admin)
- *     tags: [Products]
- *     security:
- *       - bearerAuth: []
- *
- * /products/{id}:
- *   get:
- *     summary: Get single product
- *     tags: [Products]
- *     parameters:
- *       - in: path
- *         name: id
- *         required: true
- *         schema:
- *           type: string
- *   put:
- *     summary: Update product (admin)
- *     tags: [Products]
- *     security:
- *       - bearerAuth: []
+ *               bestSeller:
+ *                 type: boolean
+ *               specialOffer:
+ *                 type: boolean
+ *               discount:
+ *                 type: number
+ *               priceAfterDiscount:
+ *                 type: number
  *   delete:
  *     summary: Delete product (admin)
  *     tags: [Products]
  *     security:
  *       - bearerAuth: []
- *
+ *     responses:
+ *       200:
+ *         description: Deleted
+ */
+
+/**
+ * @swagger
  * /products/subcategory/{categoryId}:
  *   get:
  *     summary: Get products by subcategory
@@ -124,93 +258,19 @@ const router = express.Router();
  *         required: true
  *         schema:
  *           type: string
- *
+ *     responses:
+ *       200:
+ *         description: List of products
+ */
+
+/**
+ * @swagger
  * /products/{id}/stock:
  *   patch:
  *     summary: Update product stock (admin)
  *     tags: [Products]
  *     security:
  *       - bearerAuth: []
- */
-
-/**
- * @swagger
- * /products:
- *   get:
- *     summary: Get all products with filtering and search
- *     tags: [Products]
- *     parameters:
- *       - in: query
- *         name: page
- *         schema:
- *           type: integer
- *           example: 1
- *         description: Page number
- *       - in: query
- *         name: limit
- *         schema:
- *           type: integer
- *           example: 12
- *         description: Number of items per page
- *       - in: query
- *         name: category
- *         schema:
- *           type: string
- *           example: 64b7f3c2e4b0f5a1c2d3e4f5
- *         description: Filter by category ID
- *       - in: query
- *         name: subcategory
- *         schema:
- *           type: string
- *           example: 64b7f3c2e4b0f5a1c2d3e4f5
- *         description: Filter by subcategory ID
- *       - in: query
- *         name: search
- *         schema:
- *           type: string
- *           example: Laptop
- *         description: Search by product name or description
- *       - in: query
- *         name: minPrice
- *         schema:
- *           type: number
- *           example: 100
- *         description: Minimum price filter
- *       - in: query
- *         name: maxPrice
- *         schema:
- *           type: number
- *           example: 1000
- *         description: Maximum price filter
- *       - in: query
- *         name: sort
- *         schema:
- *           type: string
- *           example: -createdAt
- *         description: Sort field
- *     responses:
- *       200:
- *         description: List of products
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 success:
- *                   type: boolean
- *                   example: true
- *                 data:
- *                   type: array
- *                   items:
- *                     $ref: '#/components/schemas/Product'
- *       500:
- *         description: Internal server error
- *
- *   post:
- *     summary: Create a new product (admin only)
- *     tags: [Products]
- *     security:
- *       - bearerAuth: []
  *     requestBody:
  *       required: true
  *       content:
@@ -218,143 +278,16 @@ const router = express.Router();
  *           schema:
  *             type: object
  *             properties:
- *               name:
- *                 type: string
- *                 example: New Product
- *               description:
- *                 type: string
- *                 example: Product description
- *               price:
- *                 type: number
- *                 example: 99.99
- *               subcategory:
- *                 type: string
- *                 example: 64b7f3c2e4b0f5a1c2d3e4f5
- *               images:
- *                 type: array
- *                 items:
- *                   type: string
  *               stock:
  *                 type: integer
- *                 example: 50
- *               featured:
- *                 type: boolean
- *                 example: true
+ *                 example: 100
  *     responses:
- *       201:
- *         description: Product created successfully
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 success:
- *                   type: boolean
- *                   example: true
- *                 data:
- *                   $ref: '#/components/schemas/Product'
- *       400:
- *         description: Bad request
- *       401:
- *         description: Unauthorized
+ *       200:
+ *         description: Stock updated
  */
 
 /**
  * @swagger
- * /products/admin:
- *   get:
- *     summary: Get all products (admin)
- *     tags: [Products]
- *     security:
- *       - bearerAuth: []
- *     parameters:
- *       - in: query
- *         name: page
- *         schema:
- *           type: integer
- *           example: 1
- *       - in: query
- *         name: limit
- *         schema:
- *           type: integer
- *           example: 20
- *       - in: query
- *         name: subcategory
- *         schema:
- *           type: string
- *         description: Filter by subcategory
- *     responses:
- *       200:
- *         description: List of products
- */
-
-/**
- * @swagger
- * /products/{id}:
- *   get:
- *     summary: Get single product
- *     tags: [Products]
- *     parameters:
- *       - in: path
- *         name: id
- *         required: true
- *         schema:
- *           type: string
- *     responses:
- *       200:
- *         description: Product object
- *       404:
- *         description: Not found
- *   put:
- *     summary: Update product (admin)
- *     tags: [Products]
- *     security:
- *       - bearerAuth: []
- *     requestBody:
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             properties:
- *               name:
- *                 type: string
- *               description:
- *                 type: string
- *               price:
- *                 type: number
- *               subcategory:
- *                 type: string
- *               images:
- *                 type: array
- *                 items:
- *                   type: string
- *               stock:
- *                 type: integer
- *               featured:
- *                 type: boolean
- *   delete:
- *     summary: Delete product (admin)
- *     tags: [Products]
- *     security:
- *       - bearerAuth: []
- *     responses:
- *       200:
- *         description: Deleted
- *
- * /products/subcategory/{categoryId}:
- *   get:
- *     summary: Get products by subcategory
- *     tags: [Products]
- *     parameters:
- *       - in: path
- *         name: categoryId
- *         required: true
- *         schema:
- *           type: string
- *     responses:
- *       200:
- *         description: List of products
- *
  * components:
  *   schemas:
  *     Product:
@@ -376,500 +309,19 @@ const router = express.Router();
  *             type: string
  *         stock:
  *           type: integer
- *         isActive:
+ *         productType:
+ *           type: string
+ *           enum: [normal, featured, bestSeller, specialOffer]
+ *         featured:
  *           type: boolean
- */
-
-/**
- * @swagger
- * /products:
- *   get:
- *     summary: Get all products with filtering and search
- *     tags: [Products]
- *     parameters:
- *       - in: query
- *         name: page
- *         schema:
- *           type: integer
- *           example: 1
- *         description: Page number
- *       - in: query
- *         name: limit
- *         schema:
- *           type: integer
- *           example: 12
- *         description: Number of items per page
- *       - in: query
- *         name: category
- *         schema:
- *           type: string
- *           example: 64b7f3c2e4b0f5a1c2d3e4f5
- *         description: Filter by category ID
- *       - in: query
- *         name: subcategory
- *         schema:
- *           type: string
- *           example: 64b7f3c2e4b0f5a1c2d3e4f5
- *         description: Filter by subcategory ID
- *       - in: query
- *         name: search
- *         schema:
- *           type: string
- *           example: Laptop
- *         description: Search by product name or description
- *       - in: query
- *         name: minPrice
- *         schema:
- *           type: number
- *           example: 100
- *         description: Minimum price filter
- *       - in: query
- *         name: maxPrice
- *         schema:
- *           type: number
- *           example: 1000
- *         description: Maximum price filter
- *       - in: query
- *         name: sort
- *         schema:
- *           type: string
- *           example: -createdAt
- *         description: Sort field
- *     responses:
- *       200:
- *         description: List of products
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 success:
- *                   type: boolean
- *                   example: true
- *                 data:
- *                   type: array
- *                   items:
- *                     $ref: '#/components/schemas/Product'
- *       500:
- *         description: Internal server error
- *
- *   post:
- *     summary: Create a new product (admin only)
- *     tags: [Products]
- *     security:
- *       - bearerAuth: []
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             properties:
- *               name:
- *                 type: string
- *                 example: New Product
- *               description:
- *                 type: string
- *                 example: Product description
- *               price:
- *                 type: number
- *                 example: 99.99
- *               subcategory:
- *                 type: string
- *                 example: 64b7f3c2e4b0f5a1c2d3e4f5
- *               images:
- *                 type: array
- *                 items:
- *                   type: string
- *               stock:
- *                 type: integer
- *                 example: 50
- *               featured:
- *                 type: boolean
- *                 example: true
- *     responses:
- *       201:
- *         description: Product created successfully
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 success:
- *                   type: boolean
- *                   example: true
- *                 data:
- *                   $ref: '#/components/schemas/Product'
- *       400:
- *         description: Bad request
- *       401:
- *         description: Unauthorized
- */
-
-/**
- * @swagger
- * /products/admin:
- *   get:
- *     summary: Get all products (admin)
- *     tags: [Products]
- *     security:
- *       - bearerAuth: []
- *     parameters:
- *       - in: query
- *         name: page
- *         schema:
- *           type: integer
- *           example: 1
- *       - in: query
- *         name: limit
- *         schema:
- *           type: integer
- *           example: 20
- *       - in: query
- *         name: subcategory
- *         schema:
- *           type: string
- *         description: Filter by subcategory
- *     responses:
- *       200:
- *         description: List of products
- */
-
-/**
- * @swagger
- * /products/{id}:
- *   get:
- *     summary: Get single product
- *     tags: [Products]
- *     parameters:
- *       - in: path
- *         name: id
- *         required: true
- *         schema:
- *           type: string
- *     responses:
- *       200:
- *         description: Product object
- *       404:
- *         description: Not found
- *   put:
- *     summary: Update product (admin)
- *     tags: [Products]
- *     security:
- *       - bearerAuth: []
- *     requestBody:
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             properties:
- *               name:
- *                 type: string
- *               description:
- *                 type: string
- *               price:
- *                 type: number
- *               subcategory:
- *                 type: string
- *               images:
- *                 type: array
- *                 items:
- *                   type: string
- *               stock:
- *                 type: integer
- *               featured:
- *                 type: boolean
- *   delete:
- *     summary: Delete product (admin)
- *     tags: [Products]
- *     security:
- *       - bearerAuth: []
- *     responses:
- *       200:
- *         description: Deleted
- *
- * /products/subcategory/{categoryId}:
- *   get:
- *     summary: Get products by subcategory
- *     tags: [Products]
- *     parameters:
- *       - in: path
- *         name: categoryId
- *         required: true
- *         schema:
- *           type: string
- *     responses:
- *       200:
- *         description: List of products
- *
- * components:
- *   schemas:
- *     Product:
- *       type: object
- *       properties:
- *         _id:
- *           type: string
- *         name:
- *           type: string
- *         description:
- *           type: string
- *         price:
- *           type: number
- *         subcategory:
- *           $ref: '#/components/schemas/Category'
- *         images:
- *           type: array
- *           items:
- *             type: string
- *         stock:
- *           type: integer
- *         isActive:
+ *         bestSeller:
  *           type: boolean
- */
-
-/**
- * @swagger
- * /products:
- *   get:
- *     summary: Get all products with filtering and search
- *     tags: [Products]
- *     parameters:
- *       - in: query
- *         name: page
- *         schema:
- *           type: integer
- *           example: 1
- *         description: Page number
- *       - in: query
- *         name: limit
- *         schema:
- *           type: integer
- *           example: 12
- *         description: Number of items per page
- *       - in: query
- *         name: category
- *         schema:
- *           type: string
- *           example: 64b7f3c2e4b0f5a1c2d3e4f5
- *         description: Filter by category ID
- *       - in: query
- *         name: subcategory
- *         schema:
- *           type: string
- *           example: 64b7f3c2e4b0f5a1c2d3e4f5
- *         description: Filter by subcategory ID
- *       - in: query
- *         name: search
- *         schema:
- *           type: string
- *           example: Laptop
- *         description: Search by product name or description
- *       - in: query
- *         name: minPrice
- *         schema:
+ *         specialOffer:
+ *           type: boolean
+ *         discount:
  *           type: number
- *           example: 100
- *         description: Minimum price filter
- *       - in: query
- *         name: maxPrice
- *         schema:
+ *         priceAfterDiscount:
  *           type: number
- *           example: 1000
- *         description: Maximum price filter
- *       - in: query
- *         name: sort
- *         schema:
- *           type: string
- *           example: -createdAt
- *         description: Sort field
- *     responses:
- *       200:
- *         description: List of products
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 success:
- *                   type: boolean
- *                   example: true
- *                 data:
- *                   type: array
- *                   items:
- *                     $ref: '#/components/schemas/Product'
- *       500:
- *         description: Internal server error
- *
- *   post:
- *     summary: Create a new product (admin only)
- *     tags: [Products]
- *     security:
- *       - bearerAuth: []
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             properties:
- *               name:
- *                 type: string
- *                 example: New Product
- *               description:
- *                 type: string
- *                 example: Product description
- *               price:
- *                 type: number
- *                 example: 99.99
- *               subcategory:
- *                 type: string
- *                 example: 64b7f3c2e4b0f5a1c2d3e4f5
- *               images:
- *                 type: array
- *                 items:
- *                   type: string
- *               stock:
- *                 type: integer
- *                 example: 50
- *               featured:
- *                 type: boolean
- *                 example: true
- *     responses:
- *       201:
- *         description: Product created successfully
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 success:
- *                   type: boolean
- *                   example: true
- *                 data:
- *                   $ref: '#/components/schemas/Product'
- *       400:
- *         description: Bad request
- *       401:
- *         description: Unauthorized
- */
-
-/**
- * @swagger
- * /products/admin:
- *   get:
- *     summary: Get all products (admin)
- *     tags: [Products]
- *     security:
- *       - bearerAuth: []
- *     parameters:
- *       - in: query
- *         name: page
- *         schema:
- *           type: integer
- *           example: 1
- *       - in: query
- *         name: limit
- *         schema:
- *           type: integer
- *           example: 20
- *       - in: query
- *         name: subcategory
- *         schema:
- *           type: string
- *         description: Filter by subcategory
- *     responses:
- *       200:
- *         description: List of products
- */
-
-/**
- * @swagger
- * /products/{id}:
- *   get:
- *     summary: Get single product
- *     tags: [Products]
- *     parameters:
- *       - in: path
- *         name: id
- *         required: true
- *         schema:
- *           type: string
- *     responses:
- *       200:
- *         description: Product object
- *       404:
- *         description: Not found
- *   put:
- *     summary: Update product (admin)
- *     tags: [Products]
- *     security:
- *       - bearerAuth: []
- *     requestBody:
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             properties:
- *               name:
- *                 type: string
- *               description:
- *                 type: string
- *               price:
- *                 type: number
- *               subcategory:
- *                 type: string
- *               images:
- *                 type: array
- *                 items:
- *                   type: string
- *               stock:
- *                 type: integer
- *               featured:
- *                 type: boolean
- *   delete:
- *     summary: Delete product (admin)
- *     tags: [Products]
- *     security:
- *       - bearerAuth: []
- *     responses:
- *       200:
- *         description: Deleted
- *
- * /products/subcategory/{categoryId}:
- *   get:
- *     summary: Get products by subcategory
- *     tags: [Products]
- *     parameters:
- *       - in: path
- *         name: categoryId
- *         required: true
- *         schema:
- *           type: string
- *     responses:
- *       200:
- *         description: List of products
- *
- * components:
- *   schemas:
- *     Product:
- *       type: object
- *       properties:
- *         _id:
- *           type: string
- *         name:
- *           type: string
- *         description:
- *           type: string
- *         price:
- *           type: number
- *         subcategory:
- *           $ref: '#/components/schemas/Category'
- *         images:
- *           type: array
- *           items:
- *             type: string
- *         stock:
- *           type: integer
  *         isActive:
  *           type: boolean
  */
@@ -984,7 +436,7 @@ router.get('/subcategory/:categoryId', async (req, res) => {
 // Create product (admin only)
 router.post('/', verifyToken, async (req, res) => {
   try {
-    const { name, description, price, subcategory, images, stock, featured } = req.body;
+    const { name, description, price, subcategory, images, stock, productType, featured, bestSeller, specialOffer, discount, priceAfterDiscount } = req.body;
 
     if (!name || !description || !price || !subcategory) {
       return res.status(400).json({ success: false, message: 'Missing required fields: name, description, price, subcategory' });
@@ -993,7 +445,20 @@ router.post('/', verifyToken, async (req, res) => {
     const subcat = await Category.findById(subcategory);
     if (!subcat) return res.status(400).json({ success: false, message: 'Subcategory not found' });
 
-    const product = new Product({ name: name.trim(), description, price, subcategory, images: images || [], stock: stock || 0, featured: !!featured });
+    const product = new Product({
+      name: name.trim(),
+      description,
+      price,
+      subcategory,
+      images: images || [],
+      stock: stock || 0,
+      productType: productType || 'normal',
+      featured: !!featured,
+      bestSeller: !!bestSeller,
+      specialOffer: !!specialOffer,
+      discount: discount || 0,
+      priceAfterDiscount: priceAfterDiscount || 0
+    });
     await product.save();
 
     res.status(201).json({ success: true, message: 'Product created successfully', data: product });
@@ -1006,7 +471,7 @@ router.post('/', verifyToken, async (req, res) => {
 // Update product (admin only)
 router.put('/:id', verifyToken, async (req, res) => {
   try {
-    const { name, description, price, subcategory, images, stock, featured, isActive } = req.body;
+    const { name, description, price, subcategory, images, stock, productType, featured, bestSeller, specialOffer, discount, priceAfterDiscount, isActive } = req.body;
 
     const product = await Product.findById(req.params.id);
     if (!product) return res.status(404).json({ success: false, message: 'Product not found' });
@@ -1022,7 +487,12 @@ router.put('/:id', verifyToken, async (req, res) => {
     if (price !== undefined) product.price = price;
     if (images !== undefined) product.images = images;
     if (stock !== undefined) product.stock = stock;
+    if (productType !== undefined) product.productType = productType;
     if (featured !== undefined) product.featured = !!featured;
+    if (bestSeller !== undefined) product.bestSeller = !!bestSeller;
+    if (specialOffer !== undefined) product.specialOffer = !!specialOffer;
+    if (discount !== undefined) product.discount = discount;
+    if (priceAfterDiscount !== undefined) product.priceAfterDiscount = priceAfterDiscount;
     if (isActive !== undefined) product.isActive = isActive;
 
     await product.save();

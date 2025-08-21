@@ -34,9 +34,30 @@ const productSchema = new mongoose.Schema({
     type: Boolean,
     default: true
   },
+  productType: {
+    type: String,
+    enum: ['normal', 'featured', 'bestSeller', 'specialOffer'],
+    default: 'normal'
+  },
   featured: {
     type: Boolean,
     default: false
+  },
+  bestSeller: {
+    type: Boolean,
+    default: false
+  },
+  specialOffer: {
+    type: Boolean,
+    default: false
+  },
+  discount: {
+    type: Number,
+    default: 0
+  },
+  priceAfterDiscount: {
+    type: Number,
+    default: 0
   }
 }, {
   timestamps: true
