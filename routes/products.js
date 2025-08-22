@@ -176,6 +176,18 @@ const router = express.Router();
  *           type: string
  *           enum: [normal, featured, bestSeller, specialOffer]
  *         description: Filter by product type
+ *       - in: query
+ *         name: search
+ *         schema:
+ *           type: string
+ *           example: "sample search"
+ *         description: Search term for text search
+ *       - in: query
+ *         name: sort
+ *         schema:
+ *           type: string
+ *           example: -createdAt
+ *         description: Sort order (e.g., -createdAt for descending by creation date)
  *     responses:
  *       200:
  *         description: List of products
@@ -374,10 +386,11 @@ router.get('/', async (req, res) => {
 // Get all products for admin (includes inactive)
 router.get('/admin', verifyToken, async (req, res) => {
   try {
-    const { page = 1, limit = 20, subcategory, search, sort = '-createdAt' } = req.query;
+    const { page = 1, limit = 20, subcategory, productType, search, sort = '-createdAt' } = req.query;
     const query = {};
 
     if (subcategory) query.subcategory = subcategory;
+    if (productType) query.productType = productType;
     if (search) query.$text = { $search: search };
 
     const skip = (Number(page) - 1) * Number(limit);
