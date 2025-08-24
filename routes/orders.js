@@ -304,8 +304,12 @@ router.post('/', async (req, res) => {
       });
     }
 
+    // Generate unique order number (e.g., ORD + timestamp + random 3 digits)
+    const orderNumber = 'ORD' + Date.now() + Math.floor(Math.random() * 1000).toString().padStart(3, '0');
+
     // Create order
     const order = new Order({
+      orderNumber,
       customerInfo: {
         name: customerInfo.name.trim(),
         email: customerInfo.email.trim().toLowerCase(),
