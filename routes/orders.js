@@ -91,15 +91,6 @@ const router = express.Router();
  *                       city:
  *                         type: string
  *                         example: New York
- *                       state:
- *                         type: string
- *                         example: NY
- *                       zipCode:
- *                         type: string
- *                         example: 10001
- *                       country:
- *                         type: string
- *                         example: USA
  *               items:
  *                 type: array
  *                 items:
@@ -245,10 +236,38 @@ const router = express.Router();
  *         description: Statistics object
  */
 
+/**
+ * @swagger
+ * /orders/user:
+ *   get:
+ *     summary: Get orders for the logged-in user
+ *     tags: [Orders]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: List of user's orders
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                 data:
+ *                   type: array
+ *                   items:
+ *                     $ref: '#/components/schemas/Order'
+ *       401:
+ *         description: Unauthorized
+ *       403:
+ *         description: Access denied
+ */
+
 // Create order (public - from frontend)
-router.post('/', async (req, res) => {
+router.post('/', verifyToken, async (req, res) => {
   try {
-    const { customerInfo, items, notes } = req.body;
+    const { customerInfo, items, notes, discountCode } = req.body;
 
     // Validate required fields
     if (!customerInfo || !customerInfo.name || !customerInfo.email || !customerInfo.phone) {
@@ -314,7 +333,10 @@ router.post('/', async (req, res) => {
         name: customerInfo.name.trim(),
         email: customerInfo.email.trim().toLowerCase(),
         phone: customerInfo.phone.trim(),
-        address: customerInfo.address || {}
+        address: {
+          street: customerInfo.address?.street || '',
+          city: customerInfo.address?.city || ''
+        }
       },
       items: validatedItems,
       totalAmount,
@@ -333,6 +355,21 @@ router.post('/', async (req, res) => {
 
     // Populate product details for response
     await order.populate('items.product', 'name price images');
+
+    // If user is logged in and discountCode is provided, check if already used
+    let user = null;
+    if (req.user && req.user.role === 'user') {
+      user = await require('../models/User').findById(req.user.id);
+      if (discountCode && user && user.usedDiscountCodes.includes(discountCode)) {
+        return res.status(400).json({ success: false, message: 'Discount code already used by this user' });
+      }
+    }
+
+    // After order is saved and discount is applied, mark code as used
+    if (user && discountCode) {
+      user.usedDiscountCodes.push(discountCode);
+      await user.save();
+    }
 
     res.status(201).json({
       success: true,
@@ -558,7 +595,12 @@ router.put('/:id', verifyToken, async (req, res) => {
       if (customerInfo.name) order.customerInfo.name = customerInfo.name.trim();
       if (customerInfo.email) order.customerInfo.email = customerInfo.email.trim().toLowerCase();
       if (customerInfo.phone) order.customerInfo.phone = customerInfo.phone.trim();
-      if (customerInfo.address) order.customerInfo.address = customerInfo.address;
+      if (customerInfo.address) {
+        order.customerInfo.address = {
+          street: customerInfo.address.street || '',
+          city: customerInfo.address.city || ''
+        };
+      }
     }
 
     // Update status
@@ -712,6 +754,24 @@ router.get('/admin/stats', verifyToken, async (req, res) => {
       success: false,
       message: 'Error fetching order statistics'
     });
+  }
+});
+
+// Get orders for logged-in user
+router.get('/user', verifyToken, async (req, res) => {
+  try {
+    // Only allow for user role
+    if (!req.user || req.user.role !== 'user') {
+      return res.status(403).json({ success: false, message: 'Access denied' });
+    }
+    const userId = req.user.id;
+    const orders = await Order.find({ 'customerInfo.userId': userId })
+      .populate('items.product', 'name price images')
+      .sort('-createdAt');
+    res.json({ success: true, data: orders });
+  } catch (error) {
+    console.error('Get user orders error:', error);
+    res.status(500).json({ success: false, message: 'Error fetching user orders' });
   }
 });
 

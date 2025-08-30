@@ -39,10 +39,7 @@ const orderSchema = new mongoose.Schema({
     },
     address: {
       street: String,
-      city: String,
-      state: String,
-      zipCode: String,
-      country: String
+      city: String
     }
   },
   items: [orderItemSchema],

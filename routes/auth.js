@@ -1,6 +1,7 @@
 const express = require('express');
 const jwt = require('jsonwebtoken');
 const Admin = require('../models/Admin');
+const User = require('../models/User');
 
 const router = express.Router();
 
@@ -104,6 +105,63 @@ router.post('/create-admin', async (req, res) => {
       success: false,
       message: 'Error creating admin'
     });
+  }
+});
+
+// User signup
+router.post('/signup', async (req, res) => {
+  try {
+    const { username, email, password } = req.body;
+    if (!username || !email || !password) {
+      return res.status(400).json({ success: false, message: 'Username, email, and password are required' });
+    }
+    const existingUser = await User.findOne({ $or: [{ username }, { email }] });
+    if (existingUser) {
+      return res.status(400).json({ success: false, message: 'Username or email already exists' });
+    }
+    const user = new User({ username, email, password });
+    await user.save();
+    res.status(201).json({ success: true, message: 'User registered successfully' });
+  } catch (error) {
+    console.error('Signup error:', error);
+    res.status(500).json({ success: false, message: 'Error during signup' });
+  }
+});
+
+// User login
+router.post('/user-login', async (req, res) => {
+  try {
+    const { username, password } = req.body;
+    if (!username || !password) {
+      return res.status(400).json({ success: false, message: 'Username and password are required' });
+    }
+    const user = await User.findOne({ $or: [{ username }, { email: username }], isActive: true });
+    if (!user) {
+      return res.status(401).json({ success: false, message: 'Invalid credentials' });
+    }
+    const isValidPassword = await user.comparePassword(password);
+    if (!isValidPassword) {
+      return res.status(401).json({ success: false, message: 'Invalid credentials' });
+    }
+    const token = jwt.sign(
+      { id: user._id, username: user.username, role: 'user' },
+      process.env.JWT_SECRET || 'your-secret-key',
+      { expiresIn: '24h' }
+    );
+    res.json({
+      success: true,
+      message: 'Login successful',
+      token,
+      user: {
+        id: user._id,
+        username: user.username,
+        email: user.email,
+        role: 'user'
+      }
+    });
+  } catch (error) {
+    console.error('User login error:', error);
+    res.status(500).json({ success: false, message: 'Server error during login' });
   }
 });
 
