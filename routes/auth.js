@@ -32,7 +32,7 @@ const router = express.Router();
  *             properties:
  *               username:
  *                 type: string
- *               email:
+ *               fullName:
  *                 type: string
  *               password:
  *                 type: string
@@ -236,16 +236,15 @@ router.post('/create-admin', async (req, res) => {
 // User signup
 router.post('/signup', async (req, res) => {
   try {
-    const { username, email, password } = req.body;
-   // console.log('Signup request body:', req.body);
-    if (!username || !email || !password) {
-      return res.status(400).json({ success: false, message: 'username, email, and password are required' });
+    const { username, fullName, password } = req.body;
+    if (!username || !fullName || !password) {
+      return res.status(400).json({ success: false, message: 'username, fullName, and password are required' });
     }
-    const existingUser = await User.findOne({ $or: [{ username }, { email }] });
+    const existingUser = await User.findOne({ username });
     if (existingUser) {
-      return res.status(400).json({ success: false, message: 'username or email already exists' });
+      return res.status(400).json({ success: false, message: 'username already exists' });
     }
-    const user = new User({ username, email, password });
+    const user = new User({ username, fullName, password });
     await user.save();
     res.status(201).json({ success: true, message: 'User registered successfully' });
   } catch (error) {
@@ -261,7 +260,7 @@ router.post('/user-login', async (req, res) => {
     if (!username || !password) {
       return res.status(400).json({ success: false, message: 'Username and password are required' });
     }
-    const user = await User.findOne({ $or: [{ username }, { email: username }], isActive: true });
+    const user = await User.findOne({ username, isActive: true });
     if (!user) {
       return res.status(401).json({ success: false, message: 'Invalid credentials' });
     }
@@ -281,7 +280,7 @@ router.post('/user-login', async (req, res) => {
       user: {
         id: user._id,
         username: user.username,
-        email: user.email,
+        fullName: user.fullName,
         role: 'user'
       }
     });
