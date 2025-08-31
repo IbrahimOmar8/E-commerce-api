@@ -327,7 +327,7 @@ router.post('/', verifyToken, async (req, res) => {
     const orderNumber = 'ORD' + Date.now() + Math.floor(Math.random() * 1000).toString().padStart(3, '0');
 
     // Create order
-    const order = new Order({
+    const orderData = {
       orderNumber,
       customerInfo: {
         name: customerInfo.name.trim(),
@@ -341,7 +341,11 @@ router.post('/', verifyToken, async (req, res) => {
       items: validatedItems,
       totalAmount,
       notes: notes?.trim() || ''
-    });
+    };
+    if (req.user && req.user.role === 'user') {
+      orderData.user = req.user.id;
+    }
+    const order = new Order(orderData);
 
     await order.save();
 

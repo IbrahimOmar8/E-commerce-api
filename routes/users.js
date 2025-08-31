@@ -36,7 +36,7 @@ const router = express.Router();
  *                       type: string
  *                     username:
  *                       type: string
- *                     email:
+ *                     fullName:
  *                       type: string
  *                     isActive:
  *                       type: boolean
@@ -57,7 +57,7 @@ const router = express.Router();
  *             properties:
  *               username:
  *                 type: string
- *               email:
+ *               fullName:
  *                 type: string
  *               password:
  *                 type: string
@@ -106,7 +106,7 @@ const router = express.Router();
  *       401:
  *         description: Unauthorized
  *
- * /users/{id}:
+ * /api/users/{id}:
  *   get:
  *     summary: Get user by ID (admin only)
  *     tags: [Users]
@@ -143,7 +143,7 @@ const router = express.Router();
  *             properties:
  *               username:
  *                 type: string
- *               email:
+ *               fullName:
  *                 type: string
  *               isActive:
  *                 type: boolean
@@ -196,14 +196,14 @@ router.put('/me', verifyToken, async (req, res) => {
     if (!req.user || req.user.role !== 'user') {
       return res.status(403).json({ success: false, message: 'Access denied' });
     }
-    const { username, email, password } = req.body;
+    const { username, fullName, password } = req.body;
     const user = await User.findById(req.user.id);
     if (!user) return res.status(404).json({ success: false, message: 'User not found' });
     if (username) user.username = username;
-    if (email) user.email = email;
+    if (fullName) user.fullName = fullName;
     if (password) user.password = password;
     await user.save();
-    res.json({ success: true, message: 'Profile updated', data: { username: user.username, email: user.email } });
+    res.json({ success: true, message: 'Profile updated', data: { username: user.username, fullName: user.fullName } });
   } catch (error) {
     console.error('Update user profile error:', error);
     res.status(500).json({ success: false, message: 'Error updating profile' });
@@ -257,14 +257,14 @@ router.put('/:id', verifyToken, async (req, res) => {
     if (!req.user || (req.user.role !== 'admin' && req.user.role !== 'super-admin')) {
       return res.status(403).json({ success: false, message: 'Access denied' });
     }
-    const { username, email, isActive } = req.body;
+    const { username, fullName, isActive } = req.body;
     const user = await User.findById(req.params.id);
     if (!user) return res.status(404).json({ success: false, message: 'User not found' });
     if (username) user.username = username;
-    if (email) user.email = email;
+    if (fullName) user.fullName = fullName;
     if (isActive !== undefined) user.isActive = isActive;
     await user.save();
-    res.json({ success: true, message: 'User updated', data: { username: user.username, email: user.email, isActive: user.isActive } });
+    res.json({ success: true, message: 'User updated', data: { username: user.username, fullName: user.fullName, isActive: user.isActive } });
   } catch (error) {
     res.status(500).json({ success: false, message: 'Error updating user' });
   }
