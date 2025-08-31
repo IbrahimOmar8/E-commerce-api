@@ -5,6 +5,131 @@ const User = require('../models/User');
 
 const router = express.Router();
 
+/**
+ * @swagger
+ * tags:
+ *   - name: Auth
+ *     description: Authentication and authorization
+ *   - name: UserAuth
+ *     description: User authentication
+ *   - name: AdminAuth
+ *     description: Admin authentication
+ */
+
+/**
+ * @swagger
+ * /signup:
+ *   post:
+ *     summary: User signup
+ *     tags: [UserAuth]
+ *     description: Register a new user account.
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               username:
+ *                 type: string
+ *               email:
+ *                 type: string
+ *               password:
+ *                 type: string
+ *     responses:
+ *       201:
+ *         description: User registered successfully
+ *       400:
+ *         description: Bad request
+ *
+ * /user-login:
+ *   post:
+ *     summary: User login
+ *     tags: [UserAuth]
+ *     description: Login for users only.
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               username:
+ *                 type: string
+ *               password:
+ *                 type: string
+ *     responses:
+ *       200:
+ *         description: Login successful
+ *       400:
+ *         description: Bad request
+ *       401:
+ *         description: Invalid credentials
+ *
+ * /login:
+ *   post:
+ *     summary: Admin login
+ *     tags: [AdminAuth]
+ *     description: Login for admin users only.
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               username:
+ *                 type: string
+ *               password:
+ *                 type: string
+ *     responses:
+ *       200:
+ *         description: Login successful
+ *       400:
+ *         description: Bad request
+ *       401:
+ *         description: Invalid credentials
+ *
+ * /create-admin:
+ *   post:
+ *     summary: Create default admin (initial setup)
+ *     tags: [AdminAuth]
+ *     description: Create the first admin account (should only be used once).
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               username:
+ *                 type: string
+ *               email:
+ *                 type: string
+ *               password:
+ *                 type: string
+ *     responses:
+ *       201:
+ *         description: Admin created successfully
+ *       400:
+ *         description: Admin already exists
+ *       500:
+ *         description: Error creating admin
+ *
+ * /verify:
+ *   get:
+ *     summary: Verify JWT token
+ *     tags: [Auth]
+ *     description: Verify a JWT token for either user or admin.
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Token is valid
+ *       401:
+ *         description: Invalid or missing token
+ */
+
 // Admin login
 router.post('/login', async (req, res) => {
   try {
