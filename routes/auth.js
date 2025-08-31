@@ -18,7 +18,7 @@ const router = express.Router();
 
 /**
  * @swagger
- * /signup:
+ * /auth/signup:
  *   post:
  *     summary: User signup
  *     tags: [UserAuth]
@@ -42,7 +42,7 @@ const router = express.Router();
  *       400:
  *         description: Bad request
  *
- * /user-login:
+ * /auth/user-login:
  *   post:
  *     summary: User login
  *     tags: [UserAuth]
@@ -66,7 +66,7 @@ const router = express.Router();
  *       401:
  *         description: Invalid credentials
  *
- * /login:
+ * /auth/login:
  *   post:
  *     summary: Admin login
  *     tags: [AdminAuth]
@@ -90,7 +90,7 @@ const router = express.Router();
  *       401:
  *         description: Invalid credentials
  *
- * /create-admin:
+ * /auth/create-admin:
  *   post:
  *     summary: Create default admin (initial setup)
  *     tags: [AdminAuth]
@@ -116,7 +116,7 @@ const router = express.Router();
  *       500:
  *         description: Error creating admin
  *
- * /verify:
+ * /auth/verify:
  *   get:
  *     summary: Verify JWT token
  *     tags: [Auth]
@@ -237,12 +237,13 @@ router.post('/create-admin', async (req, res) => {
 router.post('/signup', async (req, res) => {
   try {
     const { username, email, password } = req.body;
+   // console.log('Signup request body:', req.body);
     if (!username || !email || !password) {
-      return res.status(400).json({ success: false, message: 'Username, email, and password are required' });
+      return res.status(400).json({ success: false, message: 'username, email, and password are required' });
     }
     const existingUser = await User.findOne({ $or: [{ username }, { email }] });
     if (existingUser) {
-      return res.status(400).json({ success: false, message: 'Username or email already exists' });
+      return res.status(400).json({ success: false, message: 'username or email already exists' });
     }
     const user = new User({ username, email, password });
     await user.save();

@@ -12,6 +12,8 @@ const categoryRoutes = require('./routes/categories');
 const productRoutes = require('./routes/products');
 const orderRoutes = require('./routes/orders');
 const authRoutes = require('./routes/auth');
+const discountCodeRoutes = require('./routes/discountCodes');
+const usersRoutes = require('./routes/users');
 
 dotenv.config();
 
@@ -114,11 +116,15 @@ const authRouter = resolveRouter(authRoutes);
 const categoryRouter = resolveRouter(categoryRoutes);
 const productRouter = resolveRouter(productRoutes);
 const orderRouter = resolveRouter(orderRoutes);
+const discountCodeRouter = resolveRouter(discountCodeRoutes);
+const usersRouter = resolveRouter(usersRoutes);
 
 if (authRouter) app.use('/api/auth', authRouter); else console.error('Invalid router exported from ./routes/auth');
 if (categoryRouter) app.use('/api/categories', categoryRouter); else console.error('Invalid router exported from ./routes/categories');
 if (productRouter) app.use('/api/products', productRouter); else console.error('Invalid router exported from ./routes/products');
 if (orderRouter) app.use('/api/orders', orderRouter); else console.error('Invalid router exported from ./routes/orders');
+if (discountCodeRouter) app.use('/api/discount-codes', discountCodeRouter); else console.error('Invalid router exported from ./routes/discountCodes');
+if (usersRouter) app.use('/api/users', usersRouter); else console.error('Invalid router exported from ./routes/users');
 
 // Health check endpoint
 app.get('/api/health', (req, res) => {
