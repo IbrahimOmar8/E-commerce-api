@@ -244,7 +244,7 @@ router.post('/signup', async (req, res) => {
     if (existingUser) {
       return res.status(400).json({ success: false, message: 'username already exists' });
     }
-    const user = new User({ username, fullName, password });
+    const user = new User({ username, fullName, password , email: username });
     await user.save();
     res.status(201).json({ success: true, message: 'User registered successfully' });
   } catch (error) {
