@@ -178,6 +178,7 @@ router.get('/', function(req, res, next) {
 // Get current user profile
 router.get('/me', verifyToken, async (req, res) => {
   try {
+    close.log('Get user profile req.user:', req.user);
     if (!req.user || req.user.role !== 'user') {
       return res.status(403).json({ success: false, message: 'Access denied' });
     }
