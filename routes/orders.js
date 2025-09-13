@@ -263,6 +263,209 @@ const router = express.Router();
  *         description: Unauthorized
  *       403:
  *         description: Access denied
+ * 
+ * 
+ */
+
+/**
+ * @swagger
+ * /orders/check-discount:
+ *   post:
+ *     summary: Check discount code validity
+ *     description: Validate a discount code and calculate potential discount amount
+ *     tags: [Orders]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - discountCode
+ *               - totalAmount
+ *             properties:
+ *               discountCode:
+ *                 type: string
+ *                 description: Discount code to validate
+ *                 example: "SAVE20"
+ *               totalAmount:
+ *                 type: number
+ *                 minimum: 0.01
+ *                 description: Order subtotal amount to apply discount on
+ *                 example: 100.00
+ *           examples:
+ *             percentage_discount:
+ *               summary: Check percentage discount
+ *               value:
+ *                 discountCode: "SAVE20"
+ *                 totalAmount: 100.00
+ *             fixed_discount:
+ *               summary: Check fixed discount
+ *               value:
+ *                 discountCode: "GET10OFF"
+ *                 totalAmount: 50.00
+ *     responses:
+ *       200:
+ *         description: Discount code is valid
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 message:
+ *                   type: string
+ *                   example: "Discount code is valid"
+ *                 data:
+ *                   type: object
+ *                   properties:
+ *                     discountCode:
+ *                       type: string
+ *                       example: "SAVE20"
+ *                       description: Applied discount code
+ *                     discountType:
+ *                       type: string
+ *                       enum: [percentage, fixed]
+ *                       example: "percentage"
+ *                       description: Type of discount
+ *                     discountValue:
+ *                       type: number
+ *                       example: 20
+ *                       description: Discount value (percentage or fixed amount)
+ *                     discountAmount:
+ *                       type: string
+ *                       example: "20.00"
+ *                       description: Calculated discount amount
+ *                     originalAmount:
+ *                       type: string
+ *                       example: "100.00"
+ *                       description: Original amount before discount
+ *                     finalAmount:
+ *                       type: string
+ *                       example: "80.00"
+ *                       description: Final amount after discount
+ *                     description:
+ *                       type: string
+ *                       example: "Save 20% on your order"
+ *                       description: Discount description
+ *             examples:
+ *               percentage_discount_response:
+ *                 summary: Valid percentage discount
+ *                 value:
+ *                   success: true
+ *                   message: "Discount code is valid"
+ *                   data:
+ *                     discountCode: "SAVE20"
+ *                     discountType: "percentage"
+ *                     discountValue: 20
+ *                     discountAmount: "20.00"
+ *                     originalAmount: "100.00"
+ *                     finalAmount: "80.00"
+ *                     description: "Save 20% on your order"
+ *               fixed_discount_response:
+ *                 summary: Valid fixed discount
+ *                 value:
+ *                   success: true
+ *                   message: "Discount code is valid"
+ *                   data:
+ *                     discountCode: "GET10OFF"
+ *                     discountType: "fixed"
+ *                     discountValue: 10
+ *                     discountAmount: "10.00"
+ *                     originalAmount: "50.00"
+ *                     finalAmount: "40.00"
+ *                     description: "Get $10 off your order"
+ *       400:
+ *         description: Bad request - validation errors or invalid discount code
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: false
+ *                 message:
+ *                   type: string
+ *             examples:
+ *               missing_code:
+ *                 summary: Missing discount code
+ *                 value:
+ *                   success: false
+ *                   message: "Discount code is required"
+ *               missing_amount:
+ *                 summary: Missing total amount
+ *                 value:
+ *                   success: false
+ *                   message: "Valid total amount is required"
+ *               inactive_code:
+ *                 summary: Inactive discount code
+ *                 value:
+ *                   success: false
+ *                   message: "Discount code is not active"
+ *               expired_code:
+ *                 summary: Expired discount code
+ *                 value:
+ *                   success: false
+ *                   message: "Discount code has expired"
+ *               minimum_order:
+ *                 summary: Minimum order amount not met
+ *                 value:
+ *                   success: false
+ *                   message: "Minimum order amount of $50 required for this discount"
+ *               usage_limit:
+ *                 summary: Usage limit exceeded
+ *                 value:
+ *                   success: false
+ *                   message: "Discount code usage limit exceeded"
+ *               already_used:
+ *                 summary: Code already used by user
+ *                 value:
+ *                   success: false
+ *                   message: "You have already used this discount code"
+ *       404:
+ *         description: Discount code not found
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: false
+ *                 message:
+ *                   type: string
+ *                   example: "Invalid discount code"
+ *       401:
+ *         description: Unauthorized - invalid or missing token
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: false
+ *                 message:
+ *                   type: string
+ *                   example: "Access token is required"
+ *       500:
+ *         description: Internal server error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: false
+ *                 message:
+ *                   type: string
+ *                   example: "Error checking discount code"
  */
 
 // Create order (public - from frontend)
