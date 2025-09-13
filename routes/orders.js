@@ -473,6 +473,7 @@ router.post('/', verifyToken, async (req, res) => {
   try {
     const { customerInfo, items, notes, discountCode ,deliveryFee } = req.body;
 
+   
     // Validate required fields
     if (!customerInfo || !customerInfo.name || !customerInfo.email || !customerInfo.phone) {
       return res.status(400).json({
@@ -491,6 +492,7 @@ router.post('/', verifyToken, async (req, res) => {
     // Validate and calculate total
     let totalAmount = 0;
     let discountAmount = 0;
+    let itemTotal = 0;
     const validatedItems = [];
 
     for (const item of items) {
@@ -567,10 +569,10 @@ router.post('/', verifyToken, async (req, res) => {
 
 
 
-    const itemTotal = product.price * item.quantity;
+     itemTotal = product.price * item.quantity;
 
      // Calculate final total
-     totalAmount = Math.max(0, subtotal - discountAmount + deliveryFee);
+     totalAmount = Math.max(0, itemTotal - discountAmount + deliveryFee);
 
     
      // totalAmount += itemTotal;
