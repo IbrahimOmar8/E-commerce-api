@@ -1,6 +1,7 @@
 const express = require('express');
 const Order = require('../models/Order');
 const Product = require('../models/Product');
+const DiscountCode = require('../models/DiscountCode');
 
 const verifyToken = require('../Middleware/auth'); // Ensure you have this middleware for authentication
 
@@ -267,7 +268,7 @@ const router = express.Router();
 // Create order (public - from frontend)
 router.post('/', verifyToken, async (req, res) => {
   try {
-    const { customerInfo, items, notes, discountCode } = req.body;
+    const { customerInfo, items, notes, discountCode ,deliveryFee } = req.body;
 
     // Validate required fields
     if (!customerInfo || !customerInfo.name || !customerInfo.email || !customerInfo.phone) {
@@ -286,6 +287,7 @@ router.post('/', verifyToken, async (req, res) => {
 
     // Validate and calculate total
     let totalAmount = 0;
+    let discountAmount = 0;
     const validatedItems = [];
 
     for (const item of items) {
@@ -313,8 +315,62 @@ router.post('/', verifyToken, async (req, res) => {
         });
       }
 
-      const itemTotal = product.price * item.quantity;
-      totalAmount += itemTotal;
+      // If user is logged in and discountCode is provided, check if already used
+      let user = null;
+      if (req.user && req.user.role === 'user') {
+        user = await require('../models/User').findById(req.user.id);
+        if (discountCode && user && user.usedDiscountCodes.includes(discountCode)) {
+          return res.status(400).json({ success: false, message: 'Discount code already used by this user' });
+        }
+      }
+
+      // After order is saved and discount is applied, mark code as used
+      if (user && discountCode) {
+        user.usedDiscountCodes.push(discountCode);
+        await user.save();
+
+
+        // Find the discount code
+        const discount = await DiscountCode.findOne({ code: discountCode });
+
+        if (!discount) {
+          return res.status(404).json({
+            success: false,
+            message: 'Invalid discount code'
+          });
+        }
+
+        // Check if discount is active
+        if (!discount.isActive) {
+          return res.status(400).json({
+            success: false,
+            message: 'Discount code is not active'
+          });
+        }
+
+        // Check expiry date
+        if (discount.expiryDate && new Date() > discount.expiryDate) {
+          return res.status(400).json({
+            success: false,
+            message: 'Discount code has expired'
+          });
+        }
+
+        discountAmount = (totalAmount * discount.discount) / 100;
+
+
+
+      }
+
+
+
+    const itemTotal = product.price * item.quantity;
+
+     // Calculate final total
+     totalAmount = Math.max(0, subtotal - discountAmount + deliveryFee);
+
+    
+     // totalAmount += itemTotal;
 
       validatedItems.push({
         product: product._id,
@@ -339,6 +395,10 @@ router.post('/', verifyToken, async (req, res) => {
         }
       },
       items: validatedItems,
+      subtotal: itemTotal,
+      discountCode: discountCode || null,
+      discountAmount,
+      deliveryFee: deliveryFee || 0,
       totalAmount,
       notes: notes?.trim() || ''
     };
@@ -360,20 +420,6 @@ router.post('/', verifyToken, async (req, res) => {
     // Populate product details for response
     await order.populate('items.product', 'name price images');
 
-    // If user is logged in and discountCode is provided, check if already used
-    let user = null;
-    if (req.user && req.user.role === 'user') {
-      user = await require('../models/User').findById(req.user.id);
-      if (discountCode && user && user.usedDiscountCodes.includes(discountCode)) {
-        return res.status(400).json({ success: false, message: 'Discount code already used by this user' });
-      }
-    }
-
-    // After order is saved and discount is applied, mark code as used
-    if (user && discountCode) {
-      user.usedDiscountCodes.push(discountCode);
-      await user.save();
-    }
 
     res.status(201).json({
       success: true,
@@ -776,6 +822,101 @@ router.get('/user', verifyToken, async (req, res) => {
   } catch (error) {
     console.error('Get user orders error:', error);
     res.status(500).json({ success: false, message: 'Error fetching user orders' });
+  }
+});
+
+
+// API endpoint to check discount code validity
+router.post('/check-discount', verifyToken, async (req, res) => {
+  try {
+    const { discountCode, totalAmount } = req.body;
+
+    if (!discountCode) {
+      return res.status(400).json({
+        success: false,
+        message: 'Discount code is required'
+      });
+    }
+
+    if (!totalAmount || totalAmount <= 0) {
+      return res.status(400).json({
+        success: false,
+        message: 'Valid total amount is required'
+      });
+    }
+
+    // Find the discount code
+    const discount = await DiscountCode.findOne({ code: discountCode });
+
+    if (!discount) {
+      return res.status(404).json({
+        success: false,
+        message: 'Invalid discount code'
+      });
+    }
+
+    // Check if discount is active
+    if (!discount.isActive) {
+      return res.status(400).json({
+        success: false,
+        message: 'Discount code is not active'
+      });
+    }
+
+    // Check expiry date
+    if (discount.expiryDate && new Date() > discount.expiryDate) {
+      return res.status(400).json({
+        success: false,
+        message: 'Discount code has expired'
+      });
+    }
+
+
+
+
+
+    // Check if user already used this code (for logged-in users)
+    if (req.user && req.user.role === 'user') {
+      const user = await require('../models/User').findById(req.user.id);
+      if (user && user.usedDiscountCodes.includes(discountCode)) {
+        return res.status(400).json({
+          success: false,
+          message: 'You have already used this discount code'
+        });
+      }
+    }
+
+    // Calculate discount amount
+    let discountAmount = 0;
+    // if (discount.type === 'percentage') {
+    discountAmount = (totalAmount * discount.discount) / 100;
+    //   if (discount.maxDiscountAmount && discountAmount > discount.maxDiscountAmount) {
+    //     discountAmount = discount.maxDiscountAmount;
+    //   }
+    // } else if (discount.type === 'fixed') {
+    //   discountAmount = Math.min(discount.value, totalAmount);
+    // }
+
+    const finalAmount = Math.max(0, totalAmount - discountAmount);
+
+    res.status(200).json({
+      success: true,
+      message: 'Discount code is valid',
+      data: {
+        discountCode: discount.code,
+        discountValue: discount.discount,
+        discountAmount: discountAmount.toFixed(2),
+        originalAmount: totalAmount.toFixed(2),
+        finalAmount: finalAmount.toFixed(2)
+      }
+    });
+
+  } catch (error) {
+    console.error('Check discount error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Error checking discount code'
+    });
   }
 });
 

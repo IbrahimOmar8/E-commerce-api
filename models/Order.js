@@ -53,6 +53,25 @@ const orderSchema = new mongoose.Schema({
     enum: ['pending', 'confirmed', 'processing', 'shipped', 'delivered', 'cancelled'],
     default: 'pending'
   },
+   discountCode: {
+    type: String,
+    default: null
+  },
+  discountAmount: {
+    type: Number,
+    default: 0,
+    min: 0
+  },
+  subtotal: {
+    type: Number,
+    required: true,
+    min: 0
+  },
+  deliveryFee: {
+    type: Number,
+    default: 0,
+    min: 0
+  },
   notes: {
     type: String,
     trim: true
@@ -74,5 +93,10 @@ orderSchema.pre('save', async function(next) {
   }
   next();
 });
+
+// Index for efficient queries
+orderSchema.index({ orderNumber: 1 });
+orderSchema.index({ user: 1, createdAt: -1 });
+orderSchema.index({ status: 1 });
 
 module.exports = mongoose.model('Order', orderSchema);
