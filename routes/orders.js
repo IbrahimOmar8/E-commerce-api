@@ -475,10 +475,10 @@ router.post('/', verifyToken, async (req, res) => {
 
    
     // Validate required fields
-    if (!customerInfo || !customerInfo.name || !customerInfo.email || !customerInfo.phone) {
+    if (!customerInfo || !customerInfo.name  || !customerInfo.phone) {
       return res.status(400).json({
         success: false,
-        message: 'Customer name, email, and phone are required'
+        message: 'Customer name, and phone are required'
       });
     }
 
@@ -592,7 +592,7 @@ router.post('/', verifyToken, async (req, res) => {
       orderNumber,
       customerInfo: {
         name: customerInfo.name.trim(),
-        email: customerInfo.email.trim().toLowerCase(),
+        email: customerInfo?.email?.trim().toLowerCase() || null,
         phone: customerInfo.phone.trim(),
         address: {
           street: customerInfo.address?.street || '',
