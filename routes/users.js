@@ -283,4 +283,145 @@ router.delete('/:id', verifyToken, async (req, res) => {
   }
 });
 
+
+
+
+// Get all user addresses
+router.get('/me/addresses', verifyToken, async (req, res) => {
+  try {
+    if (!req.user || req.user.role !== 'user') {
+      return res.status(403).json({ success: false, message: 'Access denied' });
+    }
+
+    const user = await User.findById(req.user.id);
+    if (!user) return res.status(404).json({ success: false, message: 'User not found' });
+
+    res.json({ 
+      success: true, 
+      message: 'Addresses retrieved successfully', 
+      data: user.useraddress 
+    });
+  } catch (error) {
+    console.error('Get addresses error:', error);
+    res.status(500).json({ success: false, message: 'Error retrieving addresses' });
+  }
+});
+
+// Create new address
+router.post('/me/addresses', verifyToken, async (req, res) => {
+  try {
+    if (!req.user || req.user.role !== 'user') {
+      return res.status(403).json({ success: false, message: 'Access denied' });
+    }
+
+    const { phone, address } = req.body;
+    
+    // Basic validation
+    if (!address || !address.street || !address.city) {
+      return res.status(400).json({ 
+        success: false, 
+        message: 'Address street and city are required' 
+      });
+    }
+
+    const user = await User.findById(req.user.id);
+    if (!user) return res.status(404).json({ success: false, message: 'User not found' });
+
+    // Create new address object
+    const newAddress = {
+      phone: phone || '',
+      address: {
+        street: address.street,
+        city: address.city
+      }
+    };
+
+    // Add to user's addresses array
+    user.useraddress.push(newAddress);
+    await user.save();
+
+    // Get the newly created address (last item in array)
+    const createdAddress = user.useraddress[user.useraddress.length - 1];
+
+    res.status(201).json({ 
+      success: true, 
+      message: 'Address created successfully', 
+      data: createdAddress 
+    });
+  } catch (error) {
+    console.error('Create address error:', error);
+    res.status(500).json({ success: false, message: 'Error creating address' });
+  }
+});
+
+// Update specific address
+router.put('/me/addresses/:addressId', verifyToken, async (req, res) => {
+  try {
+    if (!req.user || req.user.role !== 'user') {
+      return res.status(403).json({ success: false, message: 'Access denied' });
+    }
+
+    const { addressId } = req.params;
+    const { phone, address } = req.body;
+
+    const user = await User.findById(req.user.id);
+    if (!user) return res.status(404).json({ success: false, message: 'User not found' });
+
+    // Find the address by ID
+    const addressToUpdate = user.useraddress.id(addressId);
+    if (!addressToUpdate) {
+      return res.status(404).json({ success: false, message: 'Address not found' });
+    }
+
+    // Update fields if provided
+    if (phone !== undefined) addressToUpdate.phone = phone;
+    if (address) {
+      if (address.street !== undefined) addressToUpdate.address.street = address.street;
+      if (address.city !== undefined) addressToUpdate.address.city = address.city;
+    }
+
+    await user.save();
+
+    res.json({ 
+      success: true, 
+      message: 'Address updated successfully', 
+      data: addressToUpdate 
+    });
+  } catch (error) {
+    console.error('Update address error:', error);
+    res.status(500).json({ success: false, message: 'Error updating address' });
+  }
+});
+
+// Delete specific address
+router.delete('/me/addresses/:addressId', verifyToken, async (req, res) => {
+  try {
+    if (!req.user || req.user.role !== 'user') {
+      return res.status(403).json({ success: false, message: 'Access denied' });
+    }
+
+    const { addressId } = req.params;
+
+    const user = await User.findById(req.user.id);
+    if (!user) return res.status(404).json({ success: false, message: 'User not found' });
+
+    // Find and remove the address by ID
+    const addressToDelete = user.useraddress.id(addressId);
+    if (!addressToDelete) {
+      return res.status(404).json({ success: false, message: 'Address not found' });
+    }
+
+    user.useraddress.pull(addressId);
+    await user.save();
+
+    res.json({ 
+      success: true, 
+      message: 'Address deleted successfully' 
+    });
+  } catch (error) {
+    console.error('Delete address error:', error);
+    res.status(500).json({ success: false, message: 'Error deleting address' });
+  }
+});
+
 module.exports = router;
