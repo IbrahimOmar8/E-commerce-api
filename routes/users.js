@@ -170,6 +170,158 @@ const router = express.Router();
  *         description: Not found
  */
 
+/**
+ * @swagger
+ * /users/me/addresses:
+ *   get:
+ *     summary: Get all addresses for current user
+ *     tags: [Users]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: List of addresses
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                 message:
+ *                   type: string
+ *                 data:
+ *                   type: array
+ *                   items:
+ *                     type: object
+ *                     properties:
+ *                       _id:
+ *                         type: string
+ *                       phone:
+ *                         type: string
+ *                       address:
+ *                         type: object
+ *                         properties:
+ *                           street:
+ *                             type: string
+ *                           city:
+ *                             type: string
+ *       401:
+ *         description: Unauthorized
+ *
+ *   post:
+ *     summary: Create a new address for current user
+ *     tags: [Users]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               phone:
+ *                 type: string
+ *               address:
+ *                 type: object
+ *                 required:
+ *                   - street
+ *                   - city
+ *                 properties:
+ *                   street:
+ *                     type: string
+ *                   city:
+ *                     type: string
+ *     responses:
+ *       201:
+ *         description: Address created
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                 message:
+ *                   type: string
+ *                 data:
+ *                   type: object
+ *                   properties:
+ *                     _id:
+ *                       type: string
+ *                     phone:
+ *                       type: string
+ *                     address:
+ *                       type: object
+ *                       properties:
+ *                         street:
+ *                           type: string
+ *                         city:
+ *                           type: string
+ *       400:
+ *         description: Bad request
+ *       401:
+ *         description: Unauthorized
+ *
+ * /users/me/addresses/{addressId}:
+ *   put:
+ *     summary: Update an address for current user
+ *     tags: [Users]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: addressId
+ *         required: true
+ *         schema:
+ *           type: string
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               phone:
+ *                 type: string
+ *               address:
+ *                 type: object
+ *                 properties:
+ *                   street:
+ *                     type: string
+ *                   city:
+ *                     type: string
+ *     responses:
+ *       200:
+ *         description: Address updated
+ *       400:
+ *         description: Bad request
+ *       401:
+ *         description: Unauthorized
+ *       404:
+ *         description: Address not found
+ *
+ *   delete:
+ *     summary: Delete an address for current user
+ *     tags: [Users]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: addressId
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Address deleted
+ *       401:
+ *         description: Unauthorized
+ *       404:
+ *         description: Address not found
+ */
+
 /* GET users listing. */
 router.get('/', function(req, res, next) {
   res.send('respond with a resource');
@@ -283,8 +435,157 @@ router.delete('/:id', verifyToken, async (req, res) => {
   }
 });
 
-
-
+/**
+ * @swagger
+ * /users/me/addresses:
+ *   get:
+ *     summary: Get all addresses for current user
+ *     tags: [Users]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: List of addresses
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                 message:
+ *                   type: string
+ *                 data:
+ *                   type: array
+ *                   items:
+ *                     type: object
+ *                     properties:
+ *                       _id:
+ *                         type: string
+ *                       phone:
+ *                         type: string
+ *                       address:
+ *                         type: object
+ *                         properties:
+ *                           street:
+ *                             type: string
+ *                           city:
+ *                             type: string
+ *       401:
+ *         description: Unauthorized
+ *
+ *   post:
+ *     summary: Create a new address for current user
+ *     tags: [Users]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               phone:
+ *                 type: string
+ *               address:
+ *                 type: object
+ *                 required:
+ *                   - street
+ *                   - city
+ *                 properties:
+ *                   street:
+ *                     type: string
+ *                   city:
+ *                     type: string
+ *     responses:
+ *       201:
+ *         description: Address created
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                 message:
+ *                   type: string
+ *                 data:
+ *                   type: object
+ *                   properties:
+ *                     _id:
+ *                       type: string
+ *                     phone:
+ *                       type: string
+ *                     address:
+ *                       type: object
+ *                       properties:
+ *                         street:
+ *                           type: string
+ *                         city:
+ *                           type: string
+ *       400:
+ *         description: Bad request
+ *       401:
+ *         description: Unauthorized
+ *
+ * /users/me/addresses/{addressId}:
+ *   put:
+ *     summary: Update an address for current user
+ *     tags: [Users]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: addressId
+ *         required: true
+ *         schema:
+ *           type: string
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               phone:
+ *                 type: string
+ *               address:
+ *                 type: object
+ *                 properties:
+ *                   street:
+ *                     type: string
+ *                   city:
+ *                     type: string
+ *     responses:
+ *       200:
+ *         description: Address updated
+ *       400:
+ *         description: Bad request
+ *       401:
+ *         description: Unauthorized
+ *       404:
+ *         description: Address not found
+ *
+ *   delete:
+ *     summary: Delete an address for current user
+ *     tags: [Users]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: addressId
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Address deleted
+ *       401:
+ *         description: Unauthorized
+ *       404:
+ *         description: Address not found
+ */
 
 // Get all user addresses
 router.get('/me/addresses', verifyToken, async (req, res) => {
