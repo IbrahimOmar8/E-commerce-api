@@ -473,7 +473,7 @@ router.post('/', verifyToken, async (req, res) => {
   try {
     const { customerInfo, items, notes, discountCode ,deliveryFee } = req.body;
 
-   
+
     // Validate required fields
     if (!customerInfo || !customerInfo.name  || !customerInfo.phone) {
       return res.status(400).json({
@@ -569,13 +569,13 @@ router.post('/', verifyToken, async (req, res) => {
 
 
 
-     itemTotal = product.price * item.quantity;
+      itemTotal = product.price * item.quantity;
 
-     // Calculate final total
-     totalAmount = Math.max(0, itemTotal - discountAmount + deliveryFee);
+      // Calculate final total
+      totalAmount = Math.max(0, itemTotal - discountAmount + deliveryFee);
 
-    
-     // totalAmount += itemTotal;
+
+      // totalAmount += itemTotal;
 
       validatedItems.push({
         product: product._id,
@@ -1019,8 +1019,7 @@ router.get('/user', verifyToken, async (req, res) => {
     if (!req.user || req.user.role !== 'user') {
       return res.status(403).json({ success: false, message: 'Access denied' });
     }
-    const userId = req.user.id;
-    console.log("User ID:", userId); // Debugging line
+    const userId = req.user.id; 
     const orders = await Order.find({ user: userId })
       .populate('items.product', 'name price images')
       .sort('-createdAt');
