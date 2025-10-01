@@ -1020,7 +1020,8 @@ router.get('/user', verifyToken, async (req, res) => {
       return res.status(403).json({ success: false, message: 'Access denied' });
     }
     const userId = req.user.id;
-    const orders = await Order.find({ 'customerInfo.userId': userId })
+    console.log("User ID:", userId); // Debugging line
+    const orders = await Order.find({ user: userId })
       .populate('items.product', 'name price images')
       .sort('-createdAt');
     res.json({ success: true, data: orders });
