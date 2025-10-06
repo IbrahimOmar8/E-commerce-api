@@ -468,6 +468,27 @@ const router = express.Router();
  *                   example: "Error checking discount code"
  */
 
+
+
+// Get orders for logged-in user
+router.get('/user', verifyToken, async (req, res) => {
+  try {
+    // Only allow for user role
+    if (!req.user || req.user.role !== 'user') {
+      return res.status(403).json({ success: false, message: 'Access denied' });
+    }
+   // console.log('User ID:', req.user.id); // Debugging line
+    const userId = req.user.id; 
+    const orders = await Order.find({ user: userId })
+      .populate('items.product', 'name price images')
+      .sort('-createdAt');
+    res.json({ success: true, data: orders });
+  } catch (error) {
+    console.error('Get user orders error:', error);
+    res.status(500).json({ success: false, message: 'Error fetching user orders' });
+  }
+});
+
 // Create order (public - from frontend)
 router.post('/', verifyToken, async (req, res) => {
   try {
@@ -1012,23 +1033,6 @@ router.get('/admin/stats', verifyToken, async (req, res) => {
   }
 });
 
-// Get orders for logged-in user
-router.get('/user', verifyToken, async (req, res) => {
-  try {
-    // Only allow for user role
-    if (!req.user || req.user.role !== 'user') {
-      return res.status(403).json({ success: false, message: 'Access denied' });
-    }
-    const userId = req.user.id; 
-    const orders = await Order.find({ user: userId })
-      .populate('items.product', 'name price images')
-      .sort('-createdAt');
-    res.json({ success: true, data: orders });
-  } catch (error) {
-    console.error('Get user orders error:', error);
-    res.status(500).json({ success: false, message: 'Error fetching user orders' });
-  }
-});
 
 
 // API endpoint to check discount code validity
