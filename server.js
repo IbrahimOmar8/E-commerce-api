@@ -20,14 +20,18 @@ dotenv.config();
 const app = express();
 
 // Middleware
+// app.use(cors({
+//   origin: [
+//     'https://elfateh-13.vercel.app',
+//     'https://elfateh13-admin-dhli.vercel.app',
+//     'http://localhost:3000',
+//     'http://localhost:3001',
+//   ]
+// }));
 app.use(cors({
-  origin: [
-    'https://elfateh-13.vercel.app',
-    'https://elfateh13-admin-dhli.vercel.app',
-    'http://localhost:3000',
-    'http://localhost:3001'
-  ]
+ origin: true
 }));
+
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
