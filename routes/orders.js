@@ -646,6 +646,12 @@ router.post('/', verifyToken, async (req, res) => {
     // Populate product details for response
     await order.populate('items.product', 'name price images');
 
+    // Send admin notification asynchronously, do not block response
+    sendAdminNotification(order).then((ok) => {
+      if (!ok) console.warn('Admin notification failed for order', order._id);
+    }).catch((err) => {
+      console.error('Admin notification error:', err);
+    });
 
     res.status(201).json({
       success: true,
@@ -1128,5 +1134,74 @@ router.post('/check-discount', verifyToken, async (req, res) => {
     });
   }
 });
+
+// --- Notification helpers ---
+const https = require('https');
+// Lazy-load nodemailer to avoid crashing if not installed
+let nodemailer;
+try { nodemailer = require('nodemailer'); } catch (e) { nodemailer = null; }
+
+async function sendTelegramMessage(text) {
+  const token = process.env.TELEGRAM_BOT_TOKEN;
+  const chatId = process.env.TELEGRAM_CHAT_ID;
+  if (!token || !chatId) return false;
+  const encoded = encodeURIComponent(text);
+  const path = `/bot${token}/sendMessage?chat_id=${chatId}&text=${encoded}`;
+  return new Promise((resolve) => {
+    const req = https.request({ hostname: 'api.telegram.org', port: 443, path, method: 'GET' }, (res) => {
+      // consume response
+      res.on('data', () => {});
+      res.on('end', () => resolve(true));
+    });
+    req.on('error', () => resolve(false));
+    req.end();
+  });
+}
+
+async function sendEmail(subject, text) {
+  if (!nodemailer || !process.env.SMTP_HOST) return false;
+  const transporter = nodemailer.createTransport({
+    host: process.env.SMTP_HOST,
+    port: Number(process.env.SMTP_PORT) || 587,
+    secure: process.env.SMTP_SECURE === 'true',
+    auth: process.env.SMTP_USER ? { user: process.env.SMTP_USER, pass: process.env.SMTP_PASS } : undefined,
+  });
+  const mailOptions = {
+    from: process.env.EMAIL_FROM || 'no-reply@example.com',
+    to: process.env.ADMIN_EMAIL || process.env.SMTP_USER,
+    subject,
+    text,
+  };
+  try {
+    await transporter.sendMail(mailOptions);
+    return true;
+  } catch (err) {
+    console.error('sendEmail error:', err);
+    return false;
+  }
+}
+
+async function sendAdminNotification(order) {
+  const shortItems = order.items.map(i => `${i.quantity}x`).join(' ');
+  const message = [
+    `New order: ${order.orderNumber}`,
+    `Order ID: ${order._id}`,
+    `Customer: ${order.customerInfo?.name || 'N/A'}`,
+    `Phone: ${order.customerInfo?.phone || 'N/A'}`,
+    `Items: ${order.items.length} (${shortItems})`,
+    `Total: ${order.totalAmount?.toFixed ? order.totalAmount.toFixed(2) : order.totalAmount}`,
+    `Status: ${order.status}`,
+    `View: (admin panel link if available)`
+  ].join('\n');
+
+  // Try Telegram first (fast and free)
+  const tgOk = await sendTelegramMessage(message);
+  if (tgOk) return true;
+
+  // Fallback to email if Telegram not configured or failed
+  // const emailOk = await sendEmail(`New order: ${order.orderNumber}`, message);
+  // return emailOk;
+}
+// --- end notification helpers ---
 
 module.exports = router;
