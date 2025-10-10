@@ -1183,6 +1183,9 @@ async function sendEmail(subject, text) {
 
 async function sendAdminNotification(order) {
   const shortItems = order.items.map(i => `${i.quantity}x`).join(' ');
+    // use the exact admin URL requested
+  const orderUrl = `https://elfteh-shater13-admin.pages.dev/orders/${order._id}`;
+
   const message = [
     `New order: ${order.orderNumber}`,
     `Order ID: ${order._id}`,
@@ -1191,7 +1194,10 @@ async function sendAdminNotification(order) {
     `Items: ${order.items.length} (${shortItems})`,
     `Total: ${order.totalAmount?.toFixed ? order.totalAmount.toFixed(2) : order.totalAmount}`,
     `Status: ${order.status}`,
-    `View: (admin panel link if available)`
+    `View:${orderUrl}`,
+    `Date: ${order.createdAt.toLocaleString()}`,
+    `------------------------`,
+    `Please check the admin panel for more details.`
   ].join('\n');
 
   // Try Telegram first (fast and free)
