@@ -168,7 +168,7 @@ router.post('/login', async (req, res) => {
     const token = jwt.sign(
       { id: admin._id, username: admin.username, role: admin.role },
       process.env.JWT_SECRET || 'your-secret-key',
-      { expiresIn: '24h' }
+      { expiresIn: '100h' }
     );
 
     res.json({
@@ -271,7 +271,7 @@ router.post('/user-login', async (req, res) => {
     const token = jwt.sign(
       { id: user._id, username: user.username, role: 'user' },
       process.env.JWT_SECRET || 'your-secret-key',
-      { expiresIn: '24h' }
+      { expiresIn: '100h' }
     );
     res.json({
       success: true,

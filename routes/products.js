@@ -363,7 +363,27 @@ router.get('/', async (req, res) => {
     }
 
     if (search) {
-      query.$text = { $search: search };
+      const s = String(search || '').trim();
+      if (s) {
+        // check collection indexes for any text index
+        const indexes = await Product.collection.indexes();
+        const hasTextIndex = indexes.some(idx =>
+          Object.values(idx.key).some(v => v === 'text')
+        );
+
+        if (hasTextIndex) {
+          query.$text = { $search: s };
+        } else {
+          // fallback: case-insensitive regex on searchable fields
+          const escaped = s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+          const regex = new RegExp(escaped, 'i');
+          query.$or = [
+            { name: regex },
+            { description: regex }
+            // add other fields if needed
+          ];
+        }
+      }
     }
 
     const skip = (Number(page) - 1) * Number(limit);
