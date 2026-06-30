@@ -2,6 +2,7 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useAuthStore } from '@/store/auth';
+import { useLanguage } from '@/contexts/language';
 import { wishlistApi } from '@/lib/api';
 import type { Product } from '@/types';
 import ProductCard from '@/components/store/ProductCard';
@@ -9,6 +10,7 @@ import { Heart } from 'lucide-react';
 
 export default function WishlistPage() {
   const { user } = useAuthStore();
+  const { t } = useLanguage();
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
   const [mounted, setMounted] = useState(false);
@@ -26,28 +28,34 @@ export default function WishlistPage() {
   if (!mounted) return null;
 
   if (!user) return (
-    <div className="max-w-2xl mx-auto px-4 py-20 text-center">
-      <Heart size={64} className="mx-auto mb-4 text-gray-200" />
-      <h2 className="text-2xl font-bold text-gray-900 mb-3">قائمة المفضلة</h2>
-      <p className="text-gray-500 mb-6">سجل دخولك لعرض منتجاتك المفضلة</p>
-      <Link href="/account" className="bg-orange-500 text-white px-8 py-3 rounded-2xl font-bold hover:bg-orange-600">
-        تسجيل الدخول
+    <div className="max-w-2xl mx-auto px-4 py-24 text-center fade-in">
+      <div className="w-24 h-24 bg-pink-100 rounded-full flex items-center justify-center mx-auto mb-6">
+        <Heart size={40} className="text-pink-400" />
+      </div>
+      <h2 className="text-2xl font-black text-slate-900 mb-3">{t('wishlistTitle')}</h2>
+      <p className="text-slate-500 mb-8">{t('wishlistLogin')}</p>
+      <Link href="/account" className="btn-primary px-10 py-4 inline-block rounded-2xl text-base">
+        {t('loginBtn')}
       </Link>
     </div>
   );
 
   return (
-    <div className="max-w-7xl mx-auto px-4 py-8">
-      <h1 className="text-2xl font-bold text-gray-900 mb-6">
-        المفضلة ({products.length})
-      </h1>
+    <div className="max-w-7xl mx-auto px-4 py-8 fade-in">
+      <div className="mb-8">
+        <h1 className="text-3xl font-black text-slate-900 flex items-center gap-3">
+          <Heart size={28} className="text-pink-500" />
+          {t('wishlistTitle')}
+          <span className="text-slate-400 font-medium text-xl">({products.length})</span>
+        </h1>
+      </div>
 
       {loading ? (
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           {Array.from({ length: 4 }).map((_, i) => (
-            <div key={i} className="bg-white rounded-2xl overflow-hidden border border-gray-100">
+            <div key={i} className="bg-white rounded-2xl overflow-hidden border border-slate-100 shadow-sm">
               <div className="aspect-square skeleton" />
-              <div className="p-3 space-y-2">
+              <div className="p-3.5 space-y-2">
                 <div className="h-4 skeleton rounded" />
                 <div className="h-4 skeleton rounded w-2/3" />
               </div>
@@ -55,12 +63,14 @@ export default function WishlistPage() {
           ))}
         </div>
       ) : products.length === 0 ? (
-        <div className="text-center py-20">
-          <Heart size={64} className="mx-auto mb-4 text-gray-200" />
-          <h3 className="text-lg font-semibold text-gray-700 mb-2">قائمة المفضلة فارغة</h3>
-          <p className="text-gray-500 mb-6">أضف منتجات إلى مفضلتك للعودة إليها لاحقاً</p>
-          <Link href="/products" className="bg-orange-500 text-white px-8 py-3 rounded-2xl font-bold hover:bg-orange-600">
-            تصفح المنتجات
+        <div className="text-center py-24">
+          <div className="w-20 h-20 bg-pink-50 rounded-full flex items-center justify-center mx-auto mb-5">
+            <Heart size={36} className="text-pink-300" />
+          </div>
+          <h3 className="text-xl font-bold text-slate-700 mb-2">{t('wishlistEmpty')}</h3>
+          <p className="text-slate-500 mb-8">{t('wishlistEmptyDesc')}</p>
+          <Link href="/products" className="btn-primary px-10 py-3.5 inline-block rounded-2xl">
+            {t('browseProducts')}
           </Link>
         </div>
       ) : (

@@ -1,29 +1,30 @@
 'use client';
 import { useState, useEffect, useCallback, Suspense } from 'react';
-import { useSearchParams, useRouter } from 'next/navigation';
+import { useSearchParams } from 'next/navigation';
 import ProductCard from '@/components/store/ProductCard';
 import { productsApi, categoriesApi, brandsApi } from '@/lib/api';
+import { useLanguage } from '@/contexts/language';
 import type { Product, Category, Brand } from '@/types';
-import { SlidersHorizontal, ChevronDown, X } from 'lucide-react';
-
-const GENDER_OPTIONS = [
-  { value: 'men', label: 'رجال' },
-  { value: 'women', label: 'نساء' },
-  { value: 'kids', label: 'أطفال' },
-  { value: 'unisex', label: 'للجميع' },
-];
-
-const SORT_OPTIONS = [
-  { value: '-createdAt', label: 'الأحدث' },
-  { value: 'price', label: 'السعر: الأقل أولاً' },
-  { value: '-price', label: 'السعر: الأعلى أولاً' },
-  { value: '-averageRating', label: 'الأعلى تقييماً' },
-  { value: '-totalReviews', label: 'الأكثر مراجعات' },
-];
+import { SlidersHorizontal, X, ChevronDown } from 'lucide-react';
 
 function ProductsContent() {
   const searchParams = useSearchParams();
-  const router = useRouter();
+  const { t, lang } = useLanguage();
+
+  const GENDER_OPTIONS = [
+    { value: 'men', label: t('men') },
+    { value: 'women', label: t('women') },
+    { value: 'kids', label: t('kids') },
+    { value: 'unisex', label: lang === 'ar' ? 'للجميع' : 'Unisex' },
+  ];
+
+  const SORT_OPTIONS = [
+    { value: '-createdAt', label: t('newest') },
+    { value: 'price', label: t('priceLow') },
+    { value: '-price', label: t('priceHigh') },
+    { value: '-averageRating', label: t('topRated') },
+    { value: '-totalReviews', label: t('mostReviewed') },
+  ];
 
   const [products, setProducts] = useState<Product[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
@@ -74,192 +75,235 @@ function ProductsContent() {
 
   useEffect(() => {
     const [cats, brnds] = [categoriesApi.getAll({ isActive: 'true' }), brandsApi.getAll()];
-    cats.then(r => setCategories((r.data || []).filter(c => !c.parent)));
+    cats.then(r => setCategories((r.data || []).filter((c: Category) => !c.parent)));
     brnds.then(r => setBrands(r.data || []));
   }, []);
 
   const updateFilter = (key: string, value: string | number) => {
     setFilters(prev => ({ ...prev, [key]: value, page: 1 }));
   };
-
   const clearFilter = (key: string) => updateFilter(key, '');
 
   const activeFiltersCount = [filters.category, filters.brand, filters.gender, filters.sport, filters.minPrice, filters.maxPrice, filters.productType]
     .filter(Boolean).length;
 
+  const clearAllFilters = () => setFilters(prev => ({
+    ...prev, category: '', brand: '', gender: '', sport: '', minPrice: '', maxPrice: '', productType: '', page: 1
+  }));
+
   const SkeletonCard = () => (
-    <div className="bg-white rounded-2xl overflow-hidden border border-gray-100">
+    <div className="bg-white rounded-2xl overflow-hidden border border-gray-100 shadow-sm">
       <div className="aspect-square skeleton" />
-      <div className="p-3 space-y-2">
+      <div className="p-3.5 space-y-2">
         <div className="h-3 skeleton rounded w-16" />
         <div className="h-4 skeleton rounded" />
         <div className="h-4 skeleton rounded w-3/4" />
-        <div className="h-8 skeleton rounded" />
+        <div className="h-8 skeleton rounded mt-2" />
+      </div>
+    </div>
+  );
+
+  const FilterPanel = () => (
+    <div className="bg-white rounded-2xl border border-slate-100 p-5 shadow-sm">
+      <div className="flex items-center justify-between mb-5">
+        <h3 className="font-bold text-slate-900">{t('filter')}</h3>
+        {activeFiltersCount > 0 && (
+          <button onClick={clearAllFilters} className="text-xs text-red-500 hover:text-red-600 font-semibold">
+            {t('clearAll')}
+          </button>
+        )}
+      </div>
+
+      {/* Product type */}
+      <div className="mb-5 pb-5 border-b border-slate-100">
+        <h4 className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-3">{t('productType')}</h4>
+        <div className="space-y-2">
+          {[
+            { value: 'featured', label: t('featured2') },
+            { value: 'bestSeller', label: t('bestSeller2') },
+            { value: 'specialOffer', label: t('specialOffer') },
+          ].map(opt => (
+            <label key={opt.value} className="flex items-center gap-2.5 cursor-pointer group">
+              <div className={`w-4 h-4 rounded border-2 flex items-center justify-center transition-all flex-shrink-0 ${
+                filters.productType === opt.value ? 'bg-orange-500 border-orange-500' : 'border-slate-300 group-hover:border-orange-400'
+              }`}>
+                {filters.productType === opt.value && <div className="w-2 h-2 rounded-full bg-white" />}
+              </div>
+              <span className="text-sm text-slate-600 group-hover:text-slate-900 cursor-pointer"
+                onClick={() => updateFilter('productType', filters.productType === opt.value ? '' : opt.value)}>
+                {opt.label}
+              </span>
+            </label>
+          ))}
+        </div>
+      </div>
+
+      {/* Gender */}
+      <div className="mb-5 pb-5 border-b border-slate-100">
+        <h4 className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-3">{t('gender')}</h4>
+        <div className="space-y-2">
+          {GENDER_OPTIONS.map(opt => (
+            <label key={opt.value} className="flex items-center gap-2.5 cursor-pointer group">
+              <div className={`w-4 h-4 rounded border-2 flex items-center justify-center transition-all flex-shrink-0 ${
+                filters.gender === opt.value ? 'bg-orange-500 border-orange-500' : 'border-slate-300 group-hover:border-orange-400'
+              }`}>
+                {filters.gender === opt.value && <div className="w-2 h-2 rounded-full bg-white" />}
+              </div>
+              <span className="text-sm text-slate-600 group-hover:text-slate-900 cursor-pointer"
+                onClick={() => updateFilter('gender', filters.gender === opt.value ? '' : opt.value)}>
+                {opt.label}
+              </span>
+            </label>
+          ))}
+        </div>
+      </div>
+
+      {/* Category */}
+      {categories.length > 0 && (
+        <div className="mb-5 pb-5 border-b border-slate-100">
+          <h4 className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-3">{t('category')}</h4>
+          <div className="space-y-2 max-h-44 overflow-y-auto pe-1">
+            {categories.map(cat => (
+              <label key={cat._id} className="flex items-center gap-2.5 cursor-pointer group">
+                <div className={`w-4 h-4 rounded border-2 flex items-center justify-center transition-all flex-shrink-0 ${
+                  filters.category === cat._id ? 'bg-orange-500 border-orange-500' : 'border-slate-300 group-hover:border-orange-400'
+                }`}>
+                  {filters.category === cat._id && <div className="w-2 h-2 rounded-full bg-white" />}
+                </div>
+                <span className="text-sm text-slate-600 group-hover:text-slate-900 cursor-pointer"
+                  onClick={() => updateFilter('category', filters.category === cat._id ? '' : cat._id)}>
+                  {lang === 'ar' ? cat.nameAr || cat.name : cat.name || cat.nameAr}
+                </span>
+              </label>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Brand */}
+      {brands.length > 0 && (
+        <div className="mb-5 pb-5 border-b border-slate-100">
+          <h4 className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-3">{t('brand')}</h4>
+          <div className="space-y-2 max-h-44 overflow-y-auto pe-1">
+            {brands.map(b => (
+              <label key={b._id} className="flex items-center gap-2.5 cursor-pointer group">
+                <div className={`w-4 h-4 rounded border-2 flex items-center justify-center transition-all flex-shrink-0 ${
+                  filters.brand === b._id ? 'bg-orange-500 border-orange-500' : 'border-slate-300 group-hover:border-orange-400'
+                }`}>
+                  {filters.brand === b._id && <div className="w-2 h-2 rounded-full bg-white" />}
+                </div>
+                <span className="text-sm text-slate-600 group-hover:text-slate-900 cursor-pointer"
+                  onClick={() => updateFilter('brand', filters.brand === b._id ? '' : b._id)}>
+                  {lang === 'ar' ? b.nameAr || b.name : b.name || b.nameAr}
+                </span>
+              </label>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Price */}
+      <div>
+        <h4 className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-3">{t('priceRange')}</h4>
+        <div className="flex gap-2">
+          <input type="number" placeholder={t('priceFrom')} value={filters.minPrice}
+            onChange={e => updateFilter('minPrice', e.target.value)}
+            className="input-base" />
+          <input type="number" placeholder={t('priceTo')} value={filters.maxPrice}
+            onChange={e => updateFilter('maxPrice', e.target.value)}
+            className="input-base" />
+        </div>
       </div>
     </div>
   );
 
   return (
-    <div className="max-w-7xl mx-auto px-4 py-8">
-      {/* Header */}
-      <div className="mb-6">
-        <h1 className="text-2xl font-bold text-gray-900 mb-1">
-          {filters.search ? `نتائج البحث: "${filters.search}"` : 'جميع المنتجات'}
+    <div className="max-w-7xl mx-auto px-4 py-8 fade-in">
+      <div className="mb-7">
+        <h1 className="text-3xl font-black text-slate-900 mb-1">
+          {filters.search ? `${t('searchResults')}: "${filters.search}"` : t('allProductsTitle')}
         </h1>
-        <p className="text-gray-500 text-sm">{total} منتج</p>
+        <p className="text-slate-500 text-sm">{total} {t('products')}</p>
       </div>
 
-      {/* Search bar */}
       <div className="mb-6">
         <form onSubmit={e => { e.preventDefault(); fetchProducts(); }}>
           <input
             type="text"
             value={filters.search}
             onChange={e => setFilters(prev => ({ ...prev, search: e.target.value }))}
-            placeholder="ابحث في المنتجات..."
-            className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+            placeholder={t('searchInProducts')}
+            className="input-base text-base py-3.5"
           />
         </form>
       </div>
 
       <div className="flex gap-6">
-        {/* Sidebar Filters - Desktop */}
-        <aside className="hidden lg:block w-56 flex-shrink-0">
-          <div className="bg-white rounded-2xl border border-gray-100 p-5 sticky top-24">
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="font-bold text-gray-900">تصفية</h3>
-              {activeFiltersCount > 0 && (
-                <button onClick={() => setFilters(prev => ({ ...prev, category: '', brand: '', gender: '', sport: '', minPrice: '', maxPrice: '', productType: '', page: 1 }))}
-                  className="text-xs text-red-500 hover:text-red-600">مسح الكل</button>
-              )}
-            </div>
-
-            {/* Product type */}
-            <div className="mb-5">
-              <h4 className="text-sm font-semibold text-gray-700 mb-2">نوع المنتج</h4>
-              <div className="space-y-1">
-                {[{ value: 'featured', label: 'مميزة' }, { value: 'bestSeller', label: 'الأكثر مبيعاً' }, { value: 'specialOffer', label: 'عروض' }].map(opt => (
-                  <label key={opt.value} className="flex items-center gap-2 cursor-pointer py-1">
-                    <input type="radio" name="productType" value={opt.value} checked={filters.productType === opt.value}
-                      onChange={() => updateFilter('productType', filters.productType === opt.value ? '' : opt.value)}
-                      className="text-orange-500 accent-orange-500" />
-                    <span className="text-sm text-gray-600">{opt.label}</span>
-                  </label>
-                ))}
-              </div>
-            </div>
-
-            {/* Gender */}
-            <div className="mb-5">
-              <h4 className="text-sm font-semibold text-gray-700 mb-2">الفئة</h4>
-              <div className="space-y-1">
-                {GENDER_OPTIONS.map(opt => (
-                  <label key={opt.value} className="flex items-center gap-2 cursor-pointer py-1">
-                    <input type="radio" name="gender" value={opt.value} checked={filters.gender === opt.value}
-                      onChange={() => updateFilter('gender', filters.gender === opt.value ? '' : opt.value)}
-                      className="accent-orange-500" />
-                    <span className="text-sm text-gray-600">{opt.label}</span>
-                  </label>
-                ))}
-              </div>
-            </div>
-
-            {/* Category */}
-            {categories.length > 0 && (
-              <div className="mb-5">
-                <h4 className="text-sm font-semibold text-gray-700 mb-2">التصنيف</h4>
-                <div className="space-y-1 max-h-40 overflow-y-auto">
-                  {categories.map(cat => (
-                    <label key={cat._id} className="flex items-center gap-2 cursor-pointer py-1">
-                      <input type="radio" name="category" value={cat._id} checked={filters.category === cat._id}
-                        onChange={() => updateFilter('category', filters.category === cat._id ? '' : cat._id)}
-                        className="accent-orange-500" />
-                      <span className="text-sm text-gray-600">{cat.nameAr || cat.name}</span>
-                    </label>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {/* Brand */}
-            {brands.length > 0 && (
-              <div className="mb-5">
-                <h4 className="text-sm font-semibold text-gray-700 mb-2">الماركة</h4>
-                <div className="space-y-1 max-h-40 overflow-y-auto">
-                  {brands.map(b => (
-                    <label key={b._id} className="flex items-center gap-2 cursor-pointer py-1">
-                      <input type="radio" name="brand" value={b._id} checked={filters.brand === b._id}
-                        onChange={() => updateFilter('brand', filters.brand === b._id ? '' : b._id)}
-                        className="accent-orange-500" />
-                      <span className="text-sm text-gray-600">{b.nameAr || b.name}</span>
-                    </label>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {/* Price range */}
-            <div>
-              <h4 className="text-sm font-semibold text-gray-700 mb-2">نطاق السعر (ريال)</h4>
-              <div className="flex gap-2">
-                <input type="number" placeholder="من" value={filters.minPrice}
-                  onChange={e => updateFilter('minPrice', e.target.value)}
-                  className="w-full border border-gray-200 rounded-lg px-2 py-1.5 text-sm focus:outline-none focus:ring-1 focus:ring-orange-500" />
-                <input type="number" placeholder="إلى" value={filters.maxPrice}
-                  onChange={e => updateFilter('maxPrice', e.target.value)}
-                  className="w-full border border-gray-200 rounded-lg px-2 py-1.5 text-sm focus:outline-none focus:ring-1 focus:ring-orange-500" />
-              </div>
-            </div>
+        <aside className="hidden lg:block w-60 flex-shrink-0">
+          <div className="sticky top-24">
+            <FilterPanel />
           </div>
         </aside>
 
-        {/* Products area */}
         <div className="flex-1 min-w-0">
-          {/* Toolbar */}
-          <div className="flex items-center justify-between mb-4 gap-3">
-            {/* Mobile filters button */}
-            <button onClick={() => setFiltersOpen(!filtersOpen)}
-              className="lg:hidden flex items-center gap-2 border border-gray-200 rounded-xl px-4 py-2 text-sm">
-              <SlidersHorizontal size={16} />
-              تصفية
-              {activeFiltersCount > 0 && <span className="bg-orange-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">{activeFiltersCount}</span>}
+          <div className="flex items-center justify-between mb-5 gap-3">
+            <button
+              onClick={() => setFiltersOpen(!filtersOpen)}
+              className="lg:hidden flex items-center gap-2 border border-slate-200 bg-white rounded-xl px-4 py-2.5 text-sm font-medium hover:border-orange-300 transition-colors shadow-sm"
+            >
+              <SlidersHorizontal size={15} />
+              {t('filter')}
+              {activeFiltersCount > 0 && (
+                <span className="bg-orange-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center font-bold">
+                  {activeFiltersCount}
+                </span>
+              )}
             </button>
 
-            {/* Active filters pills */}
             <div className="flex flex-wrap gap-2 flex-1">
-              {filters.gender && <span className="bg-orange-100 text-orange-700 text-xs px-3 py-1 rounded-full flex items-center gap-1">
-                {GENDER_OPTIONS.find(g => g.value === filters.gender)?.label}
-                <button onClick={() => clearFilter('gender')}><X size={12} /></button>
-              </span>}
-              {filters.productType && <span className="bg-orange-100 text-orange-700 text-xs px-3 py-1 rounded-full flex items-center gap-1">
-                {filters.productType}
-                <button onClick={() => clearFilter('productType')}><X size={12} /></button>
-              </span>}
+              {filters.gender && (
+                <span className="inline-flex items-center gap-1.5 bg-orange-100 text-orange-700 text-xs px-3 py-1.5 rounded-full font-medium">
+                  {GENDER_OPTIONS.find(g => g.value === filters.gender)?.label}
+                  <button onClick={() => clearFilter('gender')}><X size={11} /></button>
+                </span>
+              )}
+              {filters.productType && (
+                <span className="inline-flex items-center gap-1.5 bg-orange-100 text-orange-700 text-xs px-3 py-1.5 rounded-full font-medium">
+                  {filters.productType}
+                  <button onClick={() => clearFilter('productType')}><X size={11} /></button>
+                </span>
+              )}
             </div>
 
-            {/* Sort */}
             <div className="relative flex-shrink-0">
-              <select value={filters.sort} onChange={e => updateFilter('sort', e.target.value)}
-                className="border border-gray-200 rounded-xl px-3 py-2 text-sm pr-8 appearance-none focus:outline-none focus:ring-2 focus:ring-orange-500 bg-white">
+              <select
+                value={filters.sort}
+                onChange={e => updateFilter('sort', e.target.value)}
+                className="appearance-none border border-slate-200 bg-white rounded-xl px-4 py-2.5 text-sm pe-8 focus:outline-none focus:ring-2 focus:ring-orange-500 shadow-sm font-medium"
+              >
                 {SORT_OPTIONS.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
               </select>
-              <ChevronDown size={14} className="absolute left-2 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
+              <ChevronDown size={14} className="absolute top-1/2 -translate-y-1/2 end-2.5 text-slate-400 pointer-events-none" />
             </div>
           </div>
 
-          {/* Products grid */}
+          {filtersOpen && (
+            <div className="lg:hidden mb-5">
+              <FilterPanel />
+            </div>
+          )}
+
           {loading ? (
             <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-4">
               {Array.from({ length: 12 }).map((_, i) => <SkeletonCard key={i} />)}
             </div>
           ) : products.length === 0 ? (
-            <div className="text-center py-20">
-              <div className="text-5xl mb-4">🔍</div>
-              <h3 className="text-lg font-semibold text-gray-700 mb-2">لا توجد نتائج</h3>
-              <p className="text-gray-500 text-sm">جرب تغيير معايير البحث أو التصفية</p>
-              <button onClick={() => setFilters(prev => ({ ...prev, search: '', category: '', brand: '', gender: '', sport: '', minPrice: '', maxPrice: '', productType: '', page: 1 }))}
-                className="mt-4 bg-orange-500 text-white px-6 py-2 rounded-xl text-sm hover:bg-orange-600 transition-colors">
-                مسح الفلاتر
+            <div className="text-center py-24">
+              <div className="text-6xl mb-5">🔍</div>
+              <h3 className="text-xl font-bold text-slate-700 mb-2">{t('noResults')}</h3>
+              <p className="text-slate-500 text-sm mb-6">{t('noResultsDesc')}</p>
+              <button onClick={clearAllFilters} className="btn-primary px-8 py-3 text-sm">
+                {t('clearFilters')}
               </button>
             </div>
           ) : (
@@ -268,22 +312,25 @@ function ProductsContent() {
             </div>
           )}
 
-          {/* Pagination */}
           {pages > 1 && (
-            <div className="flex justify-center gap-2 mt-8">
+            <div className="flex justify-center gap-2 mt-10">
               <button disabled={filters.page <= 1} onClick={() => updateFilter('page', filters.page - 1)}
-                className="px-4 py-2 border border-gray-200 rounded-xl text-sm disabled:opacity-40 hover:bg-gray-50">
-                السابق
+                className="px-5 py-2 border border-slate-200 bg-white rounded-xl text-sm font-medium disabled:opacity-40 hover:bg-slate-50 shadow-sm">
+                {t('prev')}
               </button>
               {Array.from({ length: Math.min(pages, 5) }, (_, i) => i + 1).map(p => (
                 <button key={p} onClick={() => updateFilter('page', p)}
-                  className={`w-10 h-10 rounded-xl text-sm font-medium ${filters.page === p ? 'bg-orange-500 text-white' : 'border border-gray-200 hover:bg-gray-50'}`}>
+                  className={`w-10 h-10 rounded-xl text-sm font-bold transition-all ${
+                    filters.page === p
+                      ? 'bg-gradient-to-br from-orange-500 to-orange-600 text-white shadow-lg shadow-orange-500/30'
+                      : 'border border-slate-200 bg-white hover:bg-slate-50'
+                  }`}>
                   {p}
                 </button>
               ))}
               <button disabled={filters.page >= pages} onClick={() => updateFilter('page', filters.page + 1)}
-                className="px-4 py-2 border border-gray-200 rounded-xl text-sm disabled:opacity-40 hover:bg-gray-50">
-                التالي
+                className="px-5 py-2 border border-slate-200 bg-white rounded-xl text-sm font-medium disabled:opacity-40 hover:bg-slate-50 shadow-sm">
+                {t('next')}
               </button>
             </div>
           )}
@@ -295,7 +342,11 @@ function ProductsContent() {
 
 export default function ProductsPage() {
   return (
-    <Suspense fallback={<div className="max-w-7xl mx-auto px-4 py-12 text-center text-gray-400">جاري التحميل...</div>}>
+    <Suspense fallback={
+      <div className="max-w-7xl mx-auto px-4 py-16 text-center text-slate-400 text-sm">
+        جاري التحميل... / Loading...
+      </div>
+    }>
       <ProductsContent />
     </Suspense>
   );
