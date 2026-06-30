@@ -1,0 +1,134 @@
+const BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
+
+function getAuthHeaders(): HeadersInit {
+  if (typeof window === 'undefined') return {};
+  const token = localStorage.getItem('token');
+  return token ? { Authorization: `Bearer ${token}` } : {};
+}
+
+async function request<T>(path: string, options?: RequestInit): Promise<T> {
+  const res = await fetch(`${BASE_URL}${path}`, {
+    headers: {
+      'Content-Type': 'application/json',
+      ...getAuthHeaders(),
+      ...options?.headers,
+    },
+    ...options,
+  });
+
+  const data = await res.json();
+  if (!res.ok) throw new Error(data.message || 'Request failed');
+  return data;
+}
+
+// ── Products ──────────────────────────────────────────────────────────────
+export const productsApi = {
+  getAll: (params?: Record<string, string | number | boolean>) => {
+    const qs = params ? '?' + new URLSearchParams(params as Record<string, string>).toString() : '';
+    return request<{ success: boolean; data: import('@/types').Product[]; total: number; pages: number }>(`/products${qs}`);
+  },
+  getOne: (id: string) => request<{ success: boolean; data: import('@/types').Product }>(`/products/${id}`),
+  create: (body: FormData) =>
+    fetch(`${BASE_URL}/products`, {
+      method: 'POST',
+      headers: { ...getAuthHeaders() },
+      body,
+    }).then(r => r.json()),
+  update: (id: string, body: FormData) =>
+    fetch(`${BASE_URL}/products/${id}`, {
+      method: 'PUT',
+      headers: { ...getAuthHeaders() },
+      body,
+    }).then(r => r.json()),
+  delete: (id: string) => request(`/products/${id}`, { method: 'DELETE' }),
+};
+
+// ── Categories ────────────────────────────────────────────────────────────
+export const categoriesApi = {
+  getAll: (params?: Record<string, string>) => {
+    const qs = params ? '?' + new URLSearchParams(params).toString() : '';
+    return request<{ success: boolean; data: import('@/types').Category[] }>(`/categories${qs}`);
+  },
+  getOne: (id: string) => request<{ success: boolean; data: import('@/types').Category }>(`/categories/${id}`),
+  create: (body: object) => request('/categories', { method: 'POST', body: JSON.stringify(body) }),
+  update: (id: string, body: object) => request(`/categories/${id}`, { method: 'PUT', body: JSON.stringify(body) }),
+  delete: (id: string) => request(`/categories/${id}`, { method: 'DELETE' }),
+};
+
+// ── Brands ────────────────────────────────────────────────────────────────
+export const brandsApi = {
+  getAll: () => request<{ success: boolean; data: import('@/types').Brand[] }>('/brands'),
+  getOne: (id: string) => request<{ success: boolean; data: import('@/types').Brand }>(`/brands/${id}`),
+  create: (body: object) => request('/brands', { method: 'POST', body: JSON.stringify(body) }),
+  update: (id: string, body: object) => request(`/brands/${id}`, { method: 'PUT', body: JSON.stringify(body) }),
+  delete: (id: string) => request(`/brands/${id}`, { method: 'DELETE' }),
+};
+
+// ── Orders ────────────────────────────────────────────────────────────────
+export const ordersApi = {
+  getAll: (params?: Record<string, string | number>) => {
+    const qs = params ? '?' + new URLSearchParams(params as Record<string, string>).toString() : '';
+    return request<{ success: boolean; data: import('@/types').Order[]; total: number; pages: number }>(`/orders${qs}`);
+  },
+  getOne: (id: string) => request<{ success: boolean; data: import('@/types').Order }>(`/orders/${id}`),
+  getByNumber: (orderNumber: string) =>
+    request<{ success: boolean; data: import('@/types').Order }>(`/orders/track/${orderNumber}`),
+  create: (body: object) => request<{ success: boolean; data: import('@/types').Order }>('/orders', { method: 'POST', body: JSON.stringify(body) }),
+  updateStatus: (id: string, status: string) =>
+    request(`/orders/${id}/status`, { method: 'PATCH', body: JSON.stringify({ status }) }),
+  getMyOrders: () => request<{ success: boolean; data: import('@/types').Order[] }>('/orders/my-orders'),
+};
+
+// ── Auth ──────────────────────────────────────────────────────────────────
+export const authApi = {
+  login: (body: { username: string; password: string }) =>
+    request<{ success: boolean; token: string; admin: { id: string; username: string; role: string } }>(
+      '/auth/login', { method: 'POST', body: JSON.stringify(body) }
+    ),
+  userLogin: (body: { username: string; password: string }) =>
+    request<{ success: boolean; token: string; user: { id: string; username: string; fullName: string; role: string } }>(
+      '/auth/user-login', { method: 'POST', body: JSON.stringify(body) }
+    ),
+  signup: (body: { username: string; fullName: string; password: string }) =>
+    request('/auth/signup', { method: 'POST', body: JSON.stringify(body) }),
+  verify: () => request<{ success: boolean; admin: { id: string; username: string; role: string } }>('/auth/verify'),
+};
+
+// ── Stats ─────────────────────────────────────────────────────────────────
+export const statsApi = {
+  get: () => request<{ success: boolean; data: import('@/types').DashboardStats }>('/stats'),
+};
+
+// ── Discount Codes ────────────────────────────────────────────────────────
+export const discountApi = {
+  validate: (code: string, total: number) =>
+    request<{ success: boolean; discount: number; discountAmount: number }>(
+      `/discount-codes/validate`, { method: 'POST', body: JSON.stringify({ code, total }) }
+    ),
+  getAll: () => request<{ success: boolean; data: unknown[] }>('/discount-codes'),
+  create: (body: object) => request('/discount-codes', { method: 'POST', body: JSON.stringify(body) }),
+  delete: (id: string) => request(`/discount-codes/${id}`, { method: 'DELETE' }),
+};
+
+// ── Reviews ───────────────────────────────────────────────────────────────
+export const reviewsApi = {
+  getForProduct: (productId: string) =>
+    request<{ success: boolean; data: import('@/types').Review[] }>(`/reviews/product/${productId}`),
+  create: (body: { product: string; rating: number; comment?: string }) =>
+    request('/reviews', { method: 'POST', body: JSON.stringify(body) }),
+};
+
+// ── Wishlist ──────────────────────────────────────────────────────────────
+export const wishlistApi = {
+  get: () => request<{ success: boolean; data: import('@/types').Product[] }>('/wishlist'),
+  toggle: (productId: string) =>
+    request<{ success: boolean; added: boolean }>('/wishlist/toggle', { method: 'POST', body: JSON.stringify({ productId }) }),
+};
+
+// ── Users (admin) ─────────────────────────────────────────────────────────
+export const usersApi = {
+  getAll: (params?: Record<string, string | number>) => {
+    const qs = params ? '?' + new URLSearchParams(params as Record<string, string>).toString() : '';
+    return request<{ success: boolean; data: import('@/types').User[]; total: number }>(`/users${qs}`);
+  },
+};
