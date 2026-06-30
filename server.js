@@ -14,6 +14,10 @@ const orderRoutes = require('./routes/orders');
 const authRoutes = require('./routes/auth');
 const discountCodeRoutes = require('./routes/discountCodes');
 const usersRoutes = require('./routes/users');
+const brandRoutes = require('./routes/brands');
+const reviewRoutes = require('./routes/reviews');
+const statsRoutes = require('./routes/stats');
+const wishlistRoutes = require('./routes/wishlist');
 
 dotenv.config();
 
@@ -122,6 +126,10 @@ const productRouter = resolveRouter(productRoutes);
 const orderRouter = resolveRouter(orderRoutes);
 const discountCodeRouter = resolveRouter(discountCodeRoutes);
 const usersRouter = resolveRouter(usersRoutes);
+const brandRouter = resolveRouter(brandRoutes);
+const reviewRouter = resolveRouter(reviewRoutes);
+const statsRouter = resolveRouter(statsRoutes);
+const wishlistRouter = resolveRouter(wishlistRoutes);
 
 if (authRouter) app.use('/api/auth', authRouter); else console.error('Invalid router exported from ./routes/auth');
 if (categoryRouter) app.use('/api/categories', categoryRouter); else console.error('Invalid router exported from ./routes/categories');
@@ -129,6 +137,10 @@ if (productRouter) app.use('/api/products', productRouter); else console.error('
 if (orderRouter) app.use('/api/orders', orderRouter); else console.error('Invalid router exported from ./routes/orders');
 if (discountCodeRouter) app.use('/api/discount-codes', discountCodeRouter); else console.error('Invalid router exported from ./routes/discountCodes');
 if (usersRouter) app.use('/api/users', usersRouter); else console.error('Invalid router exported from ./routes/users');
+if (brandRouter) app.use('/api/brands', brandRouter); else console.error('Invalid router exported from ./routes/brands');
+if (reviewRouter) app.use('/api/reviews', reviewRouter); else console.error('Invalid router exported from ./routes/reviews');
+if (statsRouter) app.use('/api/stats', statsRouter); else console.error('Invalid router exported from ./routes/stats');
+if (wishlistRouter) app.use('/api/wishlist', wishlistRouter); else console.error('Invalid router exported from ./routes/wishlist');
 
 // Health check endpoint
 app.get('/api/health', (req, res) => {

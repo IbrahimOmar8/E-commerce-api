@@ -13,10 +13,14 @@ const userSchema = new mongoose.Schema({
     required: [true, 'Full name is required'],
     trim: true
   },
-   email: {
+  email: {
     type: String,
     required: false,
-    unique:false
+    unique: false
+  },
+  phone: {
+    type: String,
+    trim: true
   },
   password: {
     type: String,
@@ -27,26 +31,20 @@ const userSchema = new mongoose.Schema({
     type: Boolean,
     default: true
   },
-  usedDiscountCodes: [{
-    type: String
+  wishlist: [{
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Product'
   }],
+  usedDiscountCodes: [{ type: String }],
   useraddress: [{
-    phone: {
-      type: String,
-      required: false
-    },
+    phone: { type: String },
     address: {
       street: String,
-      city: String
+      city: String,
+      region: String
     }
   }]
-}, 
-
-{
-  timestamps: true
-}
-
-);
+}, { timestamps: true });
 
 userSchema.pre('save', async function(next) {
   if (!this.isModified('password')) return next();
