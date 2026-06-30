@@ -69,7 +69,7 @@ const orderSchema = new mongoose.Schema({
 }, { timestamps: true });
 
 orderSchema.pre('save', async function(next) {
-  if (this.isNew) {
+  if (this.isNew && !this.orderNumber) {
     const count = await mongoose.model('Order').countDocuments();
     this.orderNumber = `YS-${Date.now()}-${(count + 1).toString().padStart(4, '0')}`;
   }
