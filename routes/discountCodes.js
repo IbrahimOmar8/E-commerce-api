@@ -107,6 +107,26 @@ const router = express.Router();
  *         description: Discount code deleted
  */
 
+// Validate discount code — public (used from cart/checkout)
+router.post('/validate', async (req, res) => {
+  try {
+    const { code, total } = req.body;
+    if (!code) return res.status(400).json({ success: false, message: 'Code is required' });
+    if (!total || total <= 0) return res.status(400).json({ success: false, message: 'Valid total is required' });
+
+    const dc = await DiscountCode.findOne({ code: code.toUpperCase().trim() });
+    if (!dc) return res.status(404).json({ success: false, message: 'Invalid discount code' });
+    if (!dc.isActive) return res.status(400).json({ success: false, message: 'Discount code is not active' });
+    if (dc.expiresAt && new Date() > dc.expiresAt) return res.status(400).json({ success: false, message: 'Discount code has expired' });
+
+    const discountAmount = (total * dc.discount) / 100;
+    res.json({ success: true, discount: dc.discount, discountAmount });
+  } catch (err) {
+    console.error('Validate discount error:', err);
+    res.status(500).json({ success: false, message: 'Error validating discount code' });
+  }
+});
+
 // List all discount codes (admin only)
 router.get('/', verifyToken, async (req, res) => {
   if (!req.user || (req.user.role !== 'admin' && req.user.role !== 'super-admin')) {

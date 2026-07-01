@@ -563,7 +563,7 @@ router.post('/', optionalAuth, async (req, res) => {
     let appliedDiscountCode = null;
     if (discountCode) {
       const dc = await DiscountCode.findOne({ code: discountCode.toUpperCase(), isActive: true });
-      if (dc && (!dc.expiryDate || new Date() < dc.expiryDate)) {
+      if (dc && (!dc.expiresAt || new Date() < dc.expiresAt)) {
         discountAmount = (serverSubtotal * dc.discount) / 100;
         appliedDiscountCode = dc.code;
         dc.usageCount = (dc.usageCount || 0) + 1;
