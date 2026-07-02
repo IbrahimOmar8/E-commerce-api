@@ -36,7 +36,16 @@ router.get('/', async (req, res) => {
     }
 
     const skip = (Number(page) - 1) * Number(limit);
-    const orderBy = { [sort]: order };
+    let sortField = sort;
+    let sortOrder = order;
+    if (typeof sort === 'string' && sort.startsWith('-')) {
+      sortField = sort.slice(1);
+      sortOrder = 'desc';
+    } else if (typeof sort === 'string' && sort.startsWith('+')) {
+      sortField = sort.slice(1);
+      sortOrder = 'asc';
+    }
+    const orderBy = { [sortField]: sortOrder };
 
     const [products, total] = await Promise.all([
       prisma.product.findMany({
