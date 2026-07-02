@@ -38,6 +38,23 @@ app.use(cors({
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
+// Prisma returns `id`; frontend expects `_id`. Add _id alias recursively to all JSON responses.
+function addIdAlias(value) {
+  if (Array.isArray(value)) return value.map(addIdAlias);
+  if (value !== null && typeof value === 'object' && !(value instanceof Date)) {
+    const result = {};
+    for (const [k, v] of Object.entries(value)) result[k] = addIdAlias(v);
+    if ('id' in result && !('_id' in result)) result._id = result.id;
+    return result;
+  }
+  return value;
+}
+app.use((req, res, next) => {
+  const orig = res.json.bind(res);
+  res.json = function (data) { return orig(addIdAlias(data)); };
+  next();
+});
+
 // Database connection is managed by Prisma (see lib/prisma.js)
 
 
