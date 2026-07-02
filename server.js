@@ -1,5 +1,4 @@
 const express = require('express');
-const mongoose = require('mongoose');
 const cors = require('cors');
 const dotenv = require('dotenv');
 const swaggerUi = require('swagger-ui-express');
@@ -39,7 +38,7 @@ app.use(cors({
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-//console.log('Trying to connect to:', process.env.MONGODB_URI || 'mongodb://localhost:27017/ecommerce');
+// Database connection is managed by Prisma (see lib/prisma.js)
 
 
 // Swagger configuration
@@ -101,13 +100,6 @@ app.use('/api-docs', swaggerUi.serve, (req, res, next) => {
   customSiteTitle: 'E-Commerce API Documentation'
 }));
 
-// MongoDB Connection
-mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/ecommerce', {
-  useNewUrlParser: true,
-  useUnifiedTopology: true,
-})
-.then(() => console.log('Connected to MongoDB'))
-.catch((err) => console.error('MongoDB connection error:', err));
 
 // Routes
 
