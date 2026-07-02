@@ -76,7 +76,7 @@ export const ordersApi = {
   create: (body: object) => request<{ success: boolean; data: import('@/types').Order }>('/orders', { method: 'POST', body: JSON.stringify(body) }),
   updateStatus: (id: string, status: string) =>
     request(`/orders/${id}/status`, { method: 'PATCH', body: JSON.stringify({ status }) }),
-  getMyOrders: () => request<{ success: boolean; data: import('@/types').Order[] }>('/orders/my-orders'),
+  getMyOrders: () => request<{ success: boolean; data: import('@/types').Order[] }>('/orders/user'),
 };
 
 // ── Auth ──────────────────────────────────────────────────────────────────
@@ -114,15 +114,17 @@ export const discountApi = {
 export const reviewsApi = {
   getForProduct: (productId: string) =>
     request<{ success: boolean; data: import('@/types').Review[] }>(`/reviews/product/${productId}`),
-  create: (body: { product: string; rating: number; comment?: string }) =>
+  create: (body: { productId: string; rating: number; comment?: string }) =>
     request('/reviews', { method: 'POST', body: JSON.stringify(body) }),
 };
 
 // ── Wishlist ──────────────────────────────────────────────────────────────
 export const wishlistApi = {
   get: () => request<{ success: boolean; data: import('@/types').Product[] }>('/wishlist'),
-  toggle: (productId: string) =>
-    request<{ success: boolean; added: boolean }>('/wishlist/toggle', { method: 'POST', body: JSON.stringify({ productId }) }),
+  add: (productId: string) =>
+    request<{ success: boolean; message: string }>(`/wishlist/${productId}`, { method: 'POST' }),
+  remove: (productId: string) =>
+    request<{ success: boolean; message: string }>(`/wishlist/${productId}`, { method: 'DELETE' }),
 };
 
 // ── Users (admin) ─────────────────────────────────────────────────────────
