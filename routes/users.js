@@ -1,343 +1,24 @@
 const express = require('express');
-const User = require('../models/User');
+const prisma = require('../lib/prisma');
 const verifyToken = require('../Middleware/auth');
+const bcrypt = require('bcryptjs');
+const { randomUUID } = require('crypto');
 
 const router = express.Router();
-
-/**
- * @swagger
- * tags:
- *   name: Users
- *   description: User profile management
- */
-
-/**
- * @swagger
- * /users/me:
- *   get:
- *     summary: Get current user profile
- *     tags: [Users]
- *     security:
- *       - bearerAuth: []
- *     responses:
- *       200:
- *         description: User profile
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 success:
- *                   type: boolean
- *                 data:
- *                   type: object
- *                   properties:
- *                     _id:
- *                       type: string
- *                     username:
- *                       type: string
- *                     fullName:
- *                       type: string
- *                     isActive:
- *                       type: boolean
- *       401:
- *         description: Unauthorized
- *
- *   put:
- *     summary: Update current user profile
- *     tags: [Users]
- *     security:
- *       - bearerAuth: []
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             properties:
- *               username:
- *                 type: string
- *               fullName:
- *                 type: string
- *               password:
- *                 type: string
- *     responses:
- *       200:
- *         description: Profile updated
- *       400:
- *         description: Bad request
- *       401:
- *         description: Unauthorized
- *
- *   delete:
- *     summary: Deactivate user account
- *     tags: [Users]
- *     security:
- *       - bearerAuth: []
- *     responses:
- *       200:
- *         description: Account deactivated
- *       401:
- *         description: Unauthorized
- */
-
-/**
- * @swagger
- * /users:
- *   get:
- *     summary: Get all users (admin only)
- *     tags: [Users]
- *     security:
- *       - bearerAuth: []
- *     responses:
- *       200:
- *         description: List of users
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 success:
- *                   type: boolean
- *                 data:
- *                   type: array
- *                   items:
- *                     $ref: '#/components/schemas/User'
- *       401:
- *         description: Unauthorized
- *
- * /api/users/{id}:
- *   get:
- *     summary: Get user by ID (admin only)
- *     tags: [Users]
- *     security:
- *       - bearerAuth: []
- *     parameters:
- *       - in: path
- *         name: id
- *         required: true
- *         schema:
- *           type: string
- *     responses:
- *       200:
- *         description: User object
- *       404:
- *         description: Not found
- *   put:
- *     summary: Update user by ID (admin only)
- *     tags: [Users]
- *     security:
- *       - bearerAuth: []
- *     parameters:
- *       - in: path
- *         name: id
- *         required: true
- *         schema:
- *           type: string
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             properties:
- *               username:
- *                 type: string
- *               fullName:
- *                 type: string
- *               isActive:
- *                 type: boolean
- *     responses:
- *       200:
- *         description: User updated
- *       404:
- *         description: Not found
- *   delete:
- *     summary: Deactivate user by ID (admin only)
- *     tags: [Users]
- *     security:
- *       - bearerAuth: []
- *     parameters:
- *       - in: path
- *         name: id
- *         required: true
- *         schema:
- *           type: string
- *     responses:
- *       200:
- *         description: User deactivated
- *       404:
- *         description: Not found
- */
-
-/**
- * @swagger
- * /users/me/addresses:
- *   get:
- *     summary: Get all addresses for current user
- *     tags: [Users]
- *     security:
- *       - bearerAuth: []
- *     responses:
- *       200:
- *         description: List of addresses
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 success:
- *                   type: boolean
- *                 message:
- *                   type: string
- *                 data:
- *                   type: array
- *                   items:
- *                     type: object
- *                     properties:
- *                       _id:
- *                         type: string
- *                       phone:
- *                         type: string
- *                       address:
- *                         type: object
- *                         properties:
- *                           street:
- *                             type: string
- *                           city:
- *                             type: string
- *       401:
- *         description: Unauthorized
- *
- *   post:
- *     summary: Create a new address for current user
- *     tags: [Users]
- *     security:
- *       - bearerAuth: []
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             properties:
- *               phone:
- *                 type: string
- *               address:
- *                 type: object
- *                 required:
- *                   - street
- *                   - city
- *                 properties:
- *                   street:
- *                     type: string
- *                   city:
- *                     type: string
- *     responses:
- *       201:
- *         description: Address created
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 success:
- *                   type: boolean
- *                 message:
- *                   type: string
- *                 data:
- *                   type: object
- *                   properties:
- *                     _id:
- *                       type: string
- *                     phone:
- *                       type: string
- *                     address:
- *                       type: object
- *                       properties:
- *                         street:
- *                           type: string
- *                         city:
- *                           type: string
- *       400:
- *         description: Bad request
- *       401:
- *         description: Unauthorized
- *
- * /users/me/addresses/{addressId}:
- *   put:
- *     summary: Update an address for current user
- *     tags: [Users]
- *     security:
- *       - bearerAuth: []
- *     parameters:
- *       - in: path
- *         name: addressId
- *         required: true
- *         schema:
- *           type: string
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             properties:
- *               phone:
- *                 type: string
- *               address:
- *                 type: object
- *                 properties:
- *                   street:
- *                     type: string
- *                   city:
- *                     type: string
- *     responses:
- *       200:
- *         description: Address updated
- *       400:
- *         description: Bad request
- *       401:
- *         description: Unauthorized
- *       404:
- *         description: Address not found
- *
- *   delete:
- *     summary: Delete an address for current user
- *     tags: [Users]
- *     security:
- *       - bearerAuth: []
- *     parameters:
- *       - in: path
- *         name: addressId
- *         required: true
- *         schema:
- *           type: string
- *     responses:
- *       200:
- *         description: Address deleted
- *       401:
- *         description: Unauthorized
- *       404:
- *         description: Address not found
- */
-
-/* GET users listing. */
-router.get('/', function(req, res, next) {
-  res.send('respond with a resource');
-});
 
 // Get current user profile
 router.get('/me', verifyToken, async (req, res) => {
   try {
-    if (!req.user || req.user.role !== 'user') {
+    if (!req.user || req.user.role !== 'user')
       return res.status(403).json({ success: false, message: 'Access denied' });
-    }
-    const user = await User.findById(req.user.id).select('-password');
+    const user = await prisma.user.findUnique({
+      where: { id: req.user.id },
+      select: { id: true, username: true, fullName: true, email: true, phone: true, isActive: true, wishlist: true, useraddress: true, createdAt: true, updatedAt: true },
+    });
     if (!user) return res.status(404).json({ success: false, message: 'User not found' });
     res.json({ success: true, data: user });
-  } catch (error) {
-    console.error('Get user profile error:', error);
+  } catch (err) {
+    console.error(err);
     res.status(500).json({ success: false, message: 'Error fetching user profile' });
   }
 });
@@ -345,19 +26,18 @@ router.get('/me', verifyToken, async (req, res) => {
 // Update user profile
 router.put('/me', verifyToken, async (req, res) => {
   try {
-    if (!req.user || req.user.role !== 'user') {
+    if (!req.user || req.user.role !== 'user')
       return res.status(403).json({ success: false, message: 'Access denied' });
-    }
     const { username, fullName, password } = req.body;
-    const user = await User.findById(req.user.id);
-    if (!user) return res.status(404).json({ success: false, message: 'User not found' });
-    if (username) user.username = username;
-    if (fullName) user.fullName = fullName;
-    if (password) user.password = password;
-    await user.save();
-    res.json({ success: true, message: 'Profile updated', data: { username: user.username, fullName: user.fullName } });
-  } catch (error) {
-    console.error('Update user profile error:', error);
+    const data = {};
+    if (username) data.username = username;
+    if (fullName) data.fullName = fullName;
+    if (password) data.password = await bcrypt.hash(password, 10);
+    const user = await prisma.user.update({ where: { id: req.user.id }, data, select: { username: true, fullName: true } });
+    res.json({ success: true, message: 'Profile updated', data: user });
+  } catch (err) {
+    console.error(err);
+    if (err.code === 'P2025') return res.status(404).json({ success: false, message: 'User not found' });
     res.status(500).json({ success: false, message: 'Error updating profile' });
   }
 });
@@ -365,245 +45,26 @@ router.put('/me', verifyToken, async (req, res) => {
 // Deactivate user account
 router.delete('/me', verifyToken, async (req, res) => {
   try {
-    if (!req.user || req.user.role !== 'user') {
+    if (!req.user || req.user.role !== 'user')
       return res.status(403).json({ success: false, message: 'Access denied' });
-    }
-    await User.findByIdAndUpdate(req.user.id, { isActive: false });
+    await prisma.user.update({ where: { id: req.user.id }, data: { isActive: false } });
     res.json({ success: true, message: 'Account deactivated' });
-  } catch (error) {
-    console.error('Deactivate user error:', error);
+  } catch (err) {
+    console.error(err);
     res.status(500).json({ success: false, message: 'Error deactivating account' });
   }
 });
 
-// List all users (admin only)
-router.get('/', verifyToken, async (req, res) => {
-  try {
-    if (!req.user || (req.user.role !== 'admin' && req.user.role !== 'super-admin')) {
-      return res.status(403).json({ success: false, message: 'Access denied' });
-    }
-    const users = await User.find().select('-password');
-    res.json({ success: true, data: users });
-  } catch (error) {
-    res.status(500).json({ success: false, message: 'Error fetching users' });
-  }
-});
-
-// Get user by ID (admin only)
-router.get('/:id', verifyToken, async (req, res) => {
-  try {
-    if (!req.user || (req.user.role !== 'admin' && req.user.role !== 'super-admin')) {
-      return res.status(403).json({ success: false, message: 'Access denied' });
-    }
-    const user = await User.findById(req.params.id).select('-password');
-    if (!user) return res.status(404).json({ success: false, message: 'User not found' });
-    res.json({ success: true, data: user });
-  } catch (error) {
-    res.status(500).json({ success: false, message: 'Error fetching user' });
-  }
-});
-
-// Update user by ID (admin only)
-router.put('/:id', verifyToken, async (req, res) => {
-  try {
-    if (!req.user || (req.user.role !== 'admin' && req.user.role !== 'super-admin')) {
-      return res.status(403).json({ success: false, message: 'Access denied' });
-    }
-    const { username, fullName, isActive } = req.body;
-    const user = await User.findById(req.params.id);
-    if (!user) return res.status(404).json({ success: false, message: 'User not found' });
-    if (username) user.username = username;
-    if (fullName) user.fullName = fullName;
-    if (isActive !== undefined) user.isActive = isActive;
-    await user.save();
-    res.json({ success: true, message: 'User updated', data: { username: user.username, fullName: user.fullName, isActive: user.isActive } });
-  } catch (error) {
-    res.status(500).json({ success: false, message: 'Error updating user' });
-  }
-});
-
-// Deactivate user by ID (admin only)
-router.delete('/:id', verifyToken, async (req, res) => {
-  try {
-    if (!req.user || (req.user.role !== 'admin' && req.user.role !== 'super-admin')) {
-      return res.status(403).json({ success: false, message: 'Access denied' });
-    }
-    await User.findByIdAndUpdate(req.params.id, { isActive: false });
-    res.json({ success: true, message: 'User deactivated' });
-  } catch (error) {
-    res.status(500).json({ success: false, message: 'Error deactivating user' });
-  }
-});
-
-/**
- * @swagger
- * /users/me/addresses:
- *   get:
- *     summary: Get all addresses for current user
- *     tags: [Users]
- *     security:
- *       - bearerAuth: []
- *     responses:
- *       200:
- *         description: List of addresses
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 success:
- *                   type: boolean
- *                 message:
- *                   type: string
- *                 data:
- *                   type: array
- *                   items:
- *                     type: object
- *                     properties:
- *                       _id:
- *                         type: string
- *                       phone:
- *                         type: string
- *                       address:
- *                         type: object
- *                         properties:
- *                           street:
- *                             type: string
- *                           city:
- *                             type: string
- *       401:
- *         description: Unauthorized
- *
- *   post:
- *     summary: Create a new address for current user
- *     tags: [Users]
- *     security:
- *       - bearerAuth: []
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             properties:
- *               phone:
- *                 type: string
- *               address:
- *                 type: object
- *                 required:
- *                   - street
- *                   - city
- *                 properties:
- *                   street:
- *                     type: string
- *                   city:
- *                     type: string
- *     responses:
- *       201:
- *         description: Address created
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 success:
- *                   type: boolean
- *                 message:
- *                   type: string
- *                 data:
- *                   type: object
- *                   properties:
- *                     _id:
- *                       type: string
- *                     phone:
- *                       type: string
- *                     address:
- *                       type: object
- *                       properties:
- *                         street:
- *                           type: string
- *                         city:
- *                           type: string
- *       400:
- *         description: Bad request
- *       401:
- *         description: Unauthorized
- *
- * /users/me/addresses/{addressId}:
- *   put:
- *     summary: Update an address for current user
- *     tags: [Users]
- *     security:
- *       - bearerAuth: []
- *     parameters:
- *       - in: path
- *         name: addressId
- *         required: true
- *         schema:
- *           type: string
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             properties:
- *               phone:
- *                 type: string
- *               address:
- *                 type: object
- *                 properties:
- *                   street:
- *                     type: string
- *                   city:
- *                     type: string
- *     responses:
- *       200:
- *         description: Address updated
- *       400:
- *         description: Bad request
- *       401:
- *         description: Unauthorized
- *       404:
- *         description: Address not found
- *
- *   delete:
- *     summary: Delete an address for current user
- *     tags: [Users]
- *     security:
- *       - bearerAuth: []
- *     parameters:
- *       - in: path
- *         name: addressId
- *         required: true
- *         schema:
- *           type: string
- *     responses:
- *       200:
- *         description: Address deleted
- *       401:
- *         description: Unauthorized
- *       404:
- *         description: Address not found
- */
-
 // Get all user addresses
 router.get('/me/addresses', verifyToken, async (req, res) => {
   try {
-    if (!req.user || req.user.role !== 'user') {
+    if (!req.user || req.user.role !== 'user')
       return res.status(403).json({ success: false, message: 'Access denied' });
-    }
-
-    const user = await User.findById(req.user.id);
+    const user = await prisma.user.findUnique({ where: { id: req.user.id }, select: { useraddress: true } });
     if (!user) return res.status(404).json({ success: false, message: 'User not found' });
-
-    res.json({ 
-      success: true, 
-      message: 'Addresses retrieved successfully', 
-      data: user.useraddress 
-    });
-  } catch (error) {
-    console.error('Get addresses error:', error);
+    res.json({ success: true, message: 'Addresses retrieved successfully', data: user.useraddress });
+  } catch (err) {
+    console.error(err);
     res.status(500).json({ success: false, message: 'Error retrieving addresses' });
   }
 });
@@ -611,46 +72,19 @@ router.get('/me/addresses', verifyToken, async (req, res) => {
 // Create new address
 router.post('/me/addresses', verifyToken, async (req, res) => {
   try {
-    if (!req.user || req.user.role !== 'user') {
+    if (!req.user || req.user.role !== 'user')
       return res.status(403).json({ success: false, message: 'Access denied' });
-    }
-
     const { phone, address } = req.body;
-    
-    // Basic validation
-    if (!address || !address.street || !address.city) {
-      return res.status(400).json({ 
-        success: false, 
-        message: 'Address street and city are required' 
-      });
-    }
-
-    const user = await User.findById(req.user.id);
+    if (!address || !address.street || !address.city)
+      return res.status(400).json({ success: false, message: 'Address street and city are required' });
+    const user = await prisma.user.findUnique({ where: { id: req.user.id }, select: { useraddress: true } });
     if (!user) return res.status(404).json({ success: false, message: 'User not found' });
-
-    // Create new address object
-    const newAddress = {
-      phone: phone || '',
-      address: {
-        street: address.street,
-        city: address.city
-      }
-    };
-
-    // Add to user's addresses array
-    user.useraddress.push(newAddress);
-    await user.save();
-
-    // Get the newly created address (last item in array)
-    const createdAddress = user.useraddress[user.useraddress.length - 1];
-
-    res.status(201).json({ 
-      success: true, 
-      message: 'Address created successfully', 
-      data: createdAddress 
-    });
-  } catch (error) {
-    console.error('Create address error:', error);
+    const newAddress = { id: randomUUID(), phone: phone || '', address: { street: address.street, city: address.city } };
+    const addresses = Array.isArray(user.useraddress) ? [...user.useraddress, newAddress] : [newAddress];
+    await prisma.user.update({ where: { id: req.user.id }, data: { useraddress: addresses } });
+    res.status(201).json({ success: true, message: 'Address created successfully', data: newAddress });
+  } catch (err) {
+    console.error(err);
     res.status(500).json({ success: false, message: 'Error creating address' });
   }
 });
@@ -658,38 +92,24 @@ router.post('/me/addresses', verifyToken, async (req, res) => {
 // Update specific address
 router.put('/me/addresses/:addressId', verifyToken, async (req, res) => {
   try {
-    if (!req.user || req.user.role !== 'user') {
+    if (!req.user || req.user.role !== 'user')
       return res.status(403).json({ success: false, message: 'Access denied' });
-    }
-
     const { addressId } = req.params;
     const { phone, address } = req.body;
-
-    const user = await User.findById(req.user.id);
+    const user = await prisma.user.findUnique({ where: { id: req.user.id }, select: { useraddress: true } });
     if (!user) return res.status(404).json({ success: false, message: 'User not found' });
-
-    // Find the address by ID
-    const addressToUpdate = user.useraddress.id(addressId);
-    if (!addressToUpdate) {
-      return res.status(404).json({ success: false, message: 'Address not found' });
-    }
-
-    // Update fields if provided
-    if (phone !== undefined) addressToUpdate.phone = phone;
+    const addresses = Array.isArray(user.useraddress) ? user.useraddress : [];
+    const idx = addresses.findIndex(a => a.id === addressId);
+    if (idx === -1) return res.status(404).json({ success: false, message: 'Address not found' });
+    if (phone !== undefined) addresses[idx].phone = phone;
     if (address) {
-      if (address.street !== undefined) addressToUpdate.address.street = address.street;
-      if (address.city !== undefined) addressToUpdate.address.city = address.city;
+      if (address.street !== undefined) addresses[idx].address.street = address.street;
+      if (address.city !== undefined) addresses[idx].address.city = address.city;
     }
-
-    await user.save();
-
-    res.json({ 
-      success: true, 
-      message: 'Address updated successfully', 
-      data: addressToUpdate 
-    });
-  } catch (error) {
-    console.error('Update address error:', error);
+    await prisma.user.update({ where: { id: req.user.id }, data: { useraddress: addresses } });
+    res.json({ success: true, message: 'Address updated successfully', data: addresses[idx] });
+  } catch (err) {
+    console.error(err);
     res.status(500).json({ success: false, message: 'Error updating address' });
   }
 });
@@ -697,31 +117,85 @@ router.put('/me/addresses/:addressId', verifyToken, async (req, res) => {
 // Delete specific address
 router.delete('/me/addresses/:addressId', verifyToken, async (req, res) => {
   try {
-    if (!req.user || req.user.role !== 'user') {
+    if (!req.user || req.user.role !== 'user')
       return res.status(403).json({ success: false, message: 'Access denied' });
-    }
-
     const { addressId } = req.params;
-
-    const user = await User.findById(req.user.id);
+    const user = await prisma.user.findUnique({ where: { id: req.user.id }, select: { useraddress: true } });
     if (!user) return res.status(404).json({ success: false, message: 'User not found' });
-
-    // Find and remove the address by ID
-    const addressToDelete = user.useraddress.id(addressId);
-    if (!addressToDelete) {
-      return res.status(404).json({ success: false, message: 'Address not found' });
-    }
-
-    user.useraddress.pull(addressId);
-    await user.save();
-
-    res.json({ 
-      success: true, 
-      message: 'Address deleted successfully' 
-    });
-  } catch (error) {
-    console.error('Delete address error:', error);
+    const addresses = Array.isArray(user.useraddress) ? user.useraddress : [];
+    const filtered = addresses.filter(a => a.id !== addressId);
+    if (filtered.length === addresses.length) return res.status(404).json({ success: false, message: 'Address not found' });
+    await prisma.user.update({ where: { id: req.user.id }, data: { useraddress: filtered } });
+    res.json({ success: true, message: 'Address deleted successfully' });
+  } catch (err) {
+    console.error(err);
     res.status(500).json({ success: false, message: 'Error deleting address' });
+  }
+});
+
+// List all users (admin only)
+router.get('/', verifyToken, async (req, res) => {
+  try {
+    if (!req.user || (req.user.role !== 'admin' && req.user.role !== 'super-admin'))
+      return res.status(403).json({ success: false, message: 'Access denied' });
+    const users = await prisma.user.findMany({
+      select: { id: true, username: true, fullName: true, email: true, phone: true, isActive: true, createdAt: true, updatedAt: true },
+      orderBy: { createdAt: 'desc' },
+    });
+    res.json({ success: true, data: users });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ success: false, message: 'Error fetching users' });
+  }
+});
+
+// Get user by ID (admin only)
+router.get('/:id', verifyToken, async (req, res) => {
+  try {
+    if (!req.user || (req.user.role !== 'admin' && req.user.role !== 'super-admin'))
+      return res.status(403).json({ success: false, message: 'Access denied' });
+    const user = await prisma.user.findUnique({
+      where: { id: req.params.id },
+      select: { id: true, username: true, fullName: true, email: true, phone: true, isActive: true, createdAt: true, updatedAt: true },
+    });
+    if (!user) return res.status(404).json({ success: false, message: 'User not found' });
+    res.json({ success: true, data: user });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ success: false, message: 'Error fetching user' });
+  }
+});
+
+// Update user by ID (admin only)
+router.put('/:id', verifyToken, async (req, res) => {
+  try {
+    if (!req.user || (req.user.role !== 'admin' && req.user.role !== 'super-admin'))
+      return res.status(403).json({ success: false, message: 'Access denied' });
+    const { username, fullName, isActive } = req.body;
+    const data = {};
+    if (username !== undefined) data.username = username;
+    if (fullName !== undefined) data.fullName = fullName;
+    if (isActive !== undefined) data.isActive = isActive;
+    const user = await prisma.user.update({ where: { id: req.params.id }, data, select: { username: true, fullName: true, isActive: true } });
+    res.json({ success: true, message: 'User updated', data: user });
+  } catch (err) {
+    console.error(err);
+    if (err.code === 'P2025') return res.status(404).json({ success: false, message: 'User not found' });
+    res.status(500).json({ success: false, message: 'Error updating user' });
+  }
+});
+
+// Deactivate user by ID (admin only)
+router.delete('/:id', verifyToken, async (req, res) => {
+  try {
+    if (!req.user || (req.user.role !== 'admin' && req.user.role !== 'super-admin'))
+      return res.status(403).json({ success: false, message: 'Access denied' });
+    await prisma.user.update({ where: { id: req.params.id }, data: { isActive: false } });
+    res.json({ success: true, message: 'User deactivated' });
+  } catch (err) {
+    console.error(err);
+    if (err.code === 'P2025') return res.status(404).json({ success: false, message: 'User not found' });
+    res.status(500).json({ success: false, message: 'Error deactivating user' });
   }
 });
 

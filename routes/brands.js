@@ -1,97 +1,81 @@
 const express = require('express');
-const Brand = require('../models/Brand');
+const prisma = require('../lib/prisma');
 const verifyToken = require('../Middleware/auth');
-const cloudinary = require('cloudinary').v2;
-const multer = require('multer');
 
 const router = express.Router();
-const upload = multer({ storage: multer.memoryStorage() });
 
-/**
- * @swagger
- * tags:
- *   name: Brands
- *   description: Brand management
- */
-
-// GET all brands
 router.get('/', async (req, res) => {
   try {
     const { isActive } = req.query;
-    const filter = {};
-    if (isActive !== undefined) filter.isActive = isActive === 'true';
-    else filter.isActive = true;
-
-    const brands = await Brand.find(filter).sort({ name: 1 });
+    const where = {};
+    if (isActive !== undefined) where.isActive = isActive === 'true';
+    const brands = await prisma.brand.findMany({ where, orderBy: { name: 'asc' } });
     res.json({ success: true, data: brands });
   } catch (err) {
-    res.status(500).json({ success: false, message: err.message });
+    console.error(err);
+    res.status(500).json({ success: false, message: 'Error fetching brands' });
   }
 });
 
-// GET single brand
 router.get('/:id', async (req, res) => {
   try {
-    const brand = await Brand.findById(req.params.id);
+    const brand = await prisma.brand.findUnique({ where: { id: req.params.id } });
     if (!brand) return res.status(404).json({ success: false, message: 'Brand not found' });
     res.json({ success: true, data: brand });
   } catch (err) {
-    res.status(500).json({ success: false, message: err.message });
+    console.error(err);
+    res.status(500).json({ success: false, message: 'Error fetching brand' });
   }
 });
 
-// POST create brand (admin)
 router.post('/', verifyToken, async (req, res) => {
   try {
-    const brand = new Brand(req.body);
-    await brand.save();
+    if (!req.user || (req.user.role !== 'admin' && req.user.role !== 'super-admin'))
+      return res.status(403).json({ success: false, message: 'Access denied' });
+
+    const { name, nameAr, logo, description, descriptionAr, isActive } = req.body;
+    if (!name) return res.status(400).json({ success: false, message: 'Brand name is required' });
+
+    const brand = await prisma.brand.create({
+      data: { name, nameAr, logo: logo || '', description, descriptionAr, isActive: isActive !== false },
+    });
     res.status(201).json({ success: true, data: brand });
   } catch (err) {
-    if (err.code === 11000) return res.status(400).json({ success: false, message: 'Brand name already exists' });
-    res.status(400).json({ success: false, message: err.message });
+    console.error(err);
+    if (err.code === 'P2002') return res.status(400).json({ success: false, message: 'Brand name already exists' });
+    res.status(500).json({ success: false, message: 'Error creating brand' });
   }
 });
 
-// PUT update brand (admin)
 router.put('/:id', verifyToken, async (req, res) => {
   try {
-    const brand = await Brand.findByIdAndUpdate(req.params.id, req.body, { new: true, runValidators: true });
-    if (!brand) return res.status(404).json({ success: false, message: 'Brand not found' });
+    if (!req.user || (req.user.role !== 'admin' && req.user.role !== 'super-admin'))
+      return res.status(403).json({ success: false, message: 'Access denied' });
+
+    const { name, nameAr, logo, description, descriptionAr, isActive } = req.body;
+    const brand = await prisma.brand.update({
+      where: { id: req.params.id },
+      data: { name, nameAr, logo, description, descriptionAr, isActive },
+    });
     res.json({ success: true, data: brand });
   } catch (err) {
-    res.status(400).json({ success: false, message: err.message });
+    console.error(err);
+    if (err.code === 'P2025') return res.status(404).json({ success: false, message: 'Brand not found' });
+    res.status(500).json({ success: false, message: 'Error updating brand' });
   }
 });
 
-// DELETE brand (admin)
 router.delete('/:id', verifyToken, async (req, res) => {
   try {
-    const brand = await Brand.findByIdAndDelete(req.params.id);
-    if (!brand) return res.status(404).json({ success: false, message: 'Brand not found' });
+    if (!req.user || (req.user.role !== 'admin' && req.user.role !== 'super-admin'))
+      return res.status(403).json({ success: false, message: 'Access denied' });
+
+    await prisma.brand.delete({ where: { id: req.params.id } });
     res.json({ success: true, message: 'Brand deleted' });
   } catch (err) {
-    res.status(500).json({ success: false, message: err.message });
-  }
-});
-
-// POST upload brand logo
-router.post('/:id/logo', verifyToken, upload.single('logo'), async (req, res) => {
-  try {
-    if (!req.file) return res.status(400).json({ success: false, message: 'No file uploaded' });
-
-    const result = await new Promise((resolve, reject) => {
-      cloudinary.uploader.upload_stream(
-        { folder: 'yalla-sport/brands', transformation: [{ width: 300, height: 300, crop: 'pad', background: 'white' }] },
-        (error, result) => { if (error) reject(error); else resolve(result); }
-      ).end(req.file.buffer);
-    });
-
-    const brand = await Brand.findByIdAndUpdate(req.params.id, { logo: result.secure_url }, { new: true });
-    if (!brand) return res.status(404).json({ success: false, message: 'Brand not found' });
-
-    res.json({ success: true, data: brand });
-  } catch (err) {
-    res.status(500).json({ success: false, message: err.message });
+    console.error(err);
+    if (err.code === 'P2025') return res.status(404).json({ success: false, message: 'Brand not found' });
+    res.status(500).json({ success: false, message: 'Error deleting brand' });
   }
 });
 

@@ -1,92 +1,76 @@
 const express = require('express');
-const Review = require('../models/Review');
-const Product = require('../models/Product');
+const prisma = require('../lib/prisma');
 const verifyToken = require('../Middleware/auth');
 
 const router = express.Router();
 
-// GET reviews for a product
+// Get reviews for a product
 router.get('/product/:productId', async (req, res) => {
   try {
-    const { page = 1, limit = 10 } = req.query;
-    const skip = (Number(page) - 1) * Number(limit);
-
-    const [reviews, total] = await Promise.all([
-      Review.find({ product: req.params.productId, isApproved: true })
-        .populate('user', 'fullName username')
-        .sort({ createdAt: -1 })
-        .skip(skip)
-        .limit(Number(limit)),
-      Review.countDocuments({ product: req.params.productId, isApproved: true })
-    ]);
-
-    res.json({ success: true, data: reviews, total, pages: Math.ceil(total / Number(limit)) });
+    const reviews = await prisma.review.findMany({
+      where: { productId: req.params.productId, isApproved: true },
+      include: { user: { select: { username: true, fullName: true } } },
+      orderBy: { createdAt: 'desc' },
+    });
+    res.json({ success: true, data: reviews });
   } catch (err) {
-    res.status(500).json({ success: false, message: err.message });
+    console.error(err);
+    res.status(500).json({ success: false, message: 'Error fetching reviews' });
   }
 });
 
-// POST create review (user)
+// Create review (authenticated user)
 router.post('/', verifyToken, async (req, res) => {
   try {
-    if (req.user.role !== 'user') {
-      return res.status(403).json({ success: false, message: 'Only users can leave reviews' });
-    }
+    if (!req.user || req.user.role !== 'user')
+      return res.status(403).json({ success: false, message: 'Access denied' });
 
-    const { product, rating, comment } = req.body;
-    if (!product || !rating) {
-      return res.status(400).json({ success: false, message: 'Product and rating are required' });
-    }
+    const { productId, rating, comment } = req.body;
+    if (!productId || !rating) return res.status(400).json({ success: false, message: 'productId and rating are required' });
+    if (rating < 1 || rating > 5) return res.status(400).json({ success: false, message: 'Rating must be 1-5' });
 
-    const existing = await Review.findOne({ product, user: req.user.id });
-    if (existing) {
-      return res.status(400).json({ success: false, message: 'You already reviewed this product' });
-    }
+    const review = await prisma.review.create({
+      data: { productId, userId: req.user.id, rating: Number(rating), comment },
+      include: { user: { select: { username: true, fullName: true } } },
+    });
 
-    const review = new Review({ product, user: req.user.id, rating, comment });
-    await review.save();
+    // Recalculate product average rating
+    const agg = await prisma.review.aggregate({ where: { productId, isApproved: true }, _avg: { rating: true }, _count: true });
+    await prisma.product.update({
+      where: { id: productId },
+      data: { averageRating: agg._avg.rating || 0, totalReviews: agg._count },
+    });
 
-    // Update product average rating
-    const stats = await Review.aggregate([
-      { $match: { product: review.product, isApproved: true } },
-      { $group: { _id: null, avgRating: { $avg: '$rating' }, count: { $sum: 1 } } }
-    ]);
-
-    if (stats.length > 0) {
-      await Product.findByIdAndUpdate(product, {
-        averageRating: Math.round(stats[0].avgRating * 10) / 10,
-        totalReviews: stats[0].count
-      });
-    }
-
-    await review.populate('user', 'fullName username');
     res.status(201).json({ success: true, data: review });
   } catch (err) {
-    if (err.code === 11000) return res.status(400).json({ success: false, message: 'You already reviewed this product' });
-    res.status(500).json({ success: false, message: err.message });
+    console.error(err);
+    if (err.code === 'P2002') return res.status(400).json({ success: false, message: 'You already reviewed this product' });
+    res.status(500).json({ success: false, message: 'Error creating review' });
   }
 });
 
-// DELETE review (admin)
+// Delete review (admin or owner)
 router.delete('/:id', verifyToken, async (req, res) => {
   try {
-    const review = await Review.findByIdAndDelete(req.params.id);
+    const review = await prisma.review.findUnique({ where: { id: req.params.id } });
     if (!review) return res.status(404).json({ success: false, message: 'Review not found' });
 
-    // Recalculate product rating
-    const stats = await Review.aggregate([
-      { $match: { product: review.product, isApproved: true } },
-      { $group: { _id: null, avgRating: { $avg: '$rating' }, count: { $sum: 1 } } }
-    ]);
+    const isAdmin = req.user.role === 'admin' || req.user.role === 'super-admin';
+    if (!isAdmin && review.userId !== req.user.id)
+      return res.status(403).json({ success: false, message: 'Access denied' });
 
-    await Product.findByIdAndUpdate(review.product, {
-      averageRating: stats.length > 0 ? Math.round(stats[0].avgRating * 10) / 10 : 0,
-      totalReviews: stats.length > 0 ? stats[0].count : 0
+    await prisma.review.delete({ where: { id: req.params.id } });
+
+    const agg = await prisma.review.aggregate({ where: { productId: review.productId, isApproved: true }, _avg: { rating: true }, _count: true });
+    await prisma.product.update({
+      where: { id: review.productId },
+      data: { averageRating: agg._avg.rating || 0, totalReviews: agg._count },
     });
 
     res.json({ success: true, message: 'Review deleted' });
   } catch (err) {
-    res.status(500).json({ success: false, message: err.message });
+    console.error(err);
+    res.status(500).json({ success: false, message: 'Error deleting review' });
   }
 });
 
