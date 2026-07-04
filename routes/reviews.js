@@ -4,6 +4,53 @@ const verifyToken = require('../Middleware/auth');
 
 const router = express.Router();
 
+// Get ALL reviews (admin)
+router.get('/', verifyToken, async (req, res) => {
+  try {
+    if (!req.user || (req.user.role !== 'admin' && req.user.role !== 'super-admin'))
+      return res.status(403).json({ success: false, message: 'Access denied' });
+    const { page = 1, limit = 20, isApproved } = req.query;
+    const where = {};
+    if (isApproved !== undefined) where.isApproved = isApproved === 'true';
+    const skip = (Number(page) - 1) * Number(limit);
+    const [reviews, total] = await Promise.all([
+      prisma.review.findMany({
+        where, skip, take: Number(limit),
+        orderBy: { createdAt: 'desc' },
+        include: {
+          user: { select: { username: true, fullName: true } },
+          product: { select: { name: true, nameAr: true } },
+        },
+      }),
+      prisma.review.count({ where }),
+    ]);
+    res.json({ success: true, data: reviews, total, pages: Math.ceil(total / Number(limit)) });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ success: false, message: 'Error fetching reviews' });
+  }
+});
+
+// Approve / reject review (admin)
+router.patch('/:id/approve', verifyToken, async (req, res) => {
+  try {
+    if (!req.user || (req.user.role !== 'admin' && req.user.role !== 'super-admin'))
+      return res.status(403).json({ success: false, message: 'Access denied' });
+    const { isApproved } = req.body;
+    const review = await prisma.review.update({
+      where: { id: req.params.id },
+      data: { isApproved: Boolean(isApproved) },
+    });
+    // Recalculate rating
+    const agg = await prisma.review.aggregate({ where: { productId: review.productId, isApproved: true }, _avg: { rating: true }, _count: true });
+    await prisma.product.update({ where: { id: review.productId }, data: { averageRating: agg._avg.rating || 0, totalReviews: agg._count } });
+    res.json({ success: true, data: review });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ success: false, message: 'Error updating review' });
+  }
+});
+
 // Get reviews for a product
 router.get('/product/:productId', async (req, res) => {
   try {

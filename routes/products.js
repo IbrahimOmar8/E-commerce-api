@@ -55,10 +55,13 @@ router.get('/', async (req, res) => {
       prisma.product.count({ where }),
     ]);
 
+    const pages = Math.ceil(total / Number(limit));
     res.json({
       success: true,
       data: products,
-      pagination: { current: Number(page), pages: Math.ceil(total / Number(limit)), total, limit: Number(limit) },
+      total,
+      pages,
+      pagination: { current: Number(page), pages, total, limit: Number(limit) },
     });
   } catch (err) {
     console.error(err);

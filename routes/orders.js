@@ -296,10 +296,13 @@ router.get('/', verifyToken, async (req, res) => {
       prisma.order.groupBy({ by: ['status'], _count: { id: true }, _sum: { totalAmount: true } }),
     ]);
 
+    const pages = Math.ceil(total / Number(limit));
     res.json({
       success: true,
       data: orders,
-      pagination: { current: Number(page), pages: Math.ceil(total / Number(limit)), total, limit: Number(limit) },
+      total,
+      pages,
+      pagination: { current: Number(page), pages, total, limit: Number(limit) },
       stats: statusGroups.map(g => ({ _id: g.status, count: g._count.id, totalAmount: g._sum.totalAmount || 0 })),
     });
   } catch (err) {

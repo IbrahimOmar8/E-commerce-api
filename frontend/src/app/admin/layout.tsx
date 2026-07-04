@@ -5,7 +5,8 @@ import { usePathname, useRouter } from 'next/navigation';
 import { useAuthStore } from '@/store/auth';
 import {
   LayoutDashboard, Package, ShoppingBag, Tag, Award,
-  Ticket, Users, LogOut, Menu, X, ChevronLeft
+  Ticket, Users, LogOut, Menu, X, ChevronLeft,
+  MessageSquare, ShieldCheck
 } from 'lucide-react';
 
 const NAV_ITEMS = [
@@ -15,7 +16,9 @@ const NAV_ITEMS = [
   { href: '/admin/categories', label: 'الفئات', icon: Tag },
   { href: '/admin/brands', label: 'الماركات', icon: Award },
   { href: '/admin/discount-codes', label: 'كودات الخصم', icon: Ticket },
+  { href: '/admin/reviews', label: 'التقييمات', icon: MessageSquare },
   { href: '/admin/users', label: 'العملاء', icon: Users },
+  { href: '/admin/admins', label: 'المديرون', icon: ShieldCheck },
 ];
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {

@@ -100,4 +100,51 @@ router.get('/verify', (req, res) => {
   }
 });
 
+// List admins (super-admin only)
+router.get('/admins', async (req, res) => {
+  try {
+    const token = req.header('Authorization')?.replace('Bearer ', '');
+    if (!token) return res.status(401).json({ success: false, message: 'No token' });
+    const decoded = jwt.verify(token, JWT_SECRET);
+    if (decoded.role !== 'super-admin') return res.status(403).json({ success: false, message: 'Access denied' });
+    const admins = await prisma.admin.findMany({ select: { id: true, username: true, email: true, role: true, isActive: true, createdAt: true }, orderBy: { createdAt: 'desc' } });
+    res.json({ success: true, data: admins });
+  } catch {
+    res.status(401).json({ success: false, message: 'Invalid token' });
+  }
+});
+
+// Create admin (super-admin only)
+router.post('/admins', async (req, res) => {
+  try {
+    const token = req.header('Authorization')?.replace('Bearer ', '');
+    if (!token) return res.status(401).json({ success: false, message: 'No token' });
+    const decoded = jwt.verify(token, JWT_SECRET);
+    if (decoded.role !== 'super-admin') return res.status(403).json({ success: false, message: 'Access denied' });
+    const { username, email, password, role = 'admin' } = req.body;
+    if (!username || !password) return res.status(400).json({ success: false, message: 'username and password required' });
+    const hashed = await bcrypt.hash(password, 10);
+    const admin = await prisma.admin.create({ data: { username, email: email || '', password: hashed, role } });
+    res.status(201).json({ success: true, data: { id: admin.id, username: admin.username, email: admin.email, role: admin.role } });
+  } catch (err) {
+    if (err.code === 'P2002') return res.status(400).json({ success: false, message: 'Username already exists' });
+    res.status(500).json({ success: false, message: 'Error creating admin' });
+  }
+});
+
+// Deactivate/delete admin (super-admin only)
+router.delete('/admins/:id', async (req, res) => {
+  try {
+    const token = req.header('Authorization')?.replace('Bearer ', '');
+    if (!token) return res.status(401).json({ success: false, message: 'No token' });
+    const decoded = jwt.verify(token, JWT_SECRET);
+    if (decoded.role !== 'super-admin') return res.status(403).json({ success: false, message: 'Access denied' });
+    if (decoded.id === req.params.id) return res.status(400).json({ success: false, message: 'Cannot delete yourself' });
+    await prisma.admin.update({ where: { id: req.params.id }, data: { isActive: false } });
+    res.json({ success: true, message: 'Admin deactivated' });
+  } catch {
+    res.status(500).json({ success: false, message: 'Error deactivating admin' });
+  }
+});
+
 module.exports = router;

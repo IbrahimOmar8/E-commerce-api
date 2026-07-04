@@ -133,16 +133,29 @@ router.delete('/me/addresses/:addressId', verifyToken, async (req, res) => {
   }
 });
 
-// List all users (admin only)
+// List all users (admin only) — with search + pagination
 router.get('/', verifyToken, async (req, res) => {
   try {
     if (!req.user || (req.user.role !== 'admin' && req.user.role !== 'super-admin'))
       return res.status(403).json({ success: false, message: 'Access denied' });
-    const users = await prisma.user.findMany({
-      select: { id: true, username: true, fullName: true, email: true, phone: true, isActive: true, createdAt: true, updatedAt: true },
-      orderBy: { createdAt: 'desc' },
-    });
-    res.json({ success: true, data: users });
+    const { page = 1, limit = 20, search } = req.query;
+    const where = {};
+    if (search) {
+      where.OR = [
+        { username: { contains: search, mode: 'insensitive' } },
+        { fullName: { contains: search, mode: 'insensitive' } },
+      ];
+    }
+    const skip = (Number(page) - 1) * Number(limit);
+    const [users, total] = await Promise.all([
+      prisma.user.findMany({
+        where, skip, take: Number(limit),
+        select: { id: true, username: true, fullName: true, email: true, phone: true, isActive: true, createdAt: true, updatedAt: true },
+        orderBy: { createdAt: 'desc' },
+      }),
+      prisma.user.count({ where }),
+    ]);
+    res.json({ success: true, data: users, total, pages: Math.ceil(total / Number(limit)) });
   } catch (err) {
     console.error(err);
     res.status(500).json({ success: false, message: 'Error fetching users' });
@@ -182,6 +195,21 @@ router.put('/:id', verifyToken, async (req, res) => {
     console.error(err);
     if (err.code === 'P2025') return res.status(404).json({ success: false, message: 'User not found' });
     res.status(500).json({ success: false, message: 'Error updating user' });
+  }
+});
+
+// Activate / deactivate user (admin only)
+router.patch('/:id/status', verifyToken, async (req, res) => {
+  try {
+    if (!req.user || (req.user.role !== 'admin' && req.user.role !== 'super-admin'))
+      return res.status(403).json({ success: false, message: 'Access denied' });
+    const { isActive } = req.body;
+    const user = await prisma.user.update({ where: { id: req.params.id }, data: { isActive: Boolean(isActive) }, select: { id: true, username: true, isActive: true } });
+    res.json({ success: true, data: user });
+  } catch (err) {
+    console.error(err);
+    if (err.code === 'P2025') return res.status(404).json({ success: false, message: 'User not found' });
+    res.status(500).json({ success: false, message: 'Error updating user status' });
   }
 });
 

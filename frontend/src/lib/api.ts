@@ -114,8 +114,15 @@ export const discountApi = {
 export const reviewsApi = {
   getForProduct: (productId: string) =>
     request<{ success: boolean; data: import('@/types').Review[] }>(`/reviews/product/${productId}`),
+  getAll: (params?: Record<string, string | number>) => {
+    const qs = params ? '?' + new URLSearchParams(params as Record<string, string>).toString() : '';
+    return request<{ success: boolean; data: import('@/types').Review[]; total: number; pages: number }>(`/reviews${qs}`);
+  },
+  approve: (id: string, isApproved: boolean) =>
+    request(`/reviews/${id}/approve`, { method: 'PATCH', body: JSON.stringify({ isApproved }) }),
   create: (body: { productId: string; rating: number; comment?: string }) =>
     request('/reviews', { method: 'POST', body: JSON.stringify(body) }),
+  delete: (id: string) => request(`/reviews/${id}`, { method: 'DELETE' }),
 };
 
 // ── Wishlist ──────────────────────────────────────────────────────────────
@@ -133,4 +140,14 @@ export const usersApi = {
     const qs = params ? '?' + new URLSearchParams(params as Record<string, string>).toString() : '';
     return request<{ success: boolean; data: import('@/types').User[]; total: number }>(`/users${qs}`);
   },
+  setStatus: (id: string, isActive: boolean) =>
+    request(`/users/${id}/status`, { method: 'PATCH', body: JSON.stringify({ isActive }) }),
+};
+
+// ── Admins ────────────────────────────────────────────────────────────────
+export const adminsApi = {
+  getAll: () => request<{ success: boolean; data: { _id: string; username: string; email: string; role: string; isActive: boolean; createdAt: string }[] }>('/auth/admins'),
+  create: (body: { username: string; email?: string; password: string; role?: string }) =>
+    request('/auth/admins', { method: 'POST', body: JSON.stringify(body) }),
+  deactivate: (id: string) => request(`/auth/admins/${id}`, { method: 'DELETE' }),
 };
