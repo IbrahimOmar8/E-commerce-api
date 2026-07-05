@@ -1,4 +1,5 @@
 'use client';
+import { useEffect } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import ProductCard from '@/components/store/ProductCard';
@@ -18,6 +19,18 @@ export default function HomeClient({ featured, bestSellers, categories, brands, 
   const { t, isRTL, lang } = useLanguage();
 
   const ArrowIcon = isRTL ? ArrowLeft : ArrowRight;
+
+  useEffect(() => {
+    const els = document.querySelectorAll('.reveal, .reveal-left, .reveal-right');
+    const observer = new IntersectionObserver(
+      entries => entries.forEach(e => {
+        if (e.isIntersecting) { e.target.classList.add('visible'); observer.unobserve(e.target); }
+      }),
+      { threshold: 0.12 }
+    );
+    els.forEach(el => observer.observe(el));
+    return () => observer.disconnect();
+  }, []);
 
   const sports = [
     { icon: '⚽', key: 'football' as const, value: 'football' },
@@ -154,7 +167,7 @@ export default function HomeClient({ featured, bestSellers, categories, brands, 
       <div className="max-w-7xl mx-auto px-4 py-12 space-y-20">
 
         {/* ── Sports categories ── */}
-        <section>
+        <section className="reveal">
           <SectionHeader title={t('shopBySport')} />
           <div className="grid grid-cols-3 md:grid-cols-6 gap-4">
             {sports.map(sport => (
@@ -176,14 +189,14 @@ export default function HomeClient({ featured, bestSellers, categories, brands, 
 
         {/* ── Main categories ── */}
         {categories.length > 0 && (
-          <section>
+          <section className="reveal reveal-d1">
             <SectionHeader title={t('mainCategories')} href="/products" hrefLabel={t('viewAll')} />
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
+            <div className="h-scroll sm:grid sm:grid-cols-3 sm:gap-4 sm:overflow-x-visible md:grid-cols-3 lg:grid-cols-6">
               {categories.map((cat, i) => (
                 <Link
                   key={cat._id}
                   href={`/products?category=${cat._id}`}
-                  className="group relative overflow-hidden rounded-2xl aspect-square bg-gradient-to-br from-slate-100 to-slate-200 hover:shadow-xl transition-all duration-300"
+                  className="group relative overflow-hidden rounded-2xl aspect-square bg-gradient-to-br from-slate-100 to-slate-200 hover:shadow-xl transition-all duration-300 w-32 sm:w-auto flex-shrink-0"
                   style={{ animationDelay: `${i * 80}ms` }}
                 >
                   {cat.image ? (
@@ -208,7 +221,7 @@ export default function HomeClient({ featured, bestSellers, categories, brands, 
 
         {/* ── Special offers ── */}
         {offers.length > 0 && (
-          <section className="relative overflow-hidden rounded-3xl">
+          <section className="relative overflow-hidden rounded-3xl reveal">
             <div className="absolute inset-0 bg-gradient-to-br from-orange-500 to-rose-600 opacity-[0.06]" />
             <div className="absolute inset-0 border-2 border-orange-200 rounded-3xl pointer-events-none" />
             <div className="relative p-8">
@@ -224,8 +237,8 @@ export default function HomeClient({ featured, bestSellers, categories, brands, 
                   {t('viewAll')} <ArrowIcon size={14} />
                 </Link>
               </div>
-              <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-                {offers.map(p => <ProductCard key={p._id} product={p} />)}
+              <div className="h-scroll sm:grid sm:grid-cols-2 sm:gap-4 sm:overflow-x-visible lg:grid-cols-4">
+                {offers.map(p => <div key={p._id} className="w-44 sm:w-auto"><ProductCard product={p} /></div>)}
               </div>
             </div>
           </section>
@@ -233,22 +246,22 @@ export default function HomeClient({ featured, bestSellers, categories, brands, 
 
         {/* ── Featured ── */}
         {featured.length > 0 && (
-          <section>
+          <section className="reveal">
             <SectionHeader
               title={t('featuredProducts')}
               subtitle={t('featuredDesc')}
               href="/products?productType=featured"
               hrefLabel={t('viewAll')}
             />
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5">
-              {featured.map(p => <ProductCard key={p._id} product={p} />)}
+            <div className="h-scroll sm:grid sm:grid-cols-2 sm:gap-5 sm:overflow-x-visible md:grid-cols-3 lg:grid-cols-4">
+              {featured.map(p => <div key={p._id} className="w-44 sm:w-auto"><ProductCard product={p} /></div>)}
             </div>
           </section>
         )}
 
         {/* ── Brands ── */}
         {brands.length > 0 && (
-          <section>
+          <section className="reveal">
             <SectionHeader title={t('globalBrands')} centered />
             <div className="grid grid-cols-4 md:grid-cols-8 gap-3">
               {brands.map(brand => (
@@ -274,15 +287,15 @@ export default function HomeClient({ featured, bestSellers, categories, brands, 
 
         {/* ── Best sellers ── */}
         {bestSellers.length > 0 && (
-          <section>
+          <section className="reveal">
             <SectionHeader
               title={t('bestSellers')}
               subtitle={t('bestSellersDesc')}
               href="/products?productType=bestSeller"
               hrefLabel={t('viewAll')}
             />
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5">
-              {bestSellers.map(p => <ProductCard key={p._id} product={p} />)}
+            <div className="h-scroll sm:grid sm:grid-cols-2 sm:gap-5 sm:overflow-x-visible md:grid-cols-3 lg:grid-cols-4">
+              {bestSellers.map(p => <div key={p._id} className="w-44 sm:w-auto"><ProductCard product={p} /></div>)}
             </div>
           </section>
         )}

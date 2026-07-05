@@ -188,7 +188,7 @@ export default function Header() {
 
       {/* Mobile drawer */}
       {mobileOpen && (
-        <div className="sm:hidden bg-[#0f172a] border-t border-white/5 px-4 py-5">
+        <div className={`sm:hidden bg-[#0f172a] border-t border-white/5 px-4 py-5 ${isRTL ? 'drawer-rtl' : 'drawer-ltr'}`}>
           <nav className="flex flex-col gap-1 text-sm mb-4">
             {[
               { href: '/', label: t('home') },

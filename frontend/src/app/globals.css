@@ -287,3 +287,114 @@ body {
   to   { opacity: 1; transform: translateY(0); }
 }
 .fade-in { animation: fadeIn 0.5s ease forwards; }
+
+/* ─── Scroll reveal ─── */
+.reveal {
+  opacity: 0;
+  transform: translateY(36px);
+  transition: opacity 0.7s cubic-bezier(0.22,1,0.36,1), transform 0.7s cubic-bezier(0.22,1,0.36,1);
+}
+.reveal.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+.reveal-left {
+  opacity: 0;
+  transform: translateX(-36px);
+  transition: opacity 0.7s cubic-bezier(0.22,1,0.36,1), transform 0.7s cubic-bezier(0.22,1,0.36,1);
+}
+.reveal-left.visible { opacity: 1; transform: translateX(0); }
+.reveal-right {
+  opacity: 0;
+  transform: translateX(36px);
+  transition: opacity 0.7s cubic-bezier(0.22,1,0.36,1), transform 0.7s cubic-bezier(0.22,1,0.36,1);
+}
+.reveal-right.visible { opacity: 1; transform: translateX(0); }
+.reveal-d1 { transition-delay: 0.05s; }
+.reveal-d2 { transition-delay: 0.12s; }
+.reveal-d3 { transition-delay: 0.19s; }
+.reveal-d4 { transition-delay: 0.26s; }
+.reveal-d5 { transition-delay: 0.33s; }
+.reveal-d6 { transition-delay: 0.40s; }
+.reveal-d7 { transition-delay: 0.47s; }
+.reveal-d8 { transition-delay: 0.54s; }
+
+/* ─── Horizontal scroll carousel (mobile) ─── */
+.h-scroll {
+  display: flex;
+  overflow-x: auto;
+  gap: 0.875rem;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  scroll-snap-type: x mandatory;
+  -webkit-overflow-scrolling: touch;
+  padding-bottom: 4px;
+}
+.h-scroll::-webkit-scrollbar { display: none; }
+.h-scroll > * {
+  flex-shrink: 0;
+  scroll-snap-align: start;
+}
+
+/* ─── Mobile drawer slide ─── */
+@keyframes drawerSlideRtl {
+  from { transform: translateX(100%); opacity: 0; }
+  to   { transform: translateX(0);    opacity: 1; }
+}
+@keyframes drawerSlideLtr {
+  from { transform: translateX(-100%); opacity: 0; }
+  to   { transform: translateX(0);     opacity: 1; }
+}
+.drawer-rtl { animation: drawerSlideRtl 0.28s cubic-bezier(0.22,1,0.36,1); }
+.drawer-ltr { animation: drawerSlideLtr 0.28s cubic-bezier(0.22,1,0.36,1); }
+
+/* ─── Hero banner slide ─── */
+@keyframes heroPan {
+  0%,100% { transform: scale(1) translateX(0); }
+  50%      { transform: scale(1.04) translateX(-1%); }
+}
+.hero-pan { animation: heroPan 12s ease-in-out infinite; }
+
+/* ─── Ripple click ─── */
+@keyframes ripple {
+  to { transform: scale(4); opacity: 0; }
+}
+.ripple-btn { position: relative; overflow: hidden; }
+.ripple-btn::after {
+  content: '';
+  position: absolute;
+  inset: 50% 50% auto auto;
+  width: 0; height: 0;
+  background: rgba(255,255,255,0.3);
+  border-radius: 50%;
+  transform: scale(1);
+  opacity: 1;
+  pointer-events: none;
+  transition: 0s;
+}
+.ripple-btn:active::after {
+  width: 200px; height: 200px;
+  inset: calc(50% - 100px) calc(50% - 100px) auto auto;
+  animation: ripple 0.5s ease forwards;
+}
+
+/* ─── Stagger grid children ─── */
+.stagger > *:nth-child(1) { transition-delay: 0.04s; }
+.stagger > *:nth-child(2) { transition-delay: 0.09s; }
+.stagger > *:nth-child(3) { transition-delay: 0.14s; }
+.stagger > *:nth-child(4) { transition-delay: 0.19s; }
+.stagger > *:nth-child(5) { transition-delay: 0.24s; }
+.stagger > *:nth-child(6) { transition-delay: 0.29s; }
+.stagger > *:nth-child(7) { transition-delay: 0.34s; }
+.stagger > *:nth-child(8) { transition-delay: 0.39s; }
+
+/* ─── Mobile tap highlight ─── */
+@media (max-width: 640px) {
+  .product-card { -webkit-tap-highlight-color: transparent; }
+  .product-card:active { transform: scale(0.97); }
+}
+
+/* ─── Better mobile button sizing ─── */
+@media (max-width: 640px) {
+  .btn-primary { min-height: 44px; }
+}
