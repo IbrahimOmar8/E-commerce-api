@@ -1,6 +1,24 @@
 const express = require('express');
 const prisma = require('../lib/prisma');
 const verifyToken = require('../Middleware/auth');
+const cloudinary = require('cloudinary').v2;
+const multer = require('multer');
+
+cloudinary.config({
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+  api_key: process.env.CLOUDINARY_API_KEY,
+  api_secret: process.env.CLOUDINARY_API_SECRET,
+});
+
+const upload = multer({ storage: multer.memoryStorage(), limits: { fileSize: 5 * 1024 * 1024 } });
+
+function uploadToCloud(buffer) {
+  return new Promise((resolve, reject) => {
+    cloudinary.uploader.upload_stream({ folder: 'yallasport/products' }, (err, result) =>
+      err ? reject(err) : resolve(result.secure_url)
+    ).end(buffer);
+  });
+}
 
 const router = express.Router();
 
@@ -85,35 +103,39 @@ router.get('/:id', async (req, res) => {
 });
 
 // Create product (admin)
-router.post('/', verifyToken, async (req, res) => {
+router.post('/', verifyToken, upload.array('images', 10), async (req, res) => {
   try {
     if (!req.user || (req.user.role !== 'admin' && req.user.role !== 'super-admin'))
       return res.status(403).json({ success: false, message: 'Access denied' });
 
-    const {
-      name, nameAr, description, descriptionAr, price, discount = 0,
-      subcategoryId: _subId, subcategory: _subAlias,
-      brandId: _brandId, brand: _brandAlias,
-      images = [], stock = 0, sizes = [], hasSizes = false,
-      sport, sportAr, gender = 'unisex', material, sku, isActive = true,
-      productType = 'normal', featured = false, bestSeller = false, specialOffer = false,
-    } = req.body;
-    const subcategoryId = _subId || _subAlias;
-    const brandId = _brandId || _brandAlias;
+    const b = req.body;
+    const subcategoryId = b.subcategoryId || b.subcategory;
+    const brandId = b.brandId || b.brand || null;
+    const toBool = v => v === 'true' || v === true;
+    const sizes = b.sizes ? (typeof b.sizes === 'string' ? JSON.parse(b.sizes) : b.sizes) : [];
 
-    if (!name || !description || !price || !subcategoryId)
+    if (!b.name || !b.description || !b.price || !subcategoryId)
       return res.status(400).json({ success: false, message: 'name, description, price, subcategoryId are required' });
 
+    // Upload any attached files to Cloudinary
+    const uploadedUrls = req.files?.length
+      ? await Promise.all(req.files.map(f => uploadToCloud(f.buffer)))
+      : [];
+
+    const price = Number(b.price);
+    const discount = Number(b.discount || 0);
     const priceAfterDiscount = discount > 0 ? price * (1 - discount / 100) : 0;
 
     const product = await prisma.product.create({
       data: {
-        name, nameAr, description, descriptionAr, price: Number(price),
-        discount: Number(discount), priceAfterDiscount,
-        subcategoryId, brandId: brandId || null,
-        images, stock: Number(stock), sizes, hasSizes,
-        sport, sportAr, gender, material, sku: sku || null,
-        isActive, productType, featured, bestSeller, specialOffer,
+        name: b.name, nameAr: b.nameAr, description: b.description, descriptionAr: b.descriptionAr,
+        price, discount, priceAfterDiscount,
+        subcategoryId, brandId,
+        images: uploadedUrls, stock: Number(b.stock || 0), sizes, hasSizes: toBool(b.hasSizes),
+        sport: b.sport, sportAr: b.sportAr, gender: b.gender || 'unisex', material: b.material, sku: b.sku || null,
+        isActive: b.isActive === 'false' ? false : true,
+        productType: b.productType || 'normal',
+        featured: toBool(b.featured), bestSeller: toBool(b.bestSeller), specialOffer: toBool(b.specialOffer),
       },
       include: { subcategory: true, brand: true },
     });
@@ -126,21 +148,42 @@ router.post('/', verifyToken, async (req, res) => {
 });
 
 // Update product (admin)
-router.put('/:id', verifyToken, async (req, res) => {
+router.put('/:id', verifyToken, upload.array('images', 10), async (req, res) => {
   try {
     if (!req.user || (req.user.role !== 'admin' && req.user.role !== 'super-admin'))
       return res.status(403).json({ success: false, message: 'Access denied' });
 
     const data = { ...req.body };
-    // accept both subcategory/brand aliases and the canonical Id fields
+    // aliases
     if (data.subcategory && !data.subcategoryId) { data.subcategoryId = data.subcategory; }
-    if (data.brand && !data.brandId) { data.brandId = data.brand; }
+    if (data.brand && !data.brandId) { data.brandId = data.brand || null; }
     delete data.subcategory; delete data.brand;
+    // numbers
     if (data.price !== undefined) data.price = Number(data.price);
+    if (data.stock !== undefined) data.stock = Number(data.stock);
     if (data.discount !== undefined) {
       data.discount = Number(data.discount);
       data.priceAfterDiscount = data.price && data.discount > 0 ? Number(data.price) * (1 - data.discount / 100) : 0;
     }
+    // booleans (FormData sends strings)
+    const toBool = v => v === 'true' || v === true;
+    ['isActive', 'featured', 'bestSeller', 'specialOffer', 'hasSizes'].forEach(k => {
+      if (data[k] !== undefined) data[k] = k === 'isActive' ? data[k] !== 'false' && data[k] !== false : toBool(data[k]);
+    });
+    // sizes JSON string
+    if (data.sizes && typeof data.sizes === 'string') {
+      try { data.sizes = JSON.parse(data.sizes); } catch { delete data.sizes; }
+    }
+
+    // Merge kept existing images with any new uploads
+    if (req.files?.length) {
+      const newUrls = await Promise.all(req.files.map(f => uploadToCloud(f.buffer)));
+      const existing = data.existingImages ? JSON.parse(data.existingImages) : [];
+      data.images = [...existing, ...newUrls];
+    } else if (data.existingImages) {
+      data.images = JSON.parse(data.existingImages);
+    }
+    delete data.existingImages;
 
     const product = await prisma.product.update({
       where: { id: req.params.id },
