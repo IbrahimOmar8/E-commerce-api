@@ -156,6 +156,22 @@ app.get('/api/health', (req, res) => {
   res.json({ status: 'OK', message: 'E-commerce API is running' });
 });
 
+// Cloudinary connection test (admin-only diagnostic)
+const cloudinaryTest = require('cloudinary').v2;
+cloudinaryTest.config({
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+  api_key: process.env.CLOUDINARY_API_KEY,
+  api_secret: process.env.CLOUDINARY_API_SECRET,
+});
+app.get('/api/health/cloudinary', async (req, res) => {
+  try {
+    const result = await cloudinaryTest.api.ping();
+    res.json({ ok: true, cloud_name: process.env.CLOUDINARY_CLOUD_NAME, result });
+  } catch (err) {
+    res.status(500).json({ ok: false, cloud_name: process.env.CLOUDINARY_CLOUD_NAME, error: err.message });
+  }
+});
+
 // Error handling middleware
 app.use((err, req, res, next) => {
   console.error(err.stack);
