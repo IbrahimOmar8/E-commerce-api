@@ -117,10 +117,15 @@ router.post('/', verifyToken, upload.array('images', 10), async (req, res) => {
     if (!b.name || !b.description || !b.price || !subcategoryId)
       return res.status(400).json({ success: false, message: 'name, description, price, subcategoryId are required' });
 
-    // Upload any attached files to Cloudinary
-    const uploadedUrls = req.files?.length
-      ? await Promise.all(req.files.map(f => uploadToCloud(f.buffer)))
-      : [];
+    // Upload any attached files to Cloudinary (non-fatal — product saves even if upload fails)
+    let uploadedUrls = [];
+    if (req.files?.length) {
+      try {
+        uploadedUrls = await Promise.all(req.files.map(f => uploadToCloud(f.buffer)));
+      } catch (uploadErr) {
+        console.error('Cloudinary upload failed:', uploadErr.message);
+      }
+    }
 
     const price = Number(b.price);
     const discount = Number(b.discount || 0);
@@ -141,9 +146,9 @@ router.post('/', verifyToken, upload.array('images', 10), async (req, res) => {
     });
     res.status(201).json({ success: true, data: product });
   } catch (err) {
-    console.error(err);
+    console.error('Create product error:', err);
     if (err.code === 'P2002') return res.status(400).json({ success: false, message: 'SKU already exists' });
-    res.status(500).json({ success: false, message: 'Error creating product' });
+    res.status(500).json({ success: false, message: err.message || 'Error creating product' });
   }
 });
 
@@ -176,12 +181,17 @@ router.put('/:id', verifyToken, upload.array('images', 10), async (req, res) => 
     }
 
     // Merge kept existing images with any new uploads
+    const existing = data.existingImages ? JSON.parse(data.existingImages) : [];
     if (req.files?.length) {
-      const newUrls = await Promise.all(req.files.map(f => uploadToCloud(f.buffer)));
-      const existing = data.existingImages ? JSON.parse(data.existingImages) : [];
-      data.images = [...existing, ...newUrls];
-    } else if (data.existingImages) {
-      data.images = JSON.parse(data.existingImages);
+      try {
+        const newUrls = await Promise.all(req.files.map(f => uploadToCloud(f.buffer)));
+        data.images = [...existing, ...newUrls];
+      } catch (uploadErr) {
+        console.error('Cloudinary upload failed:', uploadErr.message);
+        data.images = existing;
+      }
+    } else {
+      data.images = existing;
     }
     delete data.existingImages;
 
