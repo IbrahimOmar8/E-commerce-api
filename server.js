@@ -159,6 +159,41 @@ app.get('/api/health', (req, res) => {
   res.json({ status: 'OK', message: 'E-commerce API is running' });
 });
 
+// Seed sports (protected by SEED_SECRET env var)
+app.post('/api/seed/sports', async (req, res) => {
+  const secret = process.env.SEED_SECRET;
+  if (!secret || req.headers['x-seed-secret'] !== secret) {
+    return res.status(403).json({ success: false, message: 'Forbidden' });
+  }
+  try {
+    const prisma = require('./lib/prisma');
+    const DEFAULT_SPORTS = [
+      { name: 'boxing',     nameAr: 'ملاكمة',          icon: '🥊', sortOrder: 1 },
+      { name: 'swimming',   nameAr: 'سباحة',            icon: '🏊', sortOrder: 2 },
+      { name: 'taekwondo',  nameAr: 'تايكوندو',         icon: '🥋', sortOrder: 3 },
+      { name: 'fitness',    nameAr: 'اللياقة البدنية',  icon: '🏋️', sortOrder: 4 },
+      { name: 'karate',     nameAr: 'الكاراتيه',        icon: '🤺', sortOrder: 5 },
+      { name: 'football',   nameAr: 'كرة القدم',        icon: '⚽', sortOrder: 6 },
+      { name: 'basketball', nameAr: 'كرة السلة',        icon: '🏀', sortOrder: 7 },
+      { name: 'cycling',    nameAr: 'دراجات',           icon: '🚴', sortOrder: 8 },
+    ];
+    const results = [];
+    for (const sport of DEFAULT_SPORTS) {
+      const existing = await prisma.sport.findUnique({ where: { name: sport.name } });
+      if (existing) {
+        results.push({ sport: sport.nameAr, status: 'skipped' });
+      } else {
+        await prisma.sport.create({ data: { ...sport, isActive: true } });
+        results.push({ sport: sport.nameAr, status: 'created' });
+      }
+    }
+    res.json({ success: true, results });
+  } catch (err) {
+    console.error('Seed error:', err);
+    res.status(500).json({ success: false, message: err.message });
+  }
+});
+
 // Cloudinary connection test (admin-only diagnostic)
 const cloudinaryTest = require('cloudinary').v2;
 cloudinaryTest.config({
