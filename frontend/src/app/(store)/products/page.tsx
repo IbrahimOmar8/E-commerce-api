@@ -318,7 +318,14 @@ function ProductsContent() {
                 className="px-5 py-2 border border-slate-200 bg-white rounded-xl text-sm font-medium disabled:opacity-40 hover:bg-slate-50 shadow-sm">
                 {t('prev')}
               </button>
-              {Array.from({ length: Math.min(pages, 5) }, (_, i) => i + 1).map(p => (
+              {(() => {
+                const windowSize = 5;
+                const half = Math.floor(windowSize / 2);
+                let start = Math.max(1, filters.page - half);
+                let end = Math.min(pages, start + windowSize - 1);
+                if (end - start < windowSize - 1) start = Math.max(1, end - windowSize + 1);
+                return Array.from({ length: end - start + 1 }, (_, i) => start + i);
+              })().map(p => (
                 <button key={p} onClick={() => updateFilter('page', p)}
                   className={`w-10 h-10 rounded-xl text-sm font-bold transition-all ${
                     filters.page === p
