@@ -92,10 +92,14 @@ router.post('/', verifyToken, async (req, res) => {
 
     const {
       name, nameAr, description, descriptionAr, price, discount = 0,
-      subcategoryId, brandId, images = [], stock = 0, sizes = [], hasSizes = false,
+      subcategoryId: _subId, subcategory: _subAlias,
+      brandId: _brandId, brand: _brandAlias,
+      images = [], stock = 0, sizes = [], hasSizes = false,
       sport, sportAr, gender = 'unisex', material, sku, isActive = true,
       productType = 'normal', featured = false, bestSeller = false, specialOffer = false,
     } = req.body;
+    const subcategoryId = _subId || _subAlias;
+    const brandId = _brandId || _brandAlias;
 
     if (!name || !description || !price || !subcategoryId)
       return res.status(400).json({ success: false, message: 'name, description, price, subcategoryId are required' });
@@ -128,6 +132,10 @@ router.put('/:id', verifyToken, async (req, res) => {
       return res.status(403).json({ success: false, message: 'Access denied' });
 
     const data = { ...req.body };
+    // accept both subcategory/brand aliases and the canonical Id fields
+    if (data.subcategory && !data.subcategoryId) { data.subcategoryId = data.subcategory; }
+    if (data.brand && !data.brandId) { data.brandId = data.brand; }
+    delete data.subcategory; delete data.brand;
     if (data.price !== undefined) data.price = Number(data.price);
     if (data.discount !== undefined) {
       data.discount = Number(data.discount);
