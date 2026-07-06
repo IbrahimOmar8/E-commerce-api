@@ -1,5 +1,5 @@
 import HomeClient from '@/components/store/HomeClient';
-import type { Product, Category, Brand } from '@/types';
+import type { Product, Category, Brand, Sport } from '@/types';
 
 const API = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
 
@@ -43,9 +43,17 @@ async function getSpecialOffers(): Promise<Product[]> {
   } catch { return []; }
 }
 
+async function getSports(): Promise<Sport[]> {
+  try {
+    const res = await fetch(`${API}/sports?isActive=true`, { next: { revalidate: 600 } });
+    const data = await res.json();
+    return data.data || [];
+  } catch { return []; }
+}
+
 export default async function HomePage() {
-  const [featured, bestSellers, categories, brands, offers] = await Promise.all([
-    getFeatured(), getBestSellers(), getCategories(), getBrands(), getSpecialOffers()
+  const [featured, bestSellers, categories, brands, offers, sports] = await Promise.all([
+    getFeatured(), getBestSellers(), getCategories(), getBrands(), getSpecialOffers(), getSports()
   ]);
 
   return (
@@ -55,6 +63,7 @@ export default async function HomePage() {
       categories={categories}
       brands={brands}
       offers={offers}
+      sports={sports}
     />
   );
 }

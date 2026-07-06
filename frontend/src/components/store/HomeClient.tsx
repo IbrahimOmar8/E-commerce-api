@@ -4,7 +4,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import ProductCard from '@/components/store/ProductCard';
 import { useLanguage } from '@/contexts/language';
-import type { Product, Category, Brand } from '@/types';
+import type { Product, Category, Brand, Sport } from '@/types';
 import { ArrowLeft, ArrowRight, Zap, RotateCcw, Shield, Headphones } from 'lucide-react';
 
 interface Props {
@@ -13,9 +13,10 @@ interface Props {
   categories: Category[];
   brands: Brand[];
   offers: Product[];
+  sports: Sport[];
 }
 
-export default function HomeClient({ featured, bestSellers, categories, brands, offers }: Props) {
+export default function HomeClient({ featured, bestSellers, categories, brands, offers, sports }: Props) {
   const { t, isRTL, lang } = useLanguage();
 
   const ArrowIcon = isRTL ? ArrowLeft : ArrowRight;
@@ -31,15 +32,6 @@ export default function HomeClient({ featured, bestSellers, categories, brands, 
     els.forEach(el => observer.observe(el));
     return () => observer.disconnect();
   }, []);
-
-  const sports = [
-    { icon: '🥊', key: 'boxing' as const, value: 'boxing' },
-    { icon: '🏊', key: 'swimming' as const, value: 'swimming' },
-    { icon: '🥋', key: 'taekwondo' as const, value: 'taekwondo' },
-    { icon: '🏋️', key: 'fitness' as const, value: 'fitness' },
-    { icon: '🥋', key: 'karate' as const, value: 'karate' },
-    { icon: '⚽', key: 'football' as const, value: 'football' },
-  ];
 
   const features = [
     { icon: <Zap size={18} />, label: t('fastShipping') },
@@ -167,25 +159,27 @@ export default function HomeClient({ featured, bestSellers, categories, brands, 
       <div className="max-w-7xl mx-auto px-4 py-12 space-y-20">
 
         {/* ── Sports categories ── */}
-        <section className="reveal">
-          <SectionHeader title={t('shopBySport')} />
-          <div className="grid grid-cols-3 md:grid-cols-6 gap-4">
-            {sports.map(sport => (
-              <Link
-                key={sport.value}
-                href={`/products?sport=${sport.value}`}
-                className="sport-card flex flex-col items-center gap-3 py-5 px-3 group"
-              >
-                <span className="text-4xl transition-transform duration-300 group-hover:scale-110 group-hover:-rotate-3">
-                  {sport.icon}
-                </span>
-                <span className="text-xs font-bold text-slate-600 group-hover:text-amber-600 transition-colors text-center">
-                  {t(sport.key)}
-                </span>
-              </Link>
-            ))}
-          </div>
-        </section>
+        {sports.length > 0 && (
+          <section className="reveal">
+            <SectionHeader title={t('shopBySport')} />
+            <div className={`grid gap-4 ${sports.length <= 3 ? 'grid-cols-3' : sports.length <= 4 ? 'grid-cols-2 sm:grid-cols-4' : 'grid-cols-3 md:grid-cols-6'}`}>
+              {sports.map(sport => (
+                <Link
+                  key={sport._id}
+                  href={`/products?sport=${sport.name}`}
+                  className="sport-card flex flex-col items-center gap-3 py-5 px-3 group"
+                >
+                  <span className="text-4xl transition-transform duration-300 group-hover:scale-110 group-hover:-rotate-3">
+                    {sport.icon}
+                  </span>
+                  <span className="text-xs font-bold text-slate-600 group-hover:text-amber-600 transition-colors text-center">
+                    {lang === 'ar' ? sport.nameAr : sport.name}
+                  </span>
+                </Link>
+              ))}
+            </div>
+          </section>
+        )}
 
         {/* ── Main categories ── */}
         {categories.length > 0 && (

@@ -1,3 +1,13 @@
+export interface Sport {
+  _id: string;
+  name: string;
+  nameAr: string;
+  icon: string;
+  isActive: boolean;
+  sortOrder: number;
+  createdAt: string;
+}
+
 export interface Brand {
   _id: string;
   name: string;

@@ -17,6 +17,7 @@ const brandRoutes = require('./routes/brands');
 const reviewRoutes = require('./routes/reviews');
 const statsRoutes = require('./routes/stats');
 const wishlistRoutes = require('./routes/wishlist');
+const sportsRoutes = require('./routes/sports');
 
 dotenv.config();
 
@@ -150,6 +151,8 @@ if (brandRouter) app.use('/api/brands', brandRouter); else console.error('Invali
 if (reviewRouter) app.use('/api/reviews', reviewRouter); else console.error('Invalid router exported from ./routes/reviews');
 if (statsRouter) app.use('/api/stats', statsRouter); else console.error('Invalid router exported from ./routes/stats');
 if (wishlistRouter) app.use('/api/wishlist', wishlistRouter); else console.error('Invalid router exported from ./routes/wishlist');
+const sportsRouter = resolveRouter(sportsRoutes);
+if (sportsRouter) app.use('/api/sports', sportsRouter); else console.error('Invalid router exported from ./routes/sports');
 
 // Health check endpoint
 app.get('/api/health', (req, res) => {

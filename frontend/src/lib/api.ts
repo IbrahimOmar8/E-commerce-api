@@ -64,6 +64,17 @@ export const brandsApi = {
   delete: (id: string) => request(`/brands/${id}`, { method: 'DELETE' }),
 };
 
+// ── Sports ────────────────────────────────────────────────────────────────
+export const sportsApi = {
+  getAll: (params?: Record<string, string>) => {
+    const qs = params ? '?' + new URLSearchParams(params).toString() : '';
+    return request<{ success: boolean; data: import('@/types').Sport[] }>(`/sports${qs}`);
+  },
+  create: (body: object) => request('/sports', { method: 'POST', body: JSON.stringify(body) }),
+  update: (id: string, body: object) => request(`/sports/${id}`, { method: 'PUT', body: JSON.stringify(body) }),
+  delete: (id: string) => request(`/sports/${id}`, { method: 'DELETE' }),
+};
+
 // ── Orders ────────────────────────────────────────────────────────────────
 export const ordersApi = {
   getAll: (params?: Record<string, string | number>) => {
