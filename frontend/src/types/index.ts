@@ -34,6 +34,7 @@ export interface Category {
 export interface SizeStock {
   size: string;
   stock: number;
+  price?: number;
 }
 
 export interface Product {
@@ -51,6 +52,7 @@ export interface Product {
   stock: number;
   sizes: SizeStock[];
   hasSizes: boolean;
+  colors: string[];
   sport?: string;
   sportAr?: string;
   gender: 'men' | 'women' | 'kids' | 'unisex';
@@ -129,6 +131,8 @@ export interface CartItem {
   product: Product;
   quantity: number;
   size?: string | null;
+  color?: string | null;
+  unitPrice?: number;
 }
 
 export interface DashboardStats {

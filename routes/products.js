@@ -113,6 +113,7 @@ router.post('/', verifyToken, upload.array('images', 10), async (req, res) => {
     const brandId = b.brandId || b.brand || null;
     const toBool = v => v === 'true' || v === true;
     const sizes = b.sizes ? (typeof b.sizes === 'string' ? JSON.parse(b.sizes) : b.sizes) : [];
+    const colors = b.colors ? (typeof b.colors === 'string' ? JSON.parse(b.colors) : b.colors) : [];
 
     if (!b.name || !b.description || !b.price || !subcategoryId)
       return res.status(400).json({ success: false, message: 'name, description, price, subcategoryId are required' });
@@ -137,7 +138,8 @@ router.post('/', verifyToken, upload.array('images', 10), async (req, res) => {
         price, discount, priceAfterDiscount,
         subcategoryId, brandId,
         images: uploadedUrls, stock: Number(b.stock || 0), sizes, hasSizes: toBool(b.hasSizes),
-        sport: b.sport, sportAr: b.sportAr, gender: b.gender || 'unisex', material: b.material, sku: b.sku || null,
+        colors,
+        sport: b.sport || null, sportAr: b.sportAr || null, gender: b.gender || 'unisex', material: b.material || null, sku: b.sku || null,
         isActive: b.isActive === 'false' ? false : true,
         productType: b.productType || 'normal',
         featured: toBool(b.featured), bestSeller: toBool(b.bestSeller), specialOffer: toBool(b.specialOffer),
@@ -161,14 +163,21 @@ router.put('/:id', verifyToken, upload.array('images', 10), async (req, res) => 
     const data = { ...req.body };
     // aliases
     if (data.subcategory && !data.subcategoryId) { data.subcategoryId = data.subcategory; }
-    if (data.brand && !data.brandId) { data.brandId = data.brand || null; }
+    if (data.brand !== undefined && !data.brandId) { data.brandId = data.brand || null; }
     delete data.subcategory; delete data.brand;
+    // fix empty strings → null for optional unique/relation fields
+    if (data.brandId === '' || data.brandId === 'undefined') data.brandId = null;
+    if (data.sku === '' || data.sku === 'undefined') data.sku = null;
+    if (data.sport === '' || data.sport === 'undefined') data.sport = null;
+    if (data.sportAr === '' || data.sportAr === 'undefined') data.sportAr = null;
+    if (data.material === '') data.material = null;
     // numbers
     if (data.price !== undefined) data.price = Number(data.price);
     if (data.stock !== undefined) data.stock = Number(data.stock);
     if (data.discount !== undefined) {
       data.discount = Number(data.discount);
-      data.priceAfterDiscount = data.price && data.discount > 0 ? Number(data.price) * (1 - data.discount / 100) : 0;
+      const p = data.price ?? 0;
+      data.priceAfterDiscount = p > 0 && data.discount > 0 ? p * (1 - data.discount / 100) : 0;
     }
     // booleans (FormData sends strings)
     const toBool = v => v === 'true' || v === true;
@@ -176,8 +185,16 @@ router.put('/:id', verifyToken, upload.array('images', 10), async (req, res) => 
       if (data[k] !== undefined) data[k] = k === 'isActive' ? data[k] !== 'false' && data[k] !== false : toBool(data[k]);
     });
     // sizes JSON string
-    if (data.sizes && typeof data.sizes === 'string') {
-      try { data.sizes = JSON.parse(data.sizes); } catch { delete data.sizes; }
+    if (data.sizes !== undefined) {
+      if (typeof data.sizes === 'string') {
+        try { data.sizes = JSON.parse(data.sizes); } catch { data.sizes = []; }
+      }
+    }
+    // colors JSON string
+    if (data.colors !== undefined) {
+      if (typeof data.colors === 'string') {
+        try { data.colors = JSON.parse(data.colors); } catch { data.colors = []; }
+      }
     }
 
     // Merge kept existing images with any new uploads

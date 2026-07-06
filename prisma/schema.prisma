@@ -80,6 +80,7 @@ model Product {
   stock              Int      @default(0)
   sizes              Json     @default("[]")
   hasSizes           Boolean  @default(false)
+  colors             String[] @default([])
   sport              String?
   sportAr            String?
   gender             String   @default("unisex")

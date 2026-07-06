@@ -2,8 +2,8 @@
 import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
-import { categoriesApi, brandsApi, productsApi } from '@/lib/api';
-import type { Category, Brand, Product } from '@/types';
+import { categoriesApi, brandsApi, productsApi, sportsApi } from '@/lib/api';
+import type { Category, Brand, Product, Sport } from '@/types';
 import { Plus, Trash2, Upload, X } from 'lucide-react';
 
 interface Props {
@@ -11,9 +11,23 @@ interface Props {
   mode: 'create' | 'edit';
 }
 
-const SPORTS = ['كرة القدم', 'الجري', 'الصالة الرياضية', 'السباحة', 'التنس', 'كرة السلة', 'كرة الطائرة', 'الهوكي', 'العاب قوى', 'غير محدد'];
 const CLOTHING_SIZES = ['XS', 'S', 'M', 'L', 'XL', 'XXL', 'XXXL'];
 const SHOE_SIZES = ['36', '37', '38', '39', '40', '41', '42', '43', '44', '45', '46', '47', '48'];
+
+const PRESET_COLORS = [
+  { hex: '#000000', label: 'أسود' },
+  { hex: '#FFFFFF', label: 'أبيض' },
+  { hex: '#EF4444', label: 'أحمر' },
+  { hex: '#3B82F6', label: 'أزرق' },
+  { hex: '#22C55E', label: 'أخضر' },
+  { hex: '#F59E0B', label: 'ذهبي' },
+  { hex: '#8B5CF6', label: 'بنفسجي' },
+  { hex: '#EC4899', label: 'وردي' },
+  { hex: '#F97316', label: 'برتقالي' },
+  { hex: '#6B7280', label: 'رمادي' },
+  { hex: '#92400E', label: 'بني' },
+  { hex: '#0EA5E9', label: 'سماوي' },
+];
 
 export default function ProductForm({ product, mode }: Props) {
   const router = useRouter();
@@ -21,6 +35,7 @@ export default function ProductForm({ product, mode }: Props) {
 
   const [categories, setCategories] = useState<Category[]>([]);
   const [brands, setBrands] = useState<Brand[]>([]);
+  const [sports, setSports] = useState<Sport[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
@@ -45,29 +60,40 @@ export default function ProductForm({ product, mode }: Props) {
     hasSizes: product?.hasSizes ?? false,
   });
 
-  const [sizes, setSizes] = useState<{ size: string; stock: number }[]>(
+  const [sizes, setSizes] = useState<{ size: string; stock: number; price?: number }[]>(
     product?.sizes?.length ? product.sizes : []
   );
+  const [colors, setColors] = useState<string[]>(product?.colors || []);
   const [existingImages, setExistingImages] = useState<string[]>(product?.images || []);
   const [newFiles, setNewFiles] = useState<File[]>([]);
   const [sizeType, setSizeType] = useState<'clothing' | 'shoes' | 'custom'>('clothing');
   const [customSize, setCustomSize] = useState('');
+  const [customColor, setCustomColor] = useState('#000000');
 
   useEffect(() => {
     categoriesApi.getAll({ isActive: 'true' }).then(r => setCategories(r.data || []));
     brandsApi.getAll().then(r => setBrands(r.data || []));
+    sportsApi.getAll({ isActive: 'true' }).then(r => setSports(r.data || []));
   }, []);
 
   const update = (k: string, v: string | boolean) => setForm(p => ({ ...p, [k]: v }));
 
   const addSize = (size: string) => {
     if (sizes.find(s => s.size === size)) return;
-    setSizes(prev => [...prev, { size, stock: 0 }]);
+    setSizes(prev => [...prev, { size, stock: 0, price: undefined }]);
   };
-
   const removeSize = (size: string) => setSizes(prev => prev.filter(s => s.size !== size));
   const updateSizeStock = (size: string, stock: number) =>
     setSizes(prev => prev.map(s => s.size === size ? { ...s, stock } : s));
+  const updateSizePrice = (size: string, price: number | undefined) =>
+    setSizes(prev => prev.map(s => s.size === size ? { ...s, price: price || undefined } : s));
+
+  const toggleColor = (hex: string) => {
+    setColors(prev => prev.includes(hex) ? prev.filter(c => c !== hex) : [...prev, hex]);
+  };
+  const addCustomColor = () => {
+    if (!colors.includes(customColor)) setColors(prev => [...prev, customColor]);
+  };
 
   const handleFiles = (files: FileList | null) => {
     if (!files) return;
@@ -91,24 +117,19 @@ export default function ProductForm({ product, mode }: Props) {
 
       if (form.hasSizes && sizes.length > 0) {
         formData.append('sizes', JSON.stringify(sizes));
+      } else {
+        formData.append('sizes', JSON.stringify([]));
       }
 
-      // Calculate priceAfterDiscount
+      formData.append('colors', JSON.stringify(colors));
+
       const price = Number(form.price);
       const disc = Number(form.discount);
-      if (disc > 0) {
-        formData.append('priceAfterDiscount', String(price - (price * disc / 100)));
-      } else {
-        formData.append('priceAfterDiscount', '0');
-      }
+      formData.append('priceAfterDiscount', disc > 0 ? String(price - (price * disc / 100)) : '0');
 
-      // Remove stock if using sizes
-      if (form.hasSizes) {
-        formData.set('stock', '0');
-      }
+      if (form.hasSizes) formData.set('stock', '0');
 
       newFiles.forEach(f => formData.append('images', f));
-
       if (existingImages.length > 0) {
         formData.append('existingImages', JSON.stringify(existingImages));
       }
@@ -209,7 +230,7 @@ export default function ProductForm({ product, mode }: Props) {
         </div>
       </div>
 
-      {/* Sizes */}
+      {/* Sizes with price */}
       <div className="bg-white rounded-2xl border border-gray-100 p-6">
         <div className="flex items-center justify-between mb-5">
           <h3 className="font-bold text-gray-900">المقاسات</h3>
@@ -270,15 +291,28 @@ export default function ProductForm({ product, mode }: Props) {
 
             {sizes.length > 0 && (
               <div className="mt-4 space-y-2">
-                <h4 className="text-sm font-semibold text-gray-700">المخزون لكل مقاس</h4>
-                <div className="grid sm:grid-cols-3 gap-3">
+                <h4 className="text-sm font-semibold text-gray-700">الكمية والسعر لكل مقاس</h4>
+                <div className="text-xs text-gray-400 mb-2">اتركي حقل السعر فارغاً لاستخدام السعر الأصلي للمنتج</div>
+                <div className="space-y-2">
                   {sizes.map(s => (
-                    <div key={s.size} className="flex items-center gap-2 bg-gray-50 rounded-xl p-3">
-                      <span className="font-bold text-sm w-12">{s.size}</span>
-                      <input type="number" value={s.stock} min="0"
-                        onChange={e => updateSizeStock(s.size, Number(e.target.value))}
-                        className="flex-1 border border-gray-200 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-1 focus:ring-amber-500" dir="ltr" />
-                      <button onClick={() => removeSize(s.size)} className="text-red-400 hover:text-red-600">
+                    <div key={s.size} className="flex items-center gap-3 bg-gray-50 rounded-xl p-3">
+                      <span className="font-bold text-sm w-14 text-center">{s.size}</span>
+                      <div className="flex-1 grid grid-cols-2 gap-2">
+                        <div>
+                          <label className="text-xs text-gray-500 mb-1 block">الكمية</label>
+                          <input type="number" value={s.stock} min="0"
+                            onChange={e => updateSizeStock(s.size, Number(e.target.value))}
+                            className="w-full border border-gray-200 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-1 focus:ring-amber-500" dir="ltr" />
+                        </div>
+                        <div>
+                          <label className="text-xs text-gray-500 mb-1 block">السعر (ر.س) — اختياري</label>
+                          <input type="number" value={s.price ?? ''} min="0" step="0.01"
+                            placeholder={form.price || '—'}
+                            onChange={e => updateSizePrice(s.size, e.target.value ? Number(e.target.value) : undefined)}
+                            className="w-full border border-gray-200 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-1 focus:ring-amber-500" dir="ltr" />
+                        </div>
+                      </div>
+                      <button onClick={() => removeSize(s.size)} className="text-red-400 hover:text-red-600 flex-shrink-0">
                         <X size={14} />
                       </button>
                     </div>
@@ -286,6 +320,47 @@ export default function ProductForm({ product, mode }: Props) {
                 </div>
               </div>
             )}
+          </div>
+        )}
+      </div>
+
+      {/* Colors */}
+      <div className="bg-white rounded-2xl border border-gray-100 p-6">
+        <h3 className="font-bold text-gray-900 mb-4">الألوان المتاحة (اختياري)</h3>
+        <div className="flex flex-wrap gap-2 mb-4">
+          {PRESET_COLORS.map(c => (
+            <button key={c.hex} onClick={() => toggleColor(c.hex)} title={c.label}
+              className={`w-9 h-9 rounded-full border-4 transition-all hover:scale-110 ${
+                colors.includes(c.hex) ? 'border-amber-500 scale-110' : 'border-white shadow-md'
+              }`}
+              style={{ backgroundColor: c.hex }}>
+              {c.hex === '#FFFFFF' && <span className="block w-full h-full rounded-full border border-gray-200" />}
+            </button>
+          ))}
+        </div>
+        <div className="flex items-center gap-3">
+          <input type="color" value={customColor} onChange={e => setCustomColor(e.target.value)}
+            className="w-10 h-10 rounded-xl border border-gray-200 cursor-pointer p-0.5" />
+          <button onClick={addCustomColor}
+            className="text-sm bg-gray-100 hover:bg-gray-200 px-4 py-2 rounded-xl transition-colors">
+            إضافة لون مخصص
+          </button>
+        </div>
+        {colors.length > 0 && (
+          <div className="mt-4">
+            <p className="text-xs text-gray-500 mb-2">الألوان المختارة:</p>
+            <div className="flex flex-wrap gap-2">
+              {colors.map(hex => (
+                <div key={hex} className="flex items-center gap-1.5 bg-gray-50 border border-gray-200 rounded-full px-3 py-1.5">
+                  <span className="w-4 h-4 rounded-full border border-gray-300 flex-shrink-0" style={{ backgroundColor: hex }} />
+                  <span className="text-xs text-gray-600 ltr">{hex}</span>
+                  <button onClick={() => setColors(prev => prev.filter(c => c !== hex))}
+                    className="text-gray-400 hover:text-red-500 ml-1">
+                    <X size={12} />
+                  </button>
+                </div>
+              ))}
+            </div>
           </div>
         )}
       </div>
@@ -325,7 +400,9 @@ export default function ProductForm({ product, mode }: Props) {
             <select value={form.sport} onChange={e => update('sport', e.target.value)}
               className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-amber-500 bg-white">
               <option value="">اختر الرياضة</option>
-              {SPORTS.map(s => <option key={s} value={s}>{s}</option>)}
+              {sports.map(s => (
+                <option key={s._id} value={s.name}>{s.nameAr}</option>
+              ))}
             </select>
           </div>
           <div>
@@ -372,7 +449,6 @@ export default function ProductForm({ product, mode }: Props) {
       <div className="bg-white rounded-2xl border border-gray-100 p-6">
         <h3 className="font-bold text-gray-900 mb-5">الصور</h3>
 
-        {/* Existing images */}
         {existingImages.length > 0 && (
           <div className="flex flex-wrap gap-3 mb-4">
             {existingImages.map((img, i) => (
@@ -387,7 +463,6 @@ export default function ProductForm({ product, mode }: Props) {
           </div>
         )}
 
-        {/* New files preview */}
         {newFiles.length > 0 && (
           <div className="flex flex-wrap gap-3 mb-4">
             {newFiles.map((file, i) => (

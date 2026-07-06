@@ -80,7 +80,8 @@ export default function CartPage() {
         {/* Items */}
         <div className="lg:col-span-2 space-y-3">
           {items.map((item: CartItem) => {
-            const itemPrice = item.product.priceAfterDiscount > 0 ? item.product.priceAfterDiscount : item.product.price;
+            const sizePrice = item.size ? item.product.sizes?.find(s => s.size === item.size)?.price : undefined;
+            const itemPrice = item.unitPrice ?? (sizePrice && sizePrice > 0 ? sizePrice : (item.product.priceAfterDiscount > 0 ? item.product.priceAfterDiscount : item.product.price));
             const img = item.product.images?.[0];
             const name = (lang === 'ar' ? item.product.nameAr || item.product.name : item.product.name || item.product.nameAr) || '';
 
@@ -101,23 +102,30 @@ export default function CartPage() {
                     className="font-semibold text-slate-900 hover:text-amber-600 text-sm leading-snug line-clamp-2">
                     {name}
                   </Link>
-                  {item.size && (
-                    <p className="text-xs text-slate-500 mt-1">
-                      {t('size')}: <span className="font-bold">{item.size}</span>
-                    </p>
-                  )}
+                  <div className="flex items-center gap-3 mt-1">
+                    {item.size && (
+                      <p className="text-xs text-slate-500">
+                        {t('size')}: <span className="font-bold">{item.size}</span>
+                      </p>
+                    )}
+                    {item.color && (
+                      <span className="flex items-center gap-1 text-xs text-slate-500">
+                        اللون: <span className="inline-block w-3.5 h-3.5 rounded-full border border-gray-300" style={{ backgroundColor: item.color }} />
+                      </span>
+                    )}
+                  </div>
                   {item.product.discount > 0 && (
                     <p className="text-xs text-red-500 mt-0.5">-{item.product.discount}% {lang === 'ar' ? 'خصم' : 'off'}</p>
                   )}
 
                   <div className="flex items-center justify-between mt-3">
                     <div className="flex items-center gap-1 border border-slate-200 rounded-xl p-1">
-                      <button onClick={() => updateQuantity(item.product._id, item.quantity - 1, item.size)}
+                      <button onClick={() => updateQuantity(item.product._id, item.quantity - 1, item.size, item.color)}
                         className="w-7 h-7 flex items-center justify-center hover:bg-slate-100 rounded-lg">
                         <Minus size={13} />
                       </button>
                       <span className="w-8 text-center text-sm font-bold">{item.quantity}</span>
-                      <button onClick={() => updateQuantity(item.product._id, item.quantity + 1, item.size)}
+                      <button onClick={() => updateQuantity(item.product._id, item.quantity + 1, item.size, item.color)}
                         className="w-7 h-7 flex items-center justify-center hover:bg-slate-100 rounded-lg">
                         <Plus size={13} />
                       </button>
@@ -128,7 +136,7 @@ export default function CartPage() {
                         {(itemPrice * item.quantity).toFixed(2)}
                         <span className="text-xs text-slate-400 font-normal ms-1">{t('sar')}</span>
                       </span>
-                      <button onClick={() => removeItem(item.product._id, item.size)}
+                      <button onClick={() => removeItem(item.product._id, item.size, item.color)}
                         className="text-slate-400 hover:text-red-500 transition-colors">
                         <Trash2 size={15} />
                       </button>

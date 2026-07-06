@@ -15,6 +15,7 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
   const [loading, setLoading] = useState(true);
   const [selectedImage, setSelectedImage] = useState(0);
   const [selectedSize, setSelectedSize] = useState<string | null>(null);
+  const [selectedColor, setSelectedColor] = useState<string | null>(null);
   const [quantity, setQuantity] = useState(1);
   const [adding, setAdding] = useState(false);
   const [added, setAdded] = useState(false);
@@ -35,7 +36,7 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
     if (product.hasSizes && !selectedSize) { setSizeError(true); return; }
     setSizeError(false);
     setAdding(true);
-    addItem(product, quantity, selectedSize);
+    addItem(product, quantity, selectedSize, selectedColor);
     setAdded(true);
     setTimeout(() => { setAdding(false); setAdded(false); }, 2000);
   };
@@ -63,8 +64,12 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
     </div>
   );
 
-  const price = product.priceAfterDiscount > 0 ? product.priceAfterDiscount : product.price;
-  const hasDiscount = product.discount > 0 && product.priceAfterDiscount > 0;
+  // Compute displayed price based on selected size (if size has its own price)
+  const basePriceAfterDiscount = product.priceAfterDiscount > 0 ? product.priceAfterDiscount : product.price;
+  const selectedSizeData = selectedSize ? product.sizes.find(s => s.size === selectedSize) : null;
+  const displayPrice = (selectedSizeData?.price && selectedSizeData.price > 0) ? selectedSizeData.price : basePriceAfterDiscount;
+  const hasDiscount = product.discount > 0 && product.priceAfterDiscount > 0 && !(selectedSizeData?.price && selectedSizeData.price > 0);
+
   const currentImages = product.images.length > 0 ? product.images : [null];
   const totalStock = product.hasSizes
     ? (selectedSize ? (product.sizes.find(s => s.size === selectedSize)?.stock || 0) : product.sizes.reduce((s, sz) => s + sz.stock, 0))
@@ -142,14 +147,14 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
           {/* Price */}
           <div className="flex items-end gap-3 mb-6">
             <div className="text-4xl font-bold text-gray-900">
-              {price.toFixed(2)}
+              {displayPrice.toFixed(2)}
               <span className="text-lg font-normal text-gray-500 mr-1">ر.س</span>
             </div>
             {hasDiscount && (
               <div>
                 <span className="text-gray-400 line-through text-lg">{product.price.toFixed(2)} ر.س</span>
                 <span className="block text-xs text-green-600 font-medium">
-                  وفّرت {(product.price - price).toFixed(2)} ر.س
+                  وفّرت {(product.price - displayPrice).toFixed(2)} ر.س
                 </span>
               </div>
             )}
@@ -163,6 +168,30 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
             {product.sku && <span className="bg-gray-100 text-gray-600 text-xs px-3 py-1.5 rounded-full ltr">SKU: {product.sku}</span>}
           </div>
 
+          {/* Colors */}
+          {product.colors?.length > 0 && (
+            <div className="mb-6">
+              <div className="flex items-center gap-2 mb-3">
+                <h3 className="font-semibold text-gray-900">اختر اللون</h3>
+                {selectedColor && (
+                  <span className="text-sm text-gray-500 ltr">{selectedColor}</span>
+                )}
+              </div>
+              <div className="flex flex-wrap gap-3">
+                {product.colors.map(hex => (
+                  <button key={hex} onClick={() => setSelectedColor(selectedColor === hex ? null : hex)}
+                    title={hex}
+                    className={`w-10 h-10 rounded-full border-4 transition-all hover:scale-110 ${
+                      selectedColor === hex ? 'border-amber-500 scale-110 shadow-lg' : 'border-white shadow-md'
+                    }`}
+                    style={{ backgroundColor: hex }}>
+                    {hex === '#FFFFFF' && <span className="block w-full h-full rounded-full border border-gray-300" />}
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
+
           {/* Sizes */}
           {product.hasSizes && product.sizes.length > 0 && (
             <div className="mb-6">
@@ -173,12 +202,15 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
               <div className="flex flex-wrap gap-2">
                 {product.sizes.map(s => (
                   <button key={s.size} disabled={s.stock === 0} onClick={() => { setSelectedSize(s.size); setSizeError(false); }}
-                    className={`px-4 py-2.5 rounded-xl text-sm font-medium border-2 transition-all ${
+                    className={`relative px-4 py-2.5 rounded-xl text-sm font-medium border-2 transition-all ${
                       selectedSize === s.size ? 'border-amber-500 bg-amber-50 text-amber-700' :
                       s.stock === 0 ? 'border-gray-100 bg-gray-50 text-gray-300 cursor-not-allowed line-through' :
                       'border-gray-200 hover:border-amber-300 text-gray-700'
                     }`}>
-                    {s.size}
+                    <span>{s.size}</span>
+                    {s.price && s.price > 0 && (
+                      <span className="block text-xs opacity-70">{s.price} ر.س</span>
+                    )}
                     {s.stock === 0 && <span className="text-xs mr-1 text-gray-300">نفد</span>}
                   </button>
                 ))}
