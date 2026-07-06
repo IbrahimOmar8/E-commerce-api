@@ -8,7 +8,6 @@ import { SAUDI_REGIONS } from '@/types';
 import { CheckCircle, Loader } from 'lucide-react';
 
 const DELIVERY_FEE = 25;
-const VAT_RATE = 0.15;
 const FREE_SHIPPING = 200;
 
 export default function CheckoutPage() {
@@ -41,9 +40,7 @@ export default function CheckoutPage() {
   const sub = subtotal();
   const delivery = sub >= FREE_SHIPPING ? 0 : DELIVERY_FEE;
   const discountAmount = (sub * discount) / 100;
-  const vatBase = sub - discountAmount + delivery;
-  const vat = vatBase * VAT_RATE;
-  const total = vatBase + vat;
+  const total = sub - discountAmount + delivery;
 
   const update = (k: string, v: string) => {
     setForm(p => ({ ...p, [k]: v }));
@@ -299,10 +296,6 @@ export default function CheckoutPage() {
               <div className="flex justify-between">
                 <span className="text-gray-600">الشحن</span>
                 <span>{delivery === 0 ? 'مجاني 🎉' : `${delivery} ر.س`}</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-gray-600">ضريبة 15%</span>
-                <span>{vat.toFixed(2)} ر.س</span>
               </div>
               <div className="border-t border-gray-100 pt-2 flex justify-between font-bold text-base">
                 <span>الإجمالي</span>

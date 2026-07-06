@@ -9,7 +9,6 @@ import { Trash2, Plus, Minus, ShoppingBag, ArrowLeft, ArrowRight, Tag, CheckCirc
 import { discountApi } from '@/lib/api';
 
 const DELIVERY_FEE = 25;
-const VAT_RATE = 0.15;
 const FREE_SHIPPING_THRESHOLD = 200;
 
 export default function CartPage() {
@@ -30,9 +29,7 @@ export default function CartPage() {
   const sub = subtotal();
   const delivery = sub >= FREE_SHIPPING_THRESHOLD ? 0 : DELIVERY_FEE;
   const discountAmount = (sub * discount) / 100;
-  const vatBase = sub - discountAmount + delivery;
-  const vat = vatBase * VAT_RATE;
-  const total = vatBase + vat;
+  const total = sub - discountAmount + delivery;
 
   const handleApplyCoupon = async () => {
     if (!coupon.trim()) return;
@@ -212,10 +209,6 @@ export default function CartPage() {
                     : `Add SAR ${(FREE_SHIPPING_THRESHOLD - sub).toFixed(0)} more for free shipping`}
                 </div>
               )}
-              <div className="flex justify-between">
-                <span className="text-slate-500">{t('vatLabel')}</span>
-                <span className="font-semibold">{vat.toFixed(2)} {t('sar')}</span>
-              </div>
               <div className="border-t border-slate-100 pt-4 flex justify-between">
                 <span className="font-bold text-slate-900 text-base">{t('total')}</span>
                 <span className="font-black text-amber-600 text-xl">{total.toFixed(2)} {t('sar')}</span>
