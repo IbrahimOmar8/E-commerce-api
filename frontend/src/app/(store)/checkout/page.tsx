@@ -118,13 +118,13 @@ export default function CheckoutPage() {
       </div>
       <h2 className="text-2xl font-bold text-gray-900 mb-2">تم إرسال طلبك بنجاح! 🎉</h2>
       <p className="text-gray-500 mb-2">رقم الطلب:</p>
-      <p className="text-2xl font-bold text-orange-500 mb-6 ltr">{order.orderNumber}</p>
+      <p className="text-2xl font-bold text-amber-500 mb-6 ltr">{order.orderNumber}</p>
       <p className="text-gray-600 mb-8 leading-relaxed">
         شكراً لتسوقك معنا! سيتم التواصل معك قريباً لتأكيد الطلب.
         يمكنك تتبع طلبك من خلال رقم الطلب.
       </p>
       <div className="flex gap-3 justify-center">
-        <Link href="/" className="bg-orange-500 text-white px-8 py-3 rounded-2xl font-bold hover:bg-orange-600 transition-colors">
+        <Link href="/" className="bg-amber-500 text-white px-8 py-3 rounded-2xl font-bold hover:bg-amber-600 transition-colors">
           الرئيسية
         </Link>
         <Link href="/products" className="border border-gray-200 text-gray-700 px-8 py-3 rounded-2xl font-medium hover:bg-gray-50 transition-colors">
@@ -160,21 +160,21 @@ export default function CheckoutPage() {
                 <label className="block text-sm font-medium text-gray-700 mb-1">الاسم الكامل *</label>
                 <input value={form.name} onChange={e => update('name', e.target.value)}
                   placeholder="محمد عبدالله الأحمدي"
-                  className={`w-full border rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500 ${errors.name ? 'border-red-400' : 'border-gray-200'}`} />
+                  className={`w-full border rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-amber-500 ${errors.name ? 'border-red-400' : 'border-gray-200'}`} />
                 {errors.name && <p className="text-red-500 text-xs mt-1">{errors.name}</p>}
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">رقم الجوال *</label>
                 <input value={form.phone} onChange={e => update('phone', e.target.value)}
                   placeholder="05xxxxxxxx" dir="ltr"
-                  className={`w-full border rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500 ${errors.phone ? 'border-red-400' : 'border-gray-200'}`} />
+                  className={`w-full border rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-amber-500 ${errors.phone ? 'border-red-400' : 'border-gray-200'}`} />
                 {errors.phone && <p className="text-red-500 text-xs mt-1">{errors.phone}</p>}
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">البريد الإلكتروني (اختياري)</label>
                 <input value={form.email} onChange={e => update('email', e.target.value)}
                   placeholder="example@email.com" dir="ltr" type="email"
-                  className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500" />
+                  className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-amber-500" />
               </div>
             </div>
           </div>
@@ -186,7 +186,7 @@ export default function CheckoutPage() {
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">المنطقة *</label>
                 <select value={form.region} onChange={e => update('region', e.target.value)}
-                  className={`w-full border rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500 bg-white ${errors.region ? 'border-red-400' : 'border-gray-200'}`}>
+                  className={`w-full border rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-amber-500 bg-white ${errors.region ? 'border-red-400' : 'border-gray-200'}`}>
                   <option value="">اختر المنطقة</option>
                   {SAUDI_REGIONS.map(r => <option key={r.value} value={r.value}>{r.label}</option>)}
                 </select>
@@ -196,20 +196,20 @@ export default function CheckoutPage() {
                 <label className="block text-sm font-medium text-gray-700 mb-1">المدينة *</label>
                 <input value={form.city} onChange={e => update('city', e.target.value)}
                   placeholder="الرياض / جدة / ..."
-                  className={`w-full border rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500 ${errors.city ? 'border-red-400' : 'border-gray-200'}`} />
+                  className={`w-full border rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-amber-500 ${errors.city ? 'border-red-400' : 'border-gray-200'}`} />
                 {errors.city && <p className="text-red-500 text-xs mt-1">{errors.city}</p>}
               </div>
               <div className="sm:col-span-2">
                 <label className="block text-sm font-medium text-gray-700 mb-1">الحي / الشارع</label>
                 <input value={form.street} onChange={e => update('street', e.target.value)}
                   placeholder="حي النزهة، شارع الملك فهد..."
-                  className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500" />
+                  className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-amber-500" />
               </div>
               <div className="sm:col-span-2">
                 <label className="block text-sm font-medium text-gray-700 mb-1">ملاحظات إضافية</label>
                 <textarea value={form.notes} onChange={e => update('notes', e.target.value)}
                   placeholder="أي تعليمات خاصة للتوصيل..." rows={2}
-                  className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500 resize-none" />
+                  className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-amber-500 resize-none" />
               </div>
             </div>
           </div>
@@ -220,10 +220,10 @@ export default function CheckoutPage() {
             <div className="grid sm:grid-cols-2 gap-3">
               {PAYMENT_METHODS.map(m => (
                 <label key={m.value} className={`flex items-center gap-3 p-4 border-2 rounded-xl cursor-pointer transition-all ${
-                  form.paymentMethod === m.value ? 'border-orange-500 bg-orange-50' : 'border-gray-200 hover:border-orange-200'
+                  form.paymentMethod === m.value ? 'border-amber-500 bg-amber-50' : 'border-gray-200 hover:border-amber-200'
                 }`}>
                   <input type="radio" name="payment" value={m.value} checked={form.paymentMethod === m.value}
-                    onChange={() => update('paymentMethod', m.value)} className="accent-orange-500" />
+                    onChange={() => update('paymentMethod', m.value)} className="accent-amber-500" />
                   <div>
                     <div className="flex items-center gap-2">
                       <span>{m.icon}</span>
@@ -259,7 +259,7 @@ export default function CheckoutPage() {
               <div className="space-y-2">
                 <div className="flex gap-2">
                   <input value={coupon} onChange={e => setCoupon(e.target.value.toUpperCase())}
-                    placeholder="أدخل الكود" className="flex-1 border border-gray-200 rounded-xl px-3 py-2 text-sm ltr uppercase placeholder:normal-case focus:outline-none focus:ring-2 focus:ring-orange-500" />
+                    placeholder="أدخل الكود" className="flex-1 border border-gray-200 rounded-xl px-3 py-2 text-sm ltr uppercase placeholder:normal-case focus:outline-none focus:ring-2 focus:ring-amber-500" />
                   <button onClick={handleApplyCoupon} className="bg-gray-900 text-white px-4 py-2 rounded-xl text-sm hover:bg-gray-700">تطبيق</button>
                 </div>
                 {discountError && <p className="text-red-500 text-xs">{discountError}</p>}
@@ -306,12 +306,12 @@ export default function CheckoutPage() {
               </div>
               <div className="border-t border-gray-100 pt-2 flex justify-between font-bold text-base">
                 <span>الإجمالي</span>
-                <span className="text-orange-600">{total.toFixed(2)} ر.س</span>
+                <span className="text-amber-600">{total.toFixed(2)} ر.س</span>
               </div>
             </div>
 
             <button onClick={handleSubmit} disabled={submitting}
-              className="mt-5 w-full flex items-center justify-center gap-2 bg-orange-500 hover:bg-orange-600 disabled:opacity-60 text-white font-bold py-4 rounded-2xl transition-colors">
+              className="mt-5 w-full flex items-center justify-center gap-2 bg-amber-500 hover:bg-amber-600 disabled:opacity-60 text-white font-bold py-4 rounded-2xl transition-colors">
               {submitting ? <><Loader size={18} className="animate-spin" /> جاري إرسال الطلب...</> : 'تأكيد الطلب'}
             </button>
           </div>

@@ -64,7 +64,7 @@ export default function ProductCard({ product }: Props) {
               </span>
             )}
             {product.bestSeller && (
-              <span className="badge bg-gradient-to-r from-orange-500 to-amber-500 text-white shadow-lg">
+              <span className="badge bg-gradient-to-r from-amber-500 to-amber-500 text-white shadow-lg">
                 {t('bestSeller')}
               </span>
             )}
@@ -86,7 +86,7 @@ export default function ProductCard({ product }: Props) {
             </button>
             <button
               onClick={e => e.preventDefault()}
-              className="w-8 h-8 bg-white/95 backdrop-blur rounded-full flex items-center justify-center shadow-md hover:bg-orange-50 hover:text-orange-500 text-slate-600 transition-all"
+              className="w-8 h-8 bg-white/95 backdrop-blur rounded-full flex items-center justify-center shadow-md hover:bg-amber-50 hover:text-amber-500 text-slate-600 transition-all"
               aria-label="Quick view"
             >
               <Eye size={14} />
@@ -115,7 +115,7 @@ export default function ProductCard({ product }: Props) {
         <div className="p-3.5 flex flex-col flex-1">
           {/* Brand */}
           {brandName && (
-            <p className="text-xs font-bold text-orange-500 uppercase tracking-wide mb-1">
+            <p className="text-xs font-bold text-amber-500 uppercase tracking-wide mb-1">
               {brandName}
             </p>
           )}
@@ -176,7 +176,7 @@ export default function ProductCard({ product }: Props) {
                 added
                   ? 'bg-green-500 text-white'
                   : product.hasSizes
-                  ? 'bg-slate-100 text-slate-700 hover:bg-orange-50 hover:text-orange-600'
+                  ? 'bg-slate-100 text-slate-700 hover:bg-amber-50 hover:text-amber-600'
                   : 'btn-primary'
               }`}
             >

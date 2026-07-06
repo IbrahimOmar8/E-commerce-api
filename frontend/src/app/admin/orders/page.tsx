@@ -75,7 +75,7 @@ export default function AdminOrdersPage() {
               value={search}
               onChange={e => { setSearch(e.target.value); setPage(1); }}
               placeholder="ابحث برقم الطلب، الاسم، الجوال..."
-              className="w-full border border-gray-200 rounded-xl pr-9 pl-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500"
+              className="w-full border border-gray-200 rounded-xl pr-9 pl-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-amber-500"
             />
           </div>
           <div className="flex gap-2 flex-wrap">
@@ -85,7 +85,7 @@ export default function AdminOrdersPage() {
             </button>
             {Object.entries(ORDER_STATUS_LABELS).map(([val, label]) => (
               <button key={val} onClick={() => { setStatus(val); setPage(1); }}
-                className={`px-4 py-2.5 rounded-xl text-sm font-medium border transition-colors ${status === val ? 'bg-orange-500 text-white border-orange-500' : 'border-gray-200 text-gray-600 hover:border-orange-200'}`}>
+                className={`px-4 py-2.5 rounded-xl text-sm font-medium border transition-colors ${status === val ? 'bg-amber-500 text-white border-amber-500' : 'border-gray-200 text-gray-600 hover:border-amber-200'}`}>
                 {label}
               </button>
             ))}
@@ -152,7 +152,7 @@ export default function AdminOrdersPage() {
                     </td>
                     <td className="px-4 py-3">
                       <Link href={`/admin/orders/${order._id}`}
-                        className="flex items-center gap-1.5 text-orange-500 hover:text-orange-600 text-sm font-medium">
+                        className="flex items-center gap-1.5 text-amber-500 hover:text-amber-600 text-sm font-medium">
                         <Eye size={14} /> تفاصيل
                       </Link>
                     </td>

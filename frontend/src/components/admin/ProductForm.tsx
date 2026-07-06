@@ -145,25 +145,25 @@ export default function ProductForm({ product, mode }: Props) {
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1.5">اسم المنتج (عربي)</label>
             <input value={form.nameAr} onChange={e => update('nameAr', e.target.value)}
-              placeholder="حذاء نايكي للجري" className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500" />
+              placeholder="حذاء نايكي للجري" className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-amber-500" />
           </div>
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1.5">اسم المنتج (إنجليزي)</label>
             <input value={form.name} onChange={e => update('name', e.target.value)}
               placeholder="Nike Running Shoes" dir="ltr"
-              className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500" />
+              className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-amber-500" />
           </div>
           <div className="sm:col-span-2">
             <label className="block text-sm font-medium text-gray-700 mb-1.5">الوصف (عربي)</label>
             <textarea value={form.descriptionAr} onChange={e => update('descriptionAr', e.target.value)}
               rows={3} placeholder="وصف المنتج بالعربية..."
-              className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500 resize-none" />
+              className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-amber-500 resize-none" />
           </div>
           <div className="sm:col-span-2">
             <label className="block text-sm font-medium text-gray-700 mb-1.5">الوصف (إنجليزي)</label>
             <textarea value={form.description} onChange={e => update('description', e.target.value)}
               rows={3} placeholder="Product description in English..." dir="ltr"
-              className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500 resize-none" />
+              className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-amber-500 resize-none" />
           </div>
         </div>
       </div>
@@ -176,13 +176,13 @@ export default function ProductForm({ product, mode }: Props) {
             <label className="block text-sm font-medium text-gray-700 mb-1.5">السعر الأصلي (ر.س) *</label>
             <input type="number" value={form.price} onChange={e => update('price', e.target.value)}
               min="0" step="0.01" placeholder="0.00" dir="ltr"
-              className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500" />
+              className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-amber-500" />
           </div>
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1.5">نسبة الخصم (%)</label>
             <input type="number" value={form.discount} onChange={e => update('discount', e.target.value)}
               min="0" max="100" dir="ltr"
-              className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500" />
+              className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-amber-500" />
           </div>
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1.5">السعر بعد الخصم</label>
@@ -197,14 +197,14 @@ export default function ProductForm({ product, mode }: Props) {
               <label className="block text-sm font-medium text-gray-700 mb-1.5">الكمية في المخزون</label>
               <input type="number" value={form.stock} onChange={e => update('stock', e.target.value)}
                 min="0" dir="ltr"
-                className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500" />
+                className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-amber-500" />
             </div>
           )}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1.5">رمز SKU (اختياري)</label>
             <input value={form.sku} onChange={e => update('sku', e.target.value)}
               placeholder="NIKE-RUN-001" dir="ltr"
-              className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500" />
+              className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-amber-500" />
           </div>
         </div>
       </div>
@@ -215,7 +215,7 @@ export default function ProductForm({ product, mode }: Props) {
           <h3 className="font-bold text-gray-900">المقاسات</h3>
           <label className="flex items-center gap-2 cursor-pointer">
             <input type="checkbox" checked={form.hasSizes} onChange={e => update('hasSizes', e.target.checked)}
-              className="w-4 h-4 accent-orange-500" />
+              className="w-4 h-4 accent-amber-500" />
             <span className="text-sm font-medium text-gray-700">المنتج له مقاسات</span>
           </label>
         </div>
@@ -224,7 +224,7 @@ export default function ProductForm({ product, mode }: Props) {
           <div className="space-y-4">
             <div className="flex gap-2">
               <select value={sizeType} onChange={e => setSizeType(e.target.value as 'clothing' | 'shoes' | 'custom')}
-                className="border border-gray-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500 bg-white">
+                className="border border-gray-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-amber-500 bg-white">
                 <option value="clothing">ملابس (XS-XXXL)</option>
                 <option value="shoes">أحذية (36-48)</option>
                 <option value="custom">مخصص</option>
@@ -236,7 +236,7 @@ export default function ProductForm({ product, mode }: Props) {
                 {CLOTHING_SIZES.map(s => (
                   <button key={s} onClick={() => sizes.find(sz => sz.size === s) ? removeSize(s) : addSize(s)}
                     className={`px-4 py-2 rounded-xl text-sm font-medium border-2 transition-all ${
-                      sizes.find(sz => sz.size === s) ? 'border-orange-500 bg-orange-50 text-orange-700' : 'border-gray-200 hover:border-orange-200'
+                      sizes.find(sz => sz.size === s) ? 'border-amber-500 bg-amber-50 text-amber-700' : 'border-gray-200 hover:border-amber-200'
                     }`}>
                     {s}
                   </button>
@@ -249,7 +249,7 @@ export default function ProductForm({ product, mode }: Props) {
                 {SHOE_SIZES.map(s => (
                   <button key={s} onClick={() => sizes.find(sz => sz.size === s) ? removeSize(s) : addSize(s)}
                     className={`px-3 py-2 rounded-xl text-sm font-medium border-2 transition-all ${
-                      sizes.find(sz => sz.size === s) ? 'border-orange-500 bg-orange-50 text-orange-700' : 'border-gray-200 hover:border-orange-200'
+                      sizes.find(sz => sz.size === s) ? 'border-amber-500 bg-amber-50 text-amber-700' : 'border-gray-200 hover:border-amber-200'
                     }`}>
                     {s}
                   </button>
@@ -260,9 +260,9 @@ export default function ProductForm({ product, mode }: Props) {
             {sizeType === 'custom' && (
               <div className="flex gap-2">
                 <input value={customSize} onChange={e => setCustomSize(e.target.value)}
-                  placeholder="أدخل المقاس..." className="border border-gray-200 rounded-xl px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500" />
+                  placeholder="أدخل المقاس..." className="border border-gray-200 rounded-xl px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-amber-500" />
                 <button onClick={() => { if (customSize.trim()) { addSize(customSize.trim()); setCustomSize(''); } }}
-                  className="bg-orange-500 text-white px-4 py-2 rounded-xl text-sm">
+                  className="bg-amber-500 text-white px-4 py-2 rounded-xl text-sm">
                   إضافة
                 </button>
               </div>
@@ -277,7 +277,7 @@ export default function ProductForm({ product, mode }: Props) {
                       <span className="font-bold text-sm w-12">{s.size}</span>
                       <input type="number" value={s.stock} min="0"
                         onChange={e => updateSizeStock(s.size, Number(e.target.value))}
-                        className="flex-1 border border-gray-200 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-1 focus:ring-orange-500" dir="ltr" />
+                        className="flex-1 border border-gray-200 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-1 focus:ring-amber-500" dir="ltr" />
                       <button onClick={() => removeSize(s.size)} className="text-red-400 hover:text-red-600">
                         <X size={14} />
                       </button>
@@ -297,7 +297,7 @@ export default function ProductForm({ product, mode }: Props) {
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1.5">الفئة / التصنيف *</label>
             <select value={form.subcategory} onChange={e => update('subcategory', e.target.value)}
-              className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500 bg-white">
+              className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-amber-500 bg-white">
               <option value="">اختر التصنيف</option>
               {parentCategories.map(cat => (
                 <optgroup key={cat._id} label={cat.nameAr || cat.name}>
@@ -315,7 +315,7 @@ export default function ProductForm({ product, mode }: Props) {
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1.5">الماركة</label>
             <select value={form.brand} onChange={e => update('brand', e.target.value)}
-              className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500 bg-white">
+              className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-amber-500 bg-white">
               <option value="">بدون ماركة</option>
               {brands.map(b => <option key={b._id} value={b._id}>{b.nameAr || b.name}</option>)}
             </select>
@@ -323,7 +323,7 @@ export default function ProductForm({ product, mode }: Props) {
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1.5">الرياضة</label>
             <select value={form.sport} onChange={e => update('sport', e.target.value)}
-              className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500 bg-white">
+              className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-amber-500 bg-white">
               <option value="">اختر الرياضة</option>
               {SPORTS.map(s => <option key={s} value={s}>{s}</option>)}
             </select>
@@ -331,7 +331,7 @@ export default function ProductForm({ product, mode }: Props) {
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1.5">الجنس</label>
             <select value={form.gender} onChange={e => update('gender', e.target.value)}
-              className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500 bg-white">
+              className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-amber-500 bg-white">
               <option value="unisex">للجميع</option>
               <option value="men">رجال</option>
               <option value="women">نساء</option>
@@ -342,7 +342,7 @@ export default function ProductForm({ product, mode }: Props) {
             <label className="block text-sm font-medium text-gray-700 mb-1.5">المادة</label>
             <input value={form.material} onChange={e => update('material', e.target.value)}
               placeholder="بوليستر، قطن، إلخ..."
-              className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500" />
+              className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-amber-500" />
           </div>
         </div>
 
@@ -361,7 +361,7 @@ export default function ProductForm({ product, mode }: Props) {
             }`}>
               <input type="checkbox" checked={Boolean(form[key as keyof typeof form])}
                 onChange={e => update(key, e.target.checked)}
-                className="accent-orange-500 w-4 h-4" />
+                className="accent-amber-500 w-4 h-4" />
               <span className="text-sm font-medium text-gray-700">{label}</span>
             </label>
           ))}
@@ -404,7 +404,7 @@ export default function ProductForm({ product, mode }: Props) {
 
         <div
           onClick={() => fileRef.current?.click()}
-          className="border-2 border-dashed border-gray-200 rounded-2xl p-8 text-center cursor-pointer hover:border-orange-300 hover:bg-orange-50 transition-all"
+          className="border-2 border-dashed border-gray-200 rounded-2xl p-8 text-center cursor-pointer hover:border-amber-300 hover:bg-amber-50 transition-all"
         >
           <Upload size={32} className="mx-auto mb-3 text-gray-300" />
           <p className="text-sm font-medium text-gray-600">اضغط لرفع الصور</p>
@@ -417,7 +417,7 @@ export default function ProductForm({ product, mode }: Props) {
       {/* Submit */}
       <div className="flex gap-3">
         <button onClick={handleSubmit} disabled={loading}
-          className="flex-1 bg-orange-500 hover:bg-orange-600 disabled:opacity-60 text-white font-bold py-4 rounded-2xl transition-colors flex items-center justify-center gap-2">
+          className="flex-1 bg-amber-500 hover:bg-amber-600 disabled:opacity-60 text-white font-bold py-4 rounded-2xl transition-colors flex items-center justify-center gap-2">
           {loading ? 'جاري الحفظ...' : mode === 'create' ? <><Plus size={18} /> إضافة المنتج</> : 'حفظ التعديلات'}
         </button>
         <button onClick={() => router.push('/admin/products')}

@@ -19,10 +19,10 @@ const t = {
     topBar: 'شحن مجاني للطلبات فوق 200 ريال | توصيل لجميع مناطق المملكة',
 
     // Home
-    heroBadge: 'الكولكشن الجديد 2025 🔥',
-    heroTitle1: 'ارتدِ العزيمة،',
-    heroTitle2: 'اعيش الرياضة',
-    heroDesc: 'أكبر تشكيلة من الملابس والمعدات الرياضية في المملكة. ماركات عالمية بأسعار تنافسية.',
+    heroBadge: 'كلاي سبورت 2025 🏆',
+    heroTitle1: 'كل ما تحتاجه',
+    heroTitle2: 'لتكون الأفضل!',
+    heroDesc: 'كلاي سبورت - وجهتك الأولى للأدوات والمعدات الرياضية. جودة مضمونة بأفضل الأسعار وشحن سريع.',
     shopNow: 'تسوق الآن',
     specialOffers: 'العروض الخاصة',
     statProducts: '+500 منتج رياضي',
@@ -42,7 +42,7 @@ const t = {
     globalBrands: 'الماركات العالمية',
     bestSellers: 'الأكثر مبيعاً',
     bestSellersDesc: 'الأعلى تقييماً من عملائنا',
-    newsletterTitle: 'انضم لمجتمع يلا سبورت',
+    newsletterTitle: 'انضم لمجتمع كلاي سبورت',
     newsletterDesc: 'اشترك للحصول على أحدث العروض والمنتجات الجديدة',
     emailPlaceholder: 'بريدك الإلكتروني',
     subscribe: 'اشترك',
@@ -52,6 +52,10 @@ const t = {
     swimming: 'السباحة',
     tennis: 'التنس',
     basketball: 'كرة السلة',
+    boxing: 'ملاكمة',
+    taekwondo: 'تايكوندو',
+    karate: 'الكاراتيه',
+    fitness: 'اللياقة البدنية',
 
     // Product card
     addToCart: 'أضف',
@@ -136,7 +140,7 @@ const t = {
     faq: 'الأسئلة الشائعة',
     followUs: 'تابعنا',
     paymentMethods: 'طرق الدفع',
-    allRights: '© 2025 يلا سبورت. جميع الحقوق محفوظة.',
+    allRights: '© 2025 كلاي سبورت. جميع الحقوق محفوظة.',
 
     // Account
     loginTitle: 'تسجيل الدخول',
@@ -171,10 +175,10 @@ const t = {
     topBar: 'Free shipping on orders over SAR 200 | Delivery across Saudi Arabia',
 
     // Home
-    heroBadge: 'New Collection 2025 🔥',
-    heroTitle1: 'Wear the Drive,',
-    heroTitle2: 'Live the Sport',
-    heroDesc: "Saudi Arabia's largest sports apparel & equipment collection. Global brands at competitive prices.",
+    heroBadge: 'Clay Sport 2025 🏆',
+    heroTitle1: 'Everything You Need',
+    heroTitle2: 'To Be the Best!',
+    heroDesc: "Clay Sport - your premier destination for sports equipment & gear. Guaranteed quality at the best prices with fast delivery.",
     shopNow: 'Shop Now',
     specialOffers: 'Special Offers',
     statProducts: '+500 Sports Products',
@@ -194,7 +198,7 @@ const t = {
     globalBrands: 'Global Brands',
     bestSellers: 'Best Sellers',
     bestSellersDesc: 'Top rated by our customers',
-    newsletterTitle: 'Join the Yalla Sport Community',
+    newsletterTitle: 'Join the Clay Sport Community',
     newsletterDesc: 'Subscribe for the latest deals and new products',
     emailPlaceholder: 'Your email address',
     subscribe: 'Subscribe',
@@ -204,6 +208,10 @@ const t = {
     swimming: 'Swimming',
     tennis: 'Tennis',
     basketball: 'Basketball',
+    boxing: 'Boxing',
+    taekwondo: 'Taekwondo',
+    karate: 'Karate',
+    fitness: 'Fitness',
 
     // Product card
     addToCart: 'Add',
@@ -288,7 +296,7 @@ const t = {
     faq: 'FAQ',
     followUs: 'Follow Us',
     paymentMethods: 'Payment Methods',
-    allRights: '© 2025 Yalla Sport. All rights reserved.',
+    allRights: '© 2025 Clay Sport. All rights reserved.',
 
     // Account
     loginTitle: 'Login',

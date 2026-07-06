@@ -56,8 +56,8 @@ export default function CartPage() {
 
   if (items.length === 0) return (
     <div className="max-w-3xl mx-auto px-4 py-24 text-center fade-in">
-      <div className="w-24 h-24 bg-orange-100 rounded-full flex items-center justify-center mx-auto mb-6">
-        <ShoppingBag size={40} className="text-orange-500" />
+      <div className="w-24 h-24 bg-amber-100 rounded-full flex items-center justify-center mx-auto mb-6">
+        <ShoppingBag size={40} className="text-amber-500" />
       </div>
       <h2 className="text-2xl font-black text-slate-900 mb-3">{t('emptyCart')}</h2>
       <p className="text-slate-500 mb-8">{t('emptyCartDesc')}</p>
@@ -101,7 +101,7 @@ export default function CartPage() {
 
                 <div className="flex-1 min-w-0">
                   <Link href={`/products/${item.product._id}`}
-                    className="font-semibold text-slate-900 hover:text-orange-600 text-sm leading-snug line-clamp-2">
+                    className="font-semibold text-slate-900 hover:text-amber-600 text-sm leading-snug line-clamp-2">
                     {name}
                   </Link>
                   {item.size && (
@@ -148,7 +148,7 @@ export default function CartPage() {
           {/* Coupon */}
           <div className="bg-white rounded-2xl p-5 border border-slate-100 shadow-sm">
             <h3 className="font-bold text-slate-900 mb-4 flex items-center gap-2">
-              <Tag size={16} className="text-orange-500" />
+              <Tag size={16} className="text-amber-500" />
               {t('couponCode')}
             </h3>
             {appliedCoupon ? (
@@ -206,7 +206,7 @@ export default function CartPage() {
                   : <span className="font-semibold">{delivery.toFixed(2)} {t('sar')}</span>}
               </div>
               {sub < FREE_SHIPPING_THRESHOLD && delivery > 0 && (
-                <div className="text-xs text-orange-700 bg-orange-50 border border-orange-100 px-3 py-2.5 rounded-xl">
+                <div className="text-xs text-amber-700 bg-amber-50 border border-amber-100 px-3 py-2.5 rounded-xl">
                   {lang === 'ar'
                     ? `أضف منتجات بـ ${(FREE_SHIPPING_THRESHOLD - sub).toFixed(0)} ر.س للشحن المجاني`
                     : `Add SAR ${(FREE_SHIPPING_THRESHOLD - sub).toFixed(0)} more for free shipping`}
@@ -218,7 +218,7 @@ export default function CartPage() {
               </div>
               <div className="border-t border-slate-100 pt-4 flex justify-between">
                 <span className="font-bold text-slate-900 text-base">{t('total')}</span>
-                <span className="font-black text-orange-600 text-xl">{total.toFixed(2)} {t('sar')}</span>
+                <span className="font-black text-amber-600 text-xl">{total.toFixed(2)} {t('sar')}</span>
               </div>
             </div>
 

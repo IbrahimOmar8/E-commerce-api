@@ -55,7 +55,7 @@ export default function AccountPage() {
     <div className="max-w-2xl mx-auto px-4 py-12">
       <div className="bg-white rounded-3xl border border-gray-100 p-8 mb-6">
         <div className="flex items-center gap-4 mb-6">
-          <div className="w-16 h-16 bg-orange-100 rounded-2xl flex items-center justify-center text-orange-600 font-bold text-2xl">
+          <div className="w-16 h-16 bg-amber-100 rounded-2xl flex items-center justify-center text-amber-600 font-bold text-2xl">
             {(user.fullName || user.username)?.[0]?.toUpperCase()}
           </div>
           <div>
@@ -65,8 +65,8 @@ export default function AccountPage() {
         </div>
         <div className="grid grid-cols-3 gap-4">
           <Link href="/account/orders"
-            className="flex flex-col items-center gap-2 p-4 bg-orange-50 rounded-2xl hover:bg-orange-100 transition-colors">
-            <ShoppingBag className="text-orange-500" size={24} />
+            className="flex flex-col items-center gap-2 p-4 bg-amber-50 rounded-2xl hover:bg-amber-100 transition-colors">
+            <ShoppingBag className="text-amber-500" size={24} />
             <span className="text-sm font-medium text-gray-700">طلباتي</span>
           </Link>
           <Link href="/wishlist"
@@ -87,7 +87,7 @@ export default function AccountPage() {
   return (
     <div className="max-w-md mx-auto px-4 py-12">
       <div className="text-center mb-8">
-        <div className="w-16 h-16 bg-orange-100 rounded-2xl flex items-center justify-center text-orange-500 mx-auto mb-4">
+        <div className="w-16 h-16 bg-amber-100 rounded-2xl flex items-center justify-center text-amber-500 mx-auto mb-4">
           <User size={32} />
         </div>
         <h1 className="text-2xl font-bold text-gray-900">حسابي</h1>
@@ -115,15 +115,15 @@ export default function AccountPage() {
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1.5">اسم المستخدم</label>
               <input value={form.username} onChange={e => setForm(p => ({ ...p, username: e.target.value }))}
-                placeholder="username" dir="ltr" className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500" />
+                placeholder="username" dir="ltr" className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-amber-500" />
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1.5">كلمة المرور</label>
               <input type="password" value={form.password} onChange={e => setForm(p => ({ ...p, password: e.target.value }))}
-                placeholder="••••••••" dir="ltr" className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500" />
+                placeholder="••••••••" dir="ltr" className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-amber-500" />
             </div>
             <button type="submit" disabled={loading}
-              className="w-full bg-orange-500 hover:bg-orange-600 disabled:opacity-60 text-white font-bold py-3.5 rounded-2xl transition-colors">
+              className="w-full bg-amber-500 hover:bg-amber-600 disabled:opacity-60 text-white font-bold py-3.5 rounded-2xl transition-colors">
               {loading ? 'جاري الدخول...' : 'تسجيل الدخول'}
             </button>
           </form>
@@ -132,20 +132,20 @@ export default function AccountPage() {
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1.5">الاسم الكامل</label>
               <input value={form.fullName} onChange={e => setForm(p => ({ ...p, fullName: e.target.value }))}
-                placeholder="محمد عبدالله" className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500" />
+                placeholder="محمد عبدالله" className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-amber-500" />
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1.5">اسم المستخدم</label>
               <input value={form.username} onChange={e => setForm(p => ({ ...p, username: e.target.value }))}
-                placeholder="username" dir="ltr" className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500" />
+                placeholder="username" dir="ltr" className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-amber-500" />
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1.5">كلمة المرور (6 أحرف على الأقل)</label>
               <input type="password" value={form.password} onChange={e => setForm(p => ({ ...p, password: e.target.value }))}
-                placeholder="••••••••" dir="ltr" className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500" />
+                placeholder="••••••••" dir="ltr" className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-amber-500" />
             </div>
             <button type="submit" disabled={loading}
-              className="w-full bg-orange-500 hover:bg-orange-600 disabled:opacity-60 text-white font-bold py-3.5 rounded-2xl transition-colors">
+              className="w-full bg-amber-500 hover:bg-amber-600 disabled:opacity-60 text-white font-bold py-3.5 rounded-2xl transition-colors">
               {loading ? 'جاري الإنشاء...' : 'إنشاء الحساب'}
             </button>
           </form>

@@ -51,7 +51,7 @@ export default function AdminUsersPage() {
           <Search size={16} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400" />
           <input type="text" value={search} onChange={e => { setSearch(e.target.value); setPage(1); }}
             placeholder="ابحث عن عميل..."
-            className="w-full border border-gray-200 rounded-xl pr-9 pl-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500" />
+            className="w-full border border-gray-200 rounded-xl pr-9 pl-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-amber-500" />
         </div>
       </div>
 
@@ -78,7 +78,7 @@ export default function AdminUsersPage() {
                   <tr key={user._id} className="hover:bg-gray-50">
                     <td className="px-5 py-3">
                       <div className="flex items-center gap-3">
-                        <div className="w-9 h-9 bg-orange-100 rounded-full flex items-center justify-center text-orange-600 font-bold text-sm">
+                        <div className="w-9 h-9 bg-amber-100 rounded-full flex items-center justify-center text-amber-600 font-bold text-sm">
                           {user.fullName?.[0] || user.username?.[0] || '?'}
                         </div>
                         <span className="font-medium text-sm text-gray-900">{user.fullName}</span>

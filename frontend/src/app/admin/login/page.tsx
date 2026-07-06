@@ -35,9 +35,9 @@ export default function AdminLoginPage() {
         {/* Logo */}
         <div className="text-center mb-8">
           <div className="inline-flex items-center gap-3 mb-3">
-            <div className="w-14 h-14 bg-orange-500 rounded-2xl flex items-center justify-center text-white font-bold text-2xl">يS</div>
+            <div className="w-14 h-14 bg-amber-500 rounded-2xl flex items-center justify-center text-white font-bold text-2xl">CS</div>
             <div className="text-right">
-              <div className="text-white font-bold text-2xl">يلا سبورت</div>
+              <div className="text-white font-bold text-2xl">كلاي سبورت</div>
               <div className="text-gray-400 text-sm">لوحة التحكم</div>
             </div>
           </div>
@@ -60,7 +60,7 @@ export default function AdminLoginPage() {
                 value={form.username}
                 onChange={e => setForm(p => ({ ...p, username: e.target.value }))}
                 placeholder="admin"
-                className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500 ltr"
+                className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-amber-500 ltr"
                 dir="ltr"
               />
             </div>
@@ -72,7 +72,7 @@ export default function AdminLoginPage() {
                   value={form.password}
                   onChange={e => setForm(p => ({ ...p, password: e.target.value }))}
                   placeholder="••••••••"
-                  className="w-full border border-gray-200 rounded-xl px-4 py-3 pl-11 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500"
+                  className="w-full border border-gray-200 rounded-xl px-4 py-3 pl-11 text-sm focus:outline-none focus:ring-2 focus:ring-amber-500"
                   dir="ltr"
                 />
                 <button type="button" onClick={() => setShowPass(!showPass)}
@@ -84,7 +84,7 @@ export default function AdminLoginPage() {
           </div>
 
           <button type="submit" disabled={loading}
-            className="mt-6 w-full flex items-center justify-center gap-2 bg-orange-500 hover:bg-orange-600 disabled:opacity-60 text-white font-bold py-4 rounded-2xl transition-colors">
+            className="mt-6 w-full flex items-center justify-center gap-2 bg-amber-500 hover:bg-amber-600 disabled:opacity-60 text-white font-bold py-4 rounded-2xl transition-colors">
             {loading ? 'جاري الدخول...' : <><LogIn size={18} /> دخول</>}
           </button>
         </form>

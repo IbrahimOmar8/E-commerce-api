@@ -2,9 +2,9 @@
 
 /* ─── Design Tokens ─── */
 :root {
-  --orange: #f97316;
-  --orange-dark: #ea580c;
-  --orange-glow: rgba(249,115,22,0.25);
+  --orange: #f59e0b;
+  --orange-dark: #d97706;
+  --orange-glow: rgba(245,158,11,0.25);
   --navy: #0f172a;
   --navy-soft: #1e293b;
   --bg: #f8fafc;
@@ -16,7 +16,7 @@
   --radius-btn: 12px;
   --shadow-card: 0 1px 3px rgba(0,0,0,.06), 0 4px 16px rgba(0,0,0,.06);
   --shadow-hover: 0 8px 32px rgba(0,0,0,.12);
-  --shadow-orange: 0 4px 20px rgba(249,115,22,0.35);
+  --shadow-orange: 0 4px 20px rgba(245,158,11,0.35);
 }
 
 /* ─── Base ─── */
@@ -82,13 +82,13 @@ body {
 
 /* ─── Gradient text ─── */
 .text-gradient {
-  background: linear-gradient(135deg, #f97316, #ef4444);
+  background: linear-gradient(135deg, #fbbf24, #d97706);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
 }
 .text-gradient-gold {
-  background: linear-gradient(135deg, #f59e0b, #f97316);
+  background: linear-gradient(135deg, #fde68a, #f59e0b);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
@@ -102,7 +102,7 @@ body {
   box-shadow: var(--shadow-orange);
 }
 .glow-btn:hover {
-  box-shadow: 0 8px 30px rgba(249,115,22,0.5);
+  box-shadow: 0 8px 30px rgba(245,158,11,0.5);
 }
 
 /* ─── Product card ─── */
@@ -117,7 +117,7 @@ body {
 .product-card:hover {
   box-shadow: var(--shadow-hover);
   transform: translateY(-4px);
-  border-color: rgba(249,115,22,0.3);
+  border-color: rgba(245,158,11,0.3);
 }
 .product-card .card-image {
   position: relative;
@@ -144,7 +144,7 @@ body {
 
 /* ─── Btn ─── */
 .btn-primary {
-  background: linear-gradient(135deg, #f97316, #ea580c);
+  background: linear-gradient(135deg, #f59e0b, #d97706);
   color: white;
   font-weight: 700;
   border-radius: var(--radius-btn);
@@ -153,7 +153,7 @@ body {
 }
 .btn-primary:hover {
   transform: translateY(-1px);
-  box-shadow: 0 8px 30px rgba(249,115,22,0.45);
+  box-shadow: 0 8px 30px rgba(245,158,11,0.45);
 }
 .btn-primary:active {
   transform: translateY(0);

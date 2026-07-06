@@ -33,7 +33,7 @@ export default function Header() {
   return (
     <header className={`sticky top-0 z-50 transition-all duration-300 ${scrolled ? 'shadow-xl' : ''}`}>
       {/* Top announcement bar */}
-      <div className="bg-gradient-to-r from-orange-600 to-orange-500 text-white text-center text-xs py-2 px-4 font-medium tracking-wide">
+      <div className="bg-gradient-to-r from-amber-700 to-amber-600 text-white text-center text-xs py-2 px-4 font-medium tracking-wide">
         {t('topBar')}
       </div>
 
@@ -44,15 +44,15 @@ export default function Header() {
 
             {/* Logo */}
             <Link href="/" className="flex items-center gap-2.5 flex-shrink-0 group">
-              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-orange-500 to-orange-600 flex items-center justify-center font-black text-white text-lg shadow-lg shadow-orange-500/30 group-hover:scale-105 transition-transform">
-                Y
+              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-amber-500 to-amber-600 flex items-center justify-center font-black text-white text-lg shadow-lg shadow-amber-500/30 group-hover:scale-105 transition-transform">
+                C
               </div>
               <div className="hidden sm:block">
                 <div className="font-black text-white text-lg leading-tight">
-                  {isRTL ? 'يلا سبورت' : 'Yalla Sport'}
+                  {isRTL ? 'كلاي سبورت' : 'Clay Sport'}
                 </div>
-                <div className="text-[10px] text-orange-400 font-semibold tracking-widest uppercase">
-                  {isRTL ? 'Yalla Sport' : 'يلا سبورت'}
+                <div className="text-[10px] text-amber-400 font-semibold tracking-widest uppercase">
+                  {isRTL ? 'Clay Sport' : 'كلاي سبورت'}
                 </div>
               </div>
             </Link>
@@ -65,12 +65,12 @@ export default function Header() {
                   value={search}
                   onChange={e => setSearch(e.target.value)}
                   placeholder={t('searchPlaceholder')}
-                  className="w-full bg-white/8 text-white placeholder-slate-400 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500 focus:bg-white/12 transition-all border border-white/10"
+                  className="w-full bg-white/8 text-white placeholder-slate-400 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-amber-500 focus:bg-white/12 transition-all border border-white/10"
                   style={{ background: 'rgba(255,255,255,0.07)' }}
                 />
                 <button
                   type="submit"
-                  className="absolute top-1/2 -translate-y-1/2 text-slate-400 hover:text-orange-400 transition-colors"
+                  className="absolute top-1/2 -translate-y-1/2 text-slate-400 hover:text-amber-400 transition-colors"
                   style={{ [isRTL ? 'left' : 'right']: '12px' }}
                 >
                   <Search size={17} />
@@ -84,7 +84,7 @@ export default function Header() {
               {/* Language toggle */}
               <button
                 onClick={() => setLang(lang === 'ar' ? 'en' : 'ar')}
-                className="hidden sm:flex items-center gap-1 px-3 py-1.5 rounded-lg border border-white/15 text-xs font-bold text-slate-300 hover:border-orange-500 hover:text-orange-400 transition-all"
+                className="hidden sm:flex items-center gap-1 px-3 py-1.5 rounded-lg border border-white/15 text-xs font-bold text-slate-300 hover:border-amber-500 hover:text-amber-400 transition-all"
               >
                 {lang === 'ar' ? 'EN' : 'عر'}
               </button>
@@ -92,7 +92,7 @@ export default function Header() {
               {/* Wishlist */}
               <Link
                 href="/wishlist"
-                className="hidden sm:flex p-2.5 text-slate-300 hover:text-orange-400 transition-colors rounded-xl hover:bg-white/5"
+                className="hidden sm:flex p-2.5 text-slate-300 hover:text-amber-400 transition-colors rounded-xl hover:bg-white/5"
                 title={t('wishlist')}
               >
                 <Heart size={21} />
@@ -101,11 +101,11 @@ export default function Header() {
               {/* Cart */}
               <Link
                 href="/cart"
-                className="relative p-2.5 text-slate-300 hover:text-orange-400 transition-colors rounded-xl hover:bg-white/5"
+                className="relative p-2.5 text-slate-300 hover:text-amber-400 transition-colors rounded-xl hover:bg-white/5"
               >
                 <ShoppingCart size={21} />
                 {count > 0 && (
-                  <span className="absolute -top-0.5 -right-0.5 bg-gradient-to-br from-orange-500 to-orange-600 text-white text-[10px] rounded-full w-5 h-5 flex items-center justify-center font-black shadow-lg shadow-orange-500/40">
+                  <span className="absolute -top-0.5 -right-0.5 bg-gradient-to-br from-amber-500 to-amber-600 text-white text-[10px] rounded-full w-5 h-5 flex items-center justify-center font-black shadow-lg shadow-amber-500/40">
                     {count > 9 ? '9+' : count}
                   </span>
                 )}
@@ -115,7 +115,7 @@ export default function Header() {
               {user ? (
                 <div className="relative group hidden sm:block">
                   <button className="flex items-center gap-2 px-3 py-2 rounded-xl text-slate-300 hover:text-white hover:bg-white/5 transition-all">
-                    <div className="w-7 h-7 rounded-full bg-gradient-to-br from-orange-500 to-orange-600 flex items-center justify-center text-white text-xs font-black">
+                    <div className="w-7 h-7 rounded-full bg-gradient-to-br from-amber-500 to-amber-600 flex items-center justify-center text-white text-xs font-black">
                       {(user.fullName || user.username || 'U')[0].toUpperCase()}
                     </div>
                     <span className="text-sm font-medium">{(user.fullName || user.username || '').split(' ')[0]}</span>
@@ -123,10 +123,10 @@ export default function Header() {
                   </button>
                   <div className="absolute top-full mt-2 bg-white rounded-2xl shadow-2xl py-2 w-52 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 border border-gray-100"
                     style={{ [isRTL ? 'left' : 'right']: 0 }}>
-                    <Link href="/account" className="flex items-center gap-2.5 px-4 py-2.5 hover:bg-orange-50 text-sm text-gray-700 hover:text-orange-600 transition-colors">
+                    <Link href="/account" className="flex items-center gap-2.5 px-4 py-2.5 hover:bg-amber-50 text-sm text-gray-700 hover:text-amber-600 transition-colors">
                       <User size={15} /> {t('account')}
                     </Link>
-                    <Link href="/account" className="flex items-center gap-2.5 px-4 py-2.5 hover:bg-orange-50 text-sm text-gray-700 hover:text-orange-600 transition-colors">
+                    <Link href="/account" className="flex items-center gap-2.5 px-4 py-2.5 hover:bg-amber-50 text-sm text-gray-700 hover:text-amber-600 transition-colors">
                       <ShoppingCart size={15} /> {t('myOrders')}
                     </Link>
                     <div className="border-t border-gray-100 mt-1 pt-1">
@@ -178,7 +178,7 @@ export default function Header() {
             ))}
             <Link
               href="/products?productType=specialOffer"
-              className="px-3.5 py-1.5 text-sm text-orange-400 hover:text-orange-300 hover:bg-orange-500/10 rounded-lg transition-all font-bold"
+              className="px-3.5 py-1.5 text-sm text-amber-400 hover:text-amber-300 hover:bg-amber-500/10 rounded-lg transition-all font-bold"
             >
               {t('offers')}
             </Link>
@@ -222,7 +222,7 @@ export default function Header() {
             <span className="text-slate-400 text-xs">{lang === 'ar' ? 'اللغة' : 'Language'}</span>
             <button
               onClick={() => setLang(lang === 'ar' ? 'en' : 'ar')}
-              className="flex items-center gap-2 px-4 py-2 border border-white/15 rounded-xl text-sm font-bold text-slate-300 hover:border-orange-500 hover:text-orange-400 transition-all"
+              className="flex items-center gap-2 px-4 py-2 border border-white/15 rounded-xl text-sm font-bold text-slate-300 hover:border-amber-500 hover:text-amber-400 transition-all"
             >
               {lang === 'ar' ? '🇺🇸 English' : '🇸🇦 عربي'}
             </button>

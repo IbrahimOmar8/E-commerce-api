@@ -52,7 +52,7 @@ export default function AdminProductsPage() {
           <p className="text-sm text-gray-500 mt-0.5">{total} منتج</p>
         </div>
         <Link href="/admin/products/new"
-          className="flex items-center gap-2 bg-orange-500 hover:bg-orange-600 text-white px-5 py-2.5 rounded-xl text-sm font-semibold transition-colors">
+          className="flex items-center gap-2 bg-amber-500 hover:bg-amber-600 text-white px-5 py-2.5 rounded-xl text-sm font-semibold transition-colors">
           <Plus size={16} /> إضافة منتج
         </Link>
       </div>
@@ -66,7 +66,7 @@ export default function AdminProductsPage() {
             value={search}
             onChange={e => { setSearch(e.target.value); setPage(1); }}
             placeholder="ابحث عن منتج..."
-            className="w-full border border-gray-200 rounded-xl pr-9 pl-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500"
+            className="w-full border border-gray-200 rounded-xl pr-9 pl-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-amber-500"
           />
         </div>
       </div>
@@ -79,7 +79,7 @@ export default function AdminProductsPage() {
           <div className="p-12 text-center">
             <Package size={48} className="mx-auto mb-3 text-gray-200" />
             <p className="text-gray-500">لا توجد منتجات</p>
-            <Link href="/admin/products/new" className="mt-4 inline-block bg-orange-500 text-white px-6 py-2 rounded-xl text-sm">
+            <Link href="/admin/products/new" className="mt-4 inline-block bg-amber-500 text-white px-6 py-2 rounded-xl text-sm">
               أضف أول منتج
             </Link>
           </div>
@@ -137,7 +137,7 @@ export default function AdminProductsPage() {
                       <td className="px-4 py-3">
                         <div className="flex flex-col gap-1">
                           {product.featured && <span className="text-xs bg-purple-100 text-purple-700 px-2 py-0.5 rounded-full">مميز</span>}
-                          {product.bestSeller && <span className="text-xs bg-orange-100 text-orange-700 px-2 py-0.5 rounded-full">الأكثر مبيعاً</span>}
+                          {product.bestSeller && <span className="text-xs bg-amber-100 text-amber-700 px-2 py-0.5 rounded-full">الأكثر مبيعاً</span>}
                           {product.specialOffer && <span className="text-xs bg-red-100 text-red-700 px-2 py-0.5 rounded-full">عرض</span>}
                           {!product.featured && !product.bestSeller && !product.specialOffer && (
                             <span className="text-xs text-gray-400">عادي</span>

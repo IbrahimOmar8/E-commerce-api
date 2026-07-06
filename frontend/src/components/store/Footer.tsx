@@ -8,20 +8,20 @@ export default function Footer() {
   return (
     <footer className="bg-[#0a0f1e] text-slate-400 mt-auto border-t border-white/5">
       {/* Newsletter strip */}
-      <div className="bg-gradient-to-r from-orange-600 to-orange-500">
+      <div className="bg-gradient-to-r from-amber-700 to-amber-600">
         <div className="max-w-7xl mx-auto px-4 py-8">
           <div className="flex flex-col md:flex-row items-center justify-between gap-6">
             <div>
               <h3 className="text-white font-bold text-xl">{t('newsletterTitle')}</h3>
-              <p className="text-orange-100 text-sm mt-1">{t('newsletterDesc')}</p>
+              <p className="text-amber-100 text-sm mt-1">{t('newsletterDesc')}</p>
             </div>
             <div className="flex gap-2 w-full md:w-auto">
               <input
                 type="email"
                 placeholder={t('emailPlaceholder')}
-                className="flex-1 md:w-72 bg-white/20 backdrop-blur text-white placeholder-orange-100 rounded-xl px-4 py-3 text-sm focus:outline-none focus:bg-white/30 border border-white/20"
+                className="flex-1 md:w-72 bg-white/20 backdrop-blur text-white placeholder-amber-100 rounded-xl px-4 py-3 text-sm focus:outline-none focus:bg-white/30 border border-white/20"
               />
-              <button className="bg-white text-orange-600 font-bold px-6 py-3 rounded-xl hover:bg-orange-50 transition-colors text-sm whitespace-nowrap">
+              <button className="bg-white text-amber-600 font-bold px-6 py-3 rounded-xl hover:bg-amber-50 transition-colors text-sm whitespace-nowrap">
                 {t('subscribe')}
               </button>
             </div>
@@ -35,12 +35,12 @@ export default function Footer() {
           {/* Brand */}
           <div>
             <Link href="/" className="flex items-center gap-2.5 mb-5 group">
-              <div className="w-11 h-11 rounded-xl bg-gradient-to-br from-orange-500 to-orange-600 flex items-center justify-center font-black text-white text-xl shadow-lg shadow-orange-500/30">
-                Y
+              <div className="w-11 h-11 rounded-xl bg-gradient-to-br from-amber-500 to-amber-600 flex items-center justify-center font-black text-white text-xl shadow-lg shadow-amber-500/30">
+                C
               </div>
               <div>
-                <div className="font-black text-white text-lg">{isRTL ? 'يلا سبورت' : 'Yalla Sport'}</div>
-                <div className="text-[10px] text-orange-400 tracking-widest uppercase">{isRTL ? 'Yalla Sport' : 'يلا سبورت'}</div>
+                <div className="font-black text-white text-lg">{isRTL ? 'كلاي سبورت' : 'Clay Sport'}</div>
+                <div className="text-[10px] text-amber-400 tracking-widest uppercase">{isRTL ? 'Clay Sport' : 'كلاي سبورت'}</div>
               </div>
             </Link>
             <p className="text-sm text-slate-500 leading-relaxed">{t('footerTagline')}</p>
@@ -57,7 +57,7 @@ export default function Footer() {
                   key={s.label}
                   href="#"
                   aria-label={s.label}
-                  className="w-9 h-9 bg-white/5 hover:bg-orange-500 border border-white/10 hover:border-orange-500 transition-all rounded-xl flex items-center justify-center text-sm"
+                  className="w-9 h-9 bg-white/5 hover:bg-amber-500 border border-white/10 hover:border-amber-500 transition-all rounded-xl flex items-center justify-center text-sm"
                 >
                   {s.icon}
                 </a>
@@ -78,8 +78,8 @@ export default function Footer() {
                 { href: '/products?gender=women', label: t('women') },
               ].map(item => (
                 <li key={item.href}>
-                  <Link href={item.href} className="text-slate-500 hover:text-orange-400 transition-colors flex items-center gap-2 group">
-                    <span className="w-1.5 h-1.5 rounded-full bg-slate-700 group-hover:bg-orange-500 transition-colors" />
+                  <Link href={item.href} className="text-slate-500 hover:text-amber-400 transition-colors flex items-center gap-2 group">
+                    <span className="w-1.5 h-1.5 rounded-full bg-slate-700 group-hover:bg-amber-500 transition-colors" />
                     {item.label}
                   </Link>
                 </li>
@@ -98,8 +98,8 @@ export default function Footer() {
                 { href: '#', label: t('faq') },
               ].map(item => (
                 <li key={item.label}>
-                  <Link href={item.href} className="text-slate-500 hover:text-orange-400 transition-colors flex items-center gap-2 group">
-                    <span className="w-1.5 h-1.5 rounded-full bg-slate-700 group-hover:bg-orange-500 transition-colors" />
+                  <Link href={item.href} className="text-slate-500 hover:text-amber-400 transition-colors flex items-center gap-2 group">
+                    <span className="w-1.5 h-1.5 rounded-full bg-slate-700 group-hover:bg-amber-500 transition-colors" />
                     {item.label}
                   </Link>
                 </li>
@@ -112,15 +112,15 @@ export default function Footer() {
             <h4 className="font-bold text-white mb-5 text-sm uppercase tracking-wider">{t('contactUs')}</h4>
             <ul className="space-y-3 text-sm">
               <li className="flex items-center gap-3">
-                <span className="text-orange-500">📱</span>
+                <span className="text-amber-500">📱</span>
                 <span className="ltr text-slate-400">+966 50 000 0000</span>
               </li>
               <li className="flex items-center gap-3">
-                <span className="text-orange-500">📧</span>
-                <span className="ltr text-slate-400">info@yallasport.sa</span>
+                <span className="text-amber-500">📧</span>
+                <span className="ltr text-slate-400">info@claysport.sa</span>
               </li>
               <li className="flex items-center gap-3">
-                <span className="text-orange-500">📍</span>
+                <span className="text-amber-500">📍</span>
                 <span className="text-slate-400">{isRTL ? 'الرياض، المملكة العربية السعودية' : 'Riyadh, Saudi Arabia'}</span>
               </li>
             </ul>

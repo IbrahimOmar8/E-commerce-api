@@ -81,7 +81,7 @@ export default function AdminCategoriesPage() {
       <div className="flex items-center justify-between">
         <h1 className="text-xl font-bold text-gray-900">الفئات</h1>
         <button onClick={() => { setShowForm(true); setEditId(null); setForm(DEFAULT_FORM); }}
-          className="flex items-center gap-2 bg-orange-500 hover:bg-orange-600 text-white px-5 py-2.5 rounded-xl text-sm font-semibold transition-colors">
+          className="flex items-center gap-2 bg-amber-500 hover:bg-amber-600 text-white px-5 py-2.5 rounded-xl text-sm font-semibold transition-colors">
           <Plus size={16} /> إضافة فئة
         </button>
       </div>
@@ -102,17 +102,17 @@ export default function AdminCategoriesPage() {
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1.5">الاسم (عربي) *</label>
               <input value={form.nameAr} onChange={e => setForm(p => ({ ...p, nameAr: e.target.value }))}
-                placeholder="ملابس رياضية" className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500" />
+                placeholder="ملابس رياضية" className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-amber-500" />
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1.5">الاسم (إنجليزي)</label>
               <input value={form.name} onChange={e => setForm(p => ({ ...p, name: e.target.value }))}
-                placeholder="Sportswear" dir="ltr" className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500" />
+                placeholder="Sportswear" dir="ltr" className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-amber-500" />
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1.5">الفئة الأم (للفئات الفرعية)</label>
               <select value={form.parent} onChange={e => setForm(p => ({ ...p, parent: e.target.value }))}
-                className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500 bg-white">
+                className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-amber-500 bg-white">
                 <option value="">فئة رئيسية</option>
                 {parents.map(p => <option key={p._id} value={p._id}>{p.nameAr || p.name}</option>)}
               </select>
@@ -120,12 +120,12 @@ export default function AdminCategoriesPage() {
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1.5">الوصف</label>
               <input value={form.description} onChange={e => setForm(p => ({ ...p, description: e.target.value }))}
-                placeholder="وصف الفئة..." className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500" />
+                placeholder="وصف الفئة..." className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-amber-500" />
             </div>
             <div>
               <label className="flex items-center gap-2 cursor-pointer mt-6">
                 <input type="checkbox" checked={form.isActive} onChange={e => setForm(p => ({ ...p, isActive: e.target.checked }))}
-                  className="accent-orange-500 w-4 h-4" />
+                  className="accent-amber-500 w-4 h-4" />
                 <span className="text-sm font-medium text-gray-700">فئة نشطة</span>
               </label>
             </div>
@@ -133,7 +133,7 @@ export default function AdminCategoriesPage() {
 
           <div className="flex gap-3 mt-5">
             <button onClick={handleSave} disabled={saving}
-              className="flex items-center gap-2 bg-orange-500 hover:bg-orange-600 disabled:opacity-60 text-white px-6 py-2.5 rounded-xl text-sm font-semibold transition-colors">
+              className="flex items-center gap-2 bg-amber-500 hover:bg-amber-600 disabled:opacity-60 text-white px-6 py-2.5 rounded-xl text-sm font-semibold transition-colors">
               <Check size={16} /> {saving ? 'جاري الحفظ...' : 'حفظ'}
             </button>
             <button onClick={() => { setShowForm(false); setForm(DEFAULT_FORM); setEditId(null); }}

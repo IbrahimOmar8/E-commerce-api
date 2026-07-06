@@ -91,7 +91,7 @@ export default function AdminBrandsPage() {
       <div className="flex items-center justify-between">
         <h1 className="text-xl font-bold text-gray-900">الماركات ({brands.length})</h1>
         <button onClick={() => { setShowForm(true); setEditId(null); setForm({ ...DEFAULT_FORM }); setLogoFile(null); }}
-          className="flex items-center gap-2 bg-orange-500 hover:bg-orange-600 text-white px-5 py-2.5 rounded-xl text-sm font-semibold transition-colors">
+          className="flex items-center gap-2 bg-amber-500 hover:bg-amber-600 text-white px-5 py-2.5 rounded-xl text-sm font-semibold transition-colors">
           <Plus size={16} /> إضافة ماركة
         </button>
       </div>
@@ -109,22 +109,22 @@ export default function AdminBrandsPage() {
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1.5">الاسم (عربي)</label>
               <input value={form.nameAr} onChange={e => setForm(p => ({ ...p, nameAr: e.target.value }))}
-                placeholder="نايكي" className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500" />
+                placeholder="نايكي" className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-amber-500" />
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1.5">الاسم (إنجليزي) *</label>
               <input value={form.name} onChange={e => setForm(p => ({ ...p, name: e.target.value }))}
-                placeholder="Nike" dir="ltr" className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500" />
+                placeholder="Nike" dir="ltr" className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-amber-500" />
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1.5">الوصف (عربي)</label>
               <input value={form.descriptionAr} onChange={e => setForm(p => ({ ...p, descriptionAr: e.target.value }))}
-                placeholder="الماركة الرياضية الأشهر عالمياً..." className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500" />
+                placeholder="الماركة الرياضية الأشهر عالمياً..." className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-amber-500" />
             </div>
             <div>
               <label className="flex items-center gap-2 cursor-pointer mt-6">
                 <input type="checkbox" checked={form.isActive} onChange={e => setForm(p => ({ ...p, isActive: e.target.checked }))}
-                  className="accent-orange-500 w-4 h-4" />
+                  className="accent-amber-500 w-4 h-4" />
                 <span className="text-sm font-medium text-gray-700">ماركة نشطة</span>
               </label>
             </div>
@@ -133,7 +133,7 @@ export default function AdminBrandsPage() {
             <div className="sm:col-span-2">
               <label className="block text-sm font-medium text-gray-700 mb-1.5">شعار الماركة</label>
               <div onClick={() => fileRef.current?.click()}
-                className="border-2 border-dashed border-gray-200 rounded-xl p-6 text-center cursor-pointer hover:border-orange-300 hover:bg-orange-50 transition-all flex items-center gap-4">
+                className="border-2 border-dashed border-gray-200 rounded-xl p-6 text-center cursor-pointer hover:border-amber-300 hover:bg-amber-50 transition-all flex items-center gap-4">
                 {logoFile ? (
                   <Image src={URL.createObjectURL(logoFile)} alt="" width={64} height={64} className="rounded-xl object-contain" />
                 ) : (
@@ -150,7 +150,7 @@ export default function AdminBrandsPage() {
 
           <div className="flex gap-3 mt-5">
             <button onClick={handleSave} disabled={saving}
-              className="flex items-center gap-2 bg-orange-500 hover:bg-orange-600 disabled:opacity-60 text-white px-6 py-2.5 rounded-xl text-sm font-semibold">
+              className="flex items-center gap-2 bg-amber-500 hover:bg-amber-600 disabled:opacity-60 text-white px-6 py-2.5 rounded-xl text-sm font-semibold">
               <Check size={16} /> {saving ? 'جاري الحفظ...' : 'حفظ'}
             </button>
             <button onClick={() => { setShowForm(false); setEditId(null); }}

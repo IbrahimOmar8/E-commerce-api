@@ -73,7 +73,7 @@ export default function AdminReviewsPage() {
         ].map(f => (
           <button key={f.key} onClick={() => { setFilter(f.key as typeof filter); setPage(1); }}
             className={`px-4 py-2 rounded-xl text-sm font-medium border transition-colors ${
-              filter === f.key ? 'bg-orange-500 text-white border-orange-500' : 'border-gray-200 text-gray-600 hover:border-orange-200'
+              filter === f.key ? 'bg-amber-500 text-white border-amber-500' : 'border-gray-200 text-gray-600 hover:border-amber-200'
             }`}>
             {f.label}
           </button>
@@ -93,7 +93,7 @@ export default function AdminReviewsPage() {
             {reviews.map(review => (
               <div key={review._id} className="p-5">
                 <div className="flex items-start gap-4">
-                  <div className="w-10 h-10 bg-orange-100 rounded-full flex items-center justify-center text-orange-600 font-bold text-sm flex-shrink-0">
+                  <div className="w-10 h-10 bg-amber-100 rounded-full flex items-center justify-center text-amber-600 font-bold text-sm flex-shrink-0">
                     {review.user?.fullName?.[0] || '?'}
                   </div>
                   <div className="flex-1 min-w-0">

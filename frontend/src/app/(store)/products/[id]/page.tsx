@@ -57,7 +57,7 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
     <div className="text-center py-20">
       <div className="text-5xl mb-4">😔</div>
       <h2 className="text-xl font-bold">المنتج غير موجود</h2>
-      <Link href="/products" className="mt-4 inline-block bg-orange-500 text-white px-6 py-3 rounded-xl">
+      <Link href="/products" className="mt-4 inline-block bg-amber-500 text-white px-6 py-3 rounded-xl">
         العودة للمنتجات
       </Link>
     </div>
@@ -79,9 +79,9 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
     <div className="max-w-7xl mx-auto px-4 py-8">
       {/* Breadcrumb */}
       <nav className="flex items-center gap-2 text-sm text-gray-500 mb-8">
-        <Link href="/" className="hover:text-orange-500">الرئيسية</Link>
+        <Link href="/" className="hover:text-amber-500">الرئيسية</Link>
         <ArrowRight size={14} className="rotate-180" />
-        <Link href="/products" className="hover:text-orange-500">المنتجات</Link>
+        <Link href="/products" className="hover:text-amber-500">المنتجات</Link>
         <ArrowRight size={14} className="rotate-180" />
         <span className="text-gray-900">{product.nameAr || product.name}</span>
       </nav>
@@ -105,7 +105,7 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
             <div className="flex gap-3 overflow-x-auto pb-1">
               {product.images.map((img, i) => (
                 <button key={i} onClick={() => setSelectedImage(i)}
-                  className={`w-20 h-20 rounded-xl overflow-hidden flex-shrink-0 border-2 transition-colors ${selectedImage === i ? 'border-orange-500' : 'border-transparent'}`}>
+                  className={`w-20 h-20 rounded-xl overflow-hidden flex-shrink-0 border-2 transition-colors ${selectedImage === i ? 'border-amber-500' : 'border-transparent'}`}>
                   <Image src={img} alt="" width={80} height={80} className="object-cover w-full h-full" />
                 </button>
               ))}
@@ -117,7 +117,7 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
         <div>
           {product.brand && typeof product.brand === 'object' && (
             <Link href={`/products?brand=${product.brand._id}`}
-              className="inline-block bg-orange-50 text-orange-600 text-sm font-semibold px-3 py-1 rounded-full mb-3 hover:bg-orange-100">
+              className="inline-block bg-amber-50 text-amber-600 text-sm font-semibold px-3 py-1 rounded-full mb-3 hover:bg-amber-100">
               {product.brand.nameAr || product.brand.name}
             </Link>
           )}
@@ -174,9 +174,9 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
                 {product.sizes.map(s => (
                   <button key={s.size} disabled={s.stock === 0} onClick={() => { setSelectedSize(s.size); setSizeError(false); }}
                     className={`px-4 py-2.5 rounded-xl text-sm font-medium border-2 transition-all ${
-                      selectedSize === s.size ? 'border-orange-500 bg-orange-50 text-orange-700' :
+                      selectedSize === s.size ? 'border-amber-500 bg-amber-50 text-amber-700' :
                       s.stock === 0 ? 'border-gray-100 bg-gray-50 text-gray-300 cursor-not-allowed line-through' :
-                      'border-gray-200 hover:border-orange-300 text-gray-700'
+                      'border-gray-200 hover:border-amber-300 text-gray-700'
                     }`}>
                     {s.size}
                     {s.stock === 0 && <span className="text-xs mr-1 text-gray-300">نفد</span>}
@@ -207,7 +207,7 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
               className={`flex-1 flex items-center justify-center gap-2 py-4 rounded-2xl text-base font-bold transition-all ${
                 added ? 'bg-green-500 text-white' :
                 totalStock === 0 ? 'bg-gray-200 text-gray-400 cursor-not-allowed' :
-                'bg-orange-500 hover:bg-orange-600 text-white shadow-lg shadow-orange-200'
+                'bg-amber-500 hover:bg-amber-600 text-white shadow-lg shadow-amber-200'
               }`}>
               <ShoppingCart size={20} />
               {added ? 'تمت الإضافة للسلة ✓' : totalStock === 0 ? 'نفد المخزون' : 'أضف إلى السلة'}
@@ -220,15 +220,15 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
           {/* Benefits */}
           <div className="grid grid-cols-3 gap-3 mt-6 pt-6 border-t border-gray-100">
             <div className="text-center">
-              <Truck className="mx-auto mb-1 text-orange-500" size={20} />
+              <Truck className="mx-auto mb-1 text-amber-500" size={20} />
               <p className="text-xs text-gray-600">شحن سريع</p>
             </div>
             <div className="text-center">
-              <RotateCcw className="mx-auto mb-1 text-orange-500" size={20} />
+              <RotateCcw className="mx-auto mb-1 text-amber-500" size={20} />
               <p className="text-xs text-gray-600">إرجاع 14 يوم</p>
             </div>
             <div className="text-center">
-              <Shield className="mx-auto mb-1 text-orange-500" size={20} />
+              <Shield className="mx-auto mb-1 text-amber-500" size={20} />
               <p className="text-xs text-gray-600">منتج أصلي</p>
             </div>
           </div>
@@ -268,7 +268,7 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
               <div key={review._id} className="border-b border-gray-50 pb-4 last:border-0">
                 <div className="flex items-center justify-between mb-2">
                   <div className="flex items-center gap-3">
-                    <div className="w-9 h-9 bg-orange-100 rounded-full flex items-center justify-center text-orange-600 font-bold text-sm">
+                    <div className="w-9 h-9 bg-amber-100 rounded-full flex items-center justify-center text-amber-600 font-bold text-sm">
                       {review.user.fullName[0]}
                     </div>
                     <div>

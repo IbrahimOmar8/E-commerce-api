@@ -125,7 +125,7 @@ function ProductsContent() {
           ].map(opt => (
             <label key={opt.value} className="flex items-center gap-2.5 cursor-pointer group">
               <div className={`w-4 h-4 rounded border-2 flex items-center justify-center transition-all flex-shrink-0 ${
-                filters.productType === opt.value ? 'bg-orange-500 border-orange-500' : 'border-slate-300 group-hover:border-orange-400'
+                filters.productType === opt.value ? 'bg-amber-500 border-amber-500' : 'border-slate-300 group-hover:border-amber-400'
               }`}>
                 {filters.productType === opt.value && <div className="w-2 h-2 rounded-full bg-white" />}
               </div>
@@ -145,7 +145,7 @@ function ProductsContent() {
           {GENDER_OPTIONS.map(opt => (
             <label key={opt.value} className="flex items-center gap-2.5 cursor-pointer group">
               <div className={`w-4 h-4 rounded border-2 flex items-center justify-center transition-all flex-shrink-0 ${
-                filters.gender === opt.value ? 'bg-orange-500 border-orange-500' : 'border-slate-300 group-hover:border-orange-400'
+                filters.gender === opt.value ? 'bg-amber-500 border-amber-500' : 'border-slate-300 group-hover:border-amber-400'
               }`}>
                 {filters.gender === opt.value && <div className="w-2 h-2 rounded-full bg-white" />}
               </div>
@@ -166,7 +166,7 @@ function ProductsContent() {
             {categories.map(cat => (
               <label key={cat._id} className="flex items-center gap-2.5 cursor-pointer group">
                 <div className={`w-4 h-4 rounded border-2 flex items-center justify-center transition-all flex-shrink-0 ${
-                  filters.category === cat._id ? 'bg-orange-500 border-orange-500' : 'border-slate-300 group-hover:border-orange-400'
+                  filters.category === cat._id ? 'bg-amber-500 border-amber-500' : 'border-slate-300 group-hover:border-amber-400'
                 }`}>
                   {filters.category === cat._id && <div className="w-2 h-2 rounded-full bg-white" />}
                 </div>
@@ -188,7 +188,7 @@ function ProductsContent() {
             {brands.map(b => (
               <label key={b._id} className="flex items-center gap-2.5 cursor-pointer group">
                 <div className={`w-4 h-4 rounded border-2 flex items-center justify-center transition-all flex-shrink-0 ${
-                  filters.brand === b._id ? 'bg-orange-500 border-orange-500' : 'border-slate-300 group-hover:border-orange-400'
+                  filters.brand === b._id ? 'bg-amber-500 border-amber-500' : 'border-slate-300 group-hover:border-amber-400'
                 }`}>
                   {filters.brand === b._id && <div className="w-2 h-2 rounded-full bg-white" />}
                 </div>
@@ -249,12 +249,12 @@ function ProductsContent() {
           <div className="flex items-center justify-between mb-5 gap-3">
             <button
               onClick={() => setFiltersOpen(!filtersOpen)}
-              className="lg:hidden flex items-center gap-2 border border-slate-200 bg-white rounded-xl px-4 py-2.5 text-sm font-medium hover:border-orange-300 transition-colors shadow-sm"
+              className="lg:hidden flex items-center gap-2 border border-slate-200 bg-white rounded-xl px-4 py-2.5 text-sm font-medium hover:border-amber-300 transition-colors shadow-sm"
             >
               <SlidersHorizontal size={15} />
               {t('filter')}
               {activeFiltersCount > 0 && (
-                <span className="bg-orange-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center font-bold">
+                <span className="bg-amber-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center font-bold">
                   {activeFiltersCount}
                 </span>
               )}
@@ -262,13 +262,13 @@ function ProductsContent() {
 
             <div className="flex flex-wrap gap-2 flex-1">
               {filters.gender && (
-                <span className="inline-flex items-center gap-1.5 bg-orange-100 text-orange-700 text-xs px-3 py-1.5 rounded-full font-medium">
+                <span className="inline-flex items-center gap-1.5 bg-amber-100 text-amber-700 text-xs px-3 py-1.5 rounded-full font-medium">
                   {GENDER_OPTIONS.find(g => g.value === filters.gender)?.label}
                   <button onClick={() => clearFilter('gender')}><X size={11} /></button>
                 </span>
               )}
               {filters.productType && (
-                <span className="inline-flex items-center gap-1.5 bg-orange-100 text-orange-700 text-xs px-3 py-1.5 rounded-full font-medium">
+                <span className="inline-flex items-center gap-1.5 bg-amber-100 text-amber-700 text-xs px-3 py-1.5 rounded-full font-medium">
                   {filters.productType}
                   <button onClick={() => clearFilter('productType')}><X size={11} /></button>
                 </span>
@@ -279,7 +279,7 @@ function ProductsContent() {
               <select
                 value={filters.sort}
                 onChange={e => updateFilter('sort', e.target.value)}
-                className="appearance-none border border-slate-200 bg-white rounded-xl px-4 py-2.5 text-sm pe-8 focus:outline-none focus:ring-2 focus:ring-orange-500 shadow-sm font-medium"
+                className="appearance-none border border-slate-200 bg-white rounded-xl px-4 py-2.5 text-sm pe-8 focus:outline-none focus:ring-2 focus:ring-amber-500 shadow-sm font-medium"
               >
                 {SORT_OPTIONS.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
               </select>
@@ -322,7 +322,7 @@ function ProductsContent() {
                 <button key={p} onClick={() => updateFilter('page', p)}
                   className={`w-10 h-10 rounded-xl text-sm font-bold transition-all ${
                     filters.page === p
-                      ? 'bg-gradient-to-br from-orange-500 to-orange-600 text-white shadow-lg shadow-orange-500/30'
+                      ? 'bg-gradient-to-br from-amber-500 to-amber-600 text-white shadow-lg shadow-amber-500/30'
                       : 'border border-slate-200 bg-white hover:bg-slate-50'
                   }`}>
                   {p}

@@ -63,9 +63,9 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         <div className="p-5 border-b border-gray-700">
           <div className="flex items-center justify-between">
             <Link href="/admin" className="flex items-center gap-2.5">
-              <div className="w-10 h-10 bg-orange-500 rounded-xl flex items-center justify-center font-bold">يS</div>
+              <div className="w-10 h-10 bg-amber-500 rounded-xl flex items-center justify-center font-bold text-white">CS</div>
               <div>
-                <div className="font-bold text-white">يلا سبورت</div>
+                <div className="font-bold text-white">كلاي سبورت</div>
                 <div className="text-xs text-gray-400">لوحة التحكم</div>
               </div>
             </Link>
@@ -84,7 +84,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
               return (
                 <Link key={item.href} href={item.href} onClick={() => setSidebarOpen(false)}
                   className={`flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-medium transition-all ${
-                    active ? 'bg-orange-500 text-white' : 'text-gray-300 hover:bg-gray-800 hover:text-white'
+                    active ? 'bg-amber-500 text-white' : 'text-gray-300 hover:bg-gray-800 hover:text-white'
                   }`}>
                   <Icon size={18} />
                   {item.label}
@@ -98,7 +98,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         {/* User */}
         <div className="p-4 border-t border-gray-700">
           <div className="flex items-center gap-3 mb-3">
-            <div className="w-9 h-9 bg-orange-500/20 rounded-full flex items-center justify-center text-orange-400 font-bold text-sm">
+            <div className="w-9 h-9 bg-amber-500/20 rounded-full flex items-center justify-center text-amber-400 font-bold text-sm">
               {user?.username?.[0]?.toUpperCase()}
             </div>
             <div className="flex-1 min-w-0">
@@ -123,7 +123,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           <h1 className="text-lg font-bold text-gray-900 flex-1">
             {NAV_ITEMS.find(n => isActive(n.href, n.exact))?.label || 'لوحة التحكم'}
           </h1>
-          <Link href="/" target="_blank" className="text-sm text-orange-500 hover:text-orange-600 font-medium">
+          <Link href="/" target="_blank" className="text-sm text-amber-500 hover:text-amber-600 font-medium">
             عرض المتجر ←
           </Link>
         </header>

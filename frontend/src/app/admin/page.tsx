@@ -99,7 +99,7 @@ export default function AdminDashboard() {
           value={overview.totalProducts.toLocaleString('ar')}
           sub={`${overview.activeProducts} منتج نشط`}
           icon={Package}
-          color="bg-orange-500"
+          color="bg-amber-500"
         />
         <StatCard
           label="العملاء"
@@ -131,7 +131,7 @@ export default function AdminDashboard() {
         <div className="bg-white rounded-2xl border border-gray-100 overflow-hidden">
           <div className="flex items-center justify-between px-5 py-4 border-b border-gray-100">
             <h3 className="font-bold text-gray-900">آخر الطلبات</h3>
-            <Link href="/admin/orders" className="text-orange-500 text-sm hover:text-orange-600">عرض الكل</Link>
+            <Link href="/admin/orders" className="text-amber-500 text-sm hover:text-amber-600">عرض الكل</Link>
           </div>
           <div className="divide-y divide-gray-50">
             {stats.recentOrders.length === 0 ? (
@@ -180,7 +180,7 @@ export default function AdminDashboard() {
                       s._id === 'delivered' ? 'bg-green-500' :
                       s._id === 'cancelled' ? 'bg-red-400' :
                       s._id === 'pending' ? 'bg-yellow-400' :
-                      'bg-orange-500'
+                      'bg-amber-500'
                     }`} style={{ width: `${pct}%` }} />
                   </div>
                 </div>
@@ -195,7 +195,7 @@ export default function AdminDashboard() {
               <div className="space-y-2">
                 {stats.topProducts.slice(0, 4).map((p, i) => (
                   <div key={p._id} className="flex items-center gap-3 text-sm">
-                    <span className="w-6 h-6 rounded-full bg-orange-100 text-orange-600 flex items-center justify-center text-xs font-bold">{i + 1}</span>
+                    <span className="w-6 h-6 rounded-full bg-amber-100 text-amber-600 flex items-center justify-center text-xs font-bold">{i + 1}</span>
                     <span className="flex-1 text-gray-700 line-clamp-1">{p.name}</span>
                     <span className="font-semibold text-gray-900">{p.totalSold} قطعة</span>
                   </div>
@@ -209,7 +209,7 @@ export default function AdminDashboard() {
       {/* Quick actions */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         {[
-          { label: 'إضافة منتج', href: '/admin/products/new', icon: '📦', color: 'bg-orange-50 border-orange-200 text-orange-700' },
+          { label: 'إضافة منتج', href: '/admin/products/new', icon: '📦', color: 'bg-amber-50 border-amber-200 text-amber-700' },
           { label: 'إضافة فئة', href: '/admin/categories', icon: '🏷️', color: 'bg-blue-50 border-blue-200 text-blue-700' },
           { label: 'إضافة ماركة', href: '/admin/brands', icon: '🏆', color: 'bg-purple-50 border-purple-200 text-purple-700' },
           { label: 'كود خصم جديد', href: '/admin/discount-codes', icon: '🎟️', color: 'bg-green-50 border-green-200 text-green-700' },

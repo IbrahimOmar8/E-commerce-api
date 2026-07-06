@@ -63,7 +63,7 @@ export default function AdminDiscountCodesPage() {
       <div className="flex items-center justify-between">
         <h1 className="text-xl font-bold text-gray-900">كودات الخصم</h1>
         <button onClick={() => setShowForm(!showForm)}
-          className="flex items-center gap-2 bg-orange-500 hover:bg-orange-600 text-white px-5 py-2.5 rounded-xl text-sm font-semibold transition-colors">
+          className="flex items-center gap-2 bg-amber-500 hover:bg-amber-600 text-white px-5 py-2.5 rounded-xl text-sm font-semibold transition-colors">
           <Plus size={16} /> كود جديد
         </button>
       </div>
@@ -79,23 +79,23 @@ export default function AdminDiscountCodesPage() {
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1.5">الكود *</label>
               <input value={form.code} onChange={e => setForm(p => ({ ...p, code: e.target.value.toUpperCase() }))}
-                placeholder="SPORT20" dir="ltr" className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500 uppercase" />
+                placeholder="SPORT20" dir="ltr" className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-amber-500 uppercase" />
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1.5">نسبة الخصم (%) *</label>
               <input type="number" value={form.discount} onChange={e => setForm(p => ({ ...p, discount: e.target.value }))}
                 min="1" max="100" placeholder="20" dir="ltr"
-                className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500" />
+                className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-amber-500" />
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1.5">تاريخ الانتهاء</label>
               <input type="date" value={form.expiresAt} onChange={e => setForm(p => ({ ...p, expiresAt: e.target.value }))}
-                className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500" dir="ltr" />
+                className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-amber-500" dir="ltr" />
             </div>
           </div>
           <div className="flex gap-3 mt-4">
             <button onClick={handleSave} disabled={saving}
-              className="flex items-center gap-2 bg-orange-500 hover:bg-orange-600 disabled:opacity-60 text-white px-6 py-2.5 rounded-xl text-sm font-semibold">
+              className="flex items-center gap-2 bg-amber-500 hover:bg-amber-600 disabled:opacity-60 text-white px-6 py-2.5 rounded-xl text-sm font-semibold">
               <Check size={16} /> {saving ? 'جاري الحفظ...' : 'إضافة'}
             </button>
             <button onClick={() => setShowForm(false)} className="px-6 py-2.5 border border-gray-200 rounded-xl text-sm">إلغاء</button>
@@ -125,7 +125,7 @@ export default function AdminDiscountCodesPage() {
                 return (
                   <tr key={code._id} className="hover:bg-gray-50">
                     <td className="px-5 py-3">
-                      <span className="font-mono font-bold text-orange-600 bg-orange-50 px-3 py-1 rounded-lg ltr text-sm">{code.code}</span>
+                      <span className="font-mono font-bold text-amber-600 bg-amber-50 px-3 py-1 rounded-lg ltr text-sm">{code.code}</span>
                     </td>
                     <td className="px-5 py-3">
                       <span className="font-bold text-green-600 text-lg">{code.discount}%</span>

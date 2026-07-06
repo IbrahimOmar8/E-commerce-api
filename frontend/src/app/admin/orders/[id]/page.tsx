@@ -49,7 +49,7 @@ export default function OrderDetailPage({ params }: { params: Promise<{ id: stri
   if (!order) return (
     <div className="text-center py-20">
       <p className="text-gray-500">الطلب غير موجود</p>
-      <Link href="/admin/orders" className="mt-4 inline-block bg-orange-500 text-white px-6 py-2 rounded-xl text-sm">
+      <Link href="/admin/orders" className="mt-4 inline-block bg-amber-500 text-white px-6 py-2 rounded-xl text-sm">
         العودة للطلبات
       </Link>
     </div>
@@ -80,16 +80,16 @@ export default function OrderDetailPage({ params }: { params: Promise<{ id: stri
         <div className="bg-white rounded-2xl border border-gray-100 p-6">
           <div className="flex items-center justify-between relative">
             <div className="absolute top-4 right-0 left-0 h-0.5 bg-gray-200 mx-10" />
-            <div className={`absolute top-4 right-0 h-0.5 bg-orange-500 mx-10 transition-all`}
+            <div className={`absolute top-4 right-0 h-0.5 bg-amber-500 mx-10 transition-all`}
               style={{ width: stepIndex >= 0 ? `${(stepIndex / (STATUS_STEPS.length - 1)) * 100}%` : '0%' }} />
             {STATUS_STEPS.map((s, i) => (
               <div key={s} className="relative flex flex-col items-center z-10">
                 <div className={`w-9 h-9 rounded-full flex items-center justify-center font-bold text-sm ${
-                  i <= stepIndex ? 'bg-orange-500 text-white' : 'bg-gray-100 text-gray-400'
+                  i <= stepIndex ? 'bg-amber-500 text-white' : 'bg-gray-100 text-gray-400'
                 }`}>
                   {i < stepIndex ? '✓' : i + 1}
                 </div>
-                <span className={`text-xs mt-2 font-medium ${i <= stepIndex ? 'text-orange-600' : 'text-gray-400'}`}>
+                <span className={`text-xs mt-2 font-medium ${i <= stepIndex ? 'text-amber-600' : 'text-gray-400'}`}>
                   {ORDER_STATUS_LABELS[s]}
                 </span>
               </div>
@@ -102,7 +102,7 @@ export default function OrderDetailPage({ params }: { params: Promise<{ id: stri
         {/* Customer info */}
         <div className="bg-white rounded-2xl border border-gray-100 p-5">
           <h3 className="font-bold text-gray-900 mb-4 flex items-center gap-2">
-            <Phone size={16} className="text-orange-500" /> بيانات العميل
+            <Phone size={16} className="text-amber-500" /> بيانات العميل
           </h3>
           <div className="space-y-2 text-sm">
             <div className="flex justify-between">
@@ -125,7 +125,7 @@ export default function OrderDetailPage({ params }: { params: Promise<{ id: stri
         {/* Address */}
         <div className="bg-white rounded-2xl border border-gray-100 p-5">
           <h3 className="font-bold text-gray-900 mb-4 flex items-center gap-2">
-            <MapPin size={16} className="text-orange-500" /> عنوان التوصيل
+            <MapPin size={16} className="text-amber-500" /> عنوان التوصيل
           </h3>
           <div className="space-y-2 text-sm">
             {regionLabel && <div className="flex justify-between"><span className="text-gray-500">المنطقة</span><span className="font-medium">{regionLabel}</span></div>}
@@ -139,7 +139,7 @@ export default function OrderDetailPage({ params }: { params: Promise<{ id: stri
       <div className="bg-white rounded-2xl border border-gray-100 overflow-hidden">
         <div className="px-5 py-4 border-b border-gray-100">
           <h3 className="font-bold text-gray-900 flex items-center gap-2">
-            <Package size={16} className="text-orange-500" /> المنتجات ({order.items.length})
+            <Package size={16} className="text-amber-500" /> المنتجات ({order.items.length})
           </h3>
         </div>
         <div className="divide-y divide-gray-50">
@@ -181,7 +181,7 @@ export default function OrderDetailPage({ params }: { params: Promise<{ id: stri
             </div>
             <div className="flex justify-between font-bold text-base border-t pt-2 mt-2">
               <span>الإجمالي</span>
-              <span className="text-orange-600">{order.totalAmount?.toFixed(2)} ر.س</span>
+              <span className="text-amber-600">{order.totalAmount?.toFixed(2)} ر.س</span>
             </div>
           </div>
           <div className="mt-3 text-xs text-gray-500 flex items-center gap-2">
@@ -200,13 +200,13 @@ export default function OrderDetailPage({ params }: { params: Promise<{ id: stri
         <h3 className="font-bold text-gray-900 mb-4">تحديث حالة الطلب</h3>
         <div className="flex gap-3">
           <select value={selectedStatus} onChange={e => setSelectedStatus(e.target.value)}
-            className="flex-1 border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500 bg-white">
+            className="flex-1 border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-amber-500 bg-white">
             {Object.entries(ORDER_STATUS_LABELS).map(([v, l]) => (
               <option key={v} value={v}>{l}</option>
             ))}
           </select>
           <button onClick={handleUpdateStatus} disabled={updating || selectedStatus === order.status}
-            className="bg-orange-500 hover:bg-orange-600 disabled:opacity-50 text-white px-6 py-3 rounded-xl text-sm font-semibold transition-colors">
+            className="bg-amber-500 hover:bg-amber-600 disabled:opacity-50 text-white px-6 py-3 rounded-xl text-sm font-semibold transition-colors">
             {updating ? 'جاري الحفظ...' : 'حفظ'}
           </button>
         </div>

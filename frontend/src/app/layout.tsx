@@ -2,9 +2,9 @@ import type { Metadata } from 'next';
 import './globals.css';
 
 export const metadata: Metadata = {
-  title: 'يلا سبورت | Yalla Sport',
-  description: 'متجر الملابس والمعدات الرياضية رقم 1 في المملكة العربية السعودية',
-  keywords: 'رياضة, ملابس رياضية, معدات رياضية, نايكي, اديداس, السعودية',
+  title: 'كلاي سبورت | Clay Sport',
+  description: 'وجهتك الأولى للأدوات والمعدات الرياضية في المملكة العربية السعودية',
+  keywords: 'رياضة, معدات رياضية, ملاكمة, تايكوندو, كاراتيه, السعودية, clay sport, كلاي سبورت',
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

@@ -63,7 +63,7 @@ export default function AdminAdminsPage() {
           <p className="text-sm text-gray-500 mt-0.5">{admins.length} مدير</p>
         </div>
         <button onClick={() => { setShowForm(true); setError(''); setForm({ ...DEFAULT_FORM }); }}
-          className="flex items-center gap-2 bg-orange-500 hover:bg-orange-600 text-white px-5 py-2.5 rounded-xl text-sm font-semibold transition-colors">
+          className="flex items-center gap-2 bg-amber-500 hover:bg-amber-600 text-white px-5 py-2.5 rounded-xl text-sm font-semibold transition-colors">
           <Plus size={16} /> إضافة مدير
         </button>
       </div>
@@ -80,24 +80,24 @@ export default function AdminAdminsPage() {
               <label className="block text-sm font-medium text-gray-700 mb-1.5">اسم المستخدم *</label>
               <input value={form.username} onChange={e => setForm(p => ({ ...p, username: e.target.value }))}
                 placeholder="admin2" dir="ltr"
-                className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500" />
+                className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-amber-500" />
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1.5">البريد الإلكتروني</label>
               <input value={form.email} onChange={e => setForm(p => ({ ...p, email: e.target.value }))}
                 placeholder="admin@example.com" dir="ltr" type="email"
-                className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500" />
+                className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-amber-500" />
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1.5">كلمة المرور *</label>
               <input value={form.password} onChange={e => setForm(p => ({ ...p, password: e.target.value }))}
                 placeholder="••••••••" dir="ltr" type="password"
-                className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500" />
+                className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-amber-500" />
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1.5">الصلاحية</label>
               <select value={form.role} onChange={e => setForm(p => ({ ...p, role: e.target.value }))}
-                className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500">
+                className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-amber-500">
                 <option value="admin">مدير</option>
                 <option value="super-admin">مدير أعلى</option>
               </select>
@@ -105,7 +105,7 @@ export default function AdminAdminsPage() {
           </div>
           <div className="flex gap-3 mt-5">
             <button onClick={handleCreate} disabled={saving}
-              className="flex items-center gap-2 bg-orange-500 hover:bg-orange-600 disabled:opacity-60 text-white px-6 py-2.5 rounded-xl text-sm font-semibold">
+              className="flex items-center gap-2 bg-amber-500 hover:bg-amber-600 disabled:opacity-60 text-white px-6 py-2.5 rounded-xl text-sm font-semibold">
               <Check size={16} /> {saving ? 'جاري الإنشاء...' : 'إنشاء'}
             </button>
             <button onClick={() => setShowForm(false)}
@@ -133,8 +133,8 @@ export default function AdminAdminsPage() {
                 <tr key={admin._id} className="hover:bg-gray-50">
                   <td className="px-5 py-3">
                     <div className="flex items-center gap-3">
-                      <div className="w-9 h-9 bg-orange-100 rounded-full flex items-center justify-center">
-                        <Shield size={16} className="text-orange-500" />
+                      <div className="w-9 h-9 bg-amber-100 rounded-full flex items-center justify-center">
+                        <Shield size={16} className="text-amber-500" />
                       </div>
                       <span className="font-medium text-sm text-gray-900 ltr">{admin.username}</span>
                     </div>

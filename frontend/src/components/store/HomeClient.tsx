@@ -33,12 +33,12 @@ export default function HomeClient({ featured, bestSellers, categories, brands, 
   }, []);
 
   const sports = [
-    { icon: '⚽', key: 'football' as const, value: 'football' },
-    { icon: '🏃', key: 'running' as const, value: 'running' },
-    { icon: '🏋️', key: 'gym' as const, value: 'gym' },
+    { icon: '🥊', key: 'boxing' as const, value: 'boxing' },
     { icon: '🏊', key: 'swimming' as const, value: 'swimming' },
-    { icon: '🎾', key: 'tennis' as const, value: 'tennis' },
-    { icon: '🏀', key: 'basketball' as const, value: 'basketball' },
+    { icon: '🥋', key: 'taekwondo' as const, value: 'taekwondo' },
+    { icon: '🏋️', key: 'fitness' as const, value: 'fitness' },
+    { icon: '🥋', key: 'karate' as const, value: 'karate' },
+    { icon: '⚽', key: 'football' as const, value: 'football' },
   ];
 
   const features = [
@@ -54,9 +54,9 @@ export default function HomeClient({ featured, bestSellers, categories, brands, 
       <section className="relative overflow-hidden bg-[#070d1a]" style={{ minHeight: '90vh' }}>
         {/* Animated blobs */}
         <div className="absolute inset-0 overflow-hidden pointer-events-none">
-          <div className="blob blob-1 absolute -top-32 -end-32 w-[500px] h-[500px] bg-orange-600/20" />
-          <div className="blob blob-2 absolute top-1/2 start-1/4 w-[300px] h-[300px] bg-orange-500/15" />
-          <div className="blob blob-3 absolute -bottom-20 end-1/3 w-[400px] h-[400px] bg-rose-600/10" />
+          <div className="blob blob-1 absolute -top-32 -end-32 w-[500px] h-[500px] bg-amber-600/20" />
+          <div className="blob blob-2 absolute top-1/2 start-1/4 w-[300px] h-[300px] bg-amber-500/15" />
+          <div className="blob blob-3 absolute -bottom-20 end-1/3 w-[400px] h-[400px] bg-amber-700/10" />
           {/* Grid overlay */}
           <div className="absolute inset-0" style={{
             backgroundImage: 'radial-gradient(circle at 1px 1px, rgba(255,255,255,0.04) 1px, transparent 0)',
@@ -68,8 +68,8 @@ export default function HomeClient({ featured, bestSellers, categories, brands, 
           {/* Text */}
           <div className="flex-1 text-center lg:text-start fade-in">
             {/* Badge */}
-            <div className="inline-flex items-center gap-2 bg-orange-500/15 border border-orange-500/30 text-orange-300 text-sm px-5 py-2 rounded-full mb-8 backdrop-blur-sm">
-              <span className="w-2 h-2 rounded-full bg-orange-400 animate-pulse" />
+            <div className="inline-flex items-center gap-2 bg-amber-500/15 border border-amber-500/30 text-amber-300 text-sm px-5 py-2 rounded-full mb-8 backdrop-blur-sm">
+              <span className="w-2 h-2 rounded-full bg-amber-400 animate-pulse" />
               {t('heroBadge')}
             </div>
 
@@ -119,15 +119,15 @@ export default function HomeClient({ featured, bestSellers, categories, brands, 
             <div className="relative w-[360px] h-[420px]">
               {/* Main product preview card */}
               <div className="absolute inset-0 glass rounded-3xl overflow-hidden border border-white/10 shadow-2xl">
-                <div className="w-full h-full bg-gradient-to-br from-orange-500/20 to-rose-500/20 flex items-center justify-center">
+                <div className="w-full h-full bg-gradient-to-br from-amber-500/20 to-amber-700/20 flex items-center justify-center">
                   <div className="text-[10rem] opacity-50">👟</div>
                 </div>
               </div>
               {/* Floating info cards */}
               <div className="absolute -top-6 -start-12 glass rounded-2xl px-4 py-3 shadow-xl border border-white/10">
-                <div className="text-xs text-orange-400 font-bold">🔥 {lang === 'ar' ? 'أكثر مبيعاً' : 'Best Seller'}</div>
+                <div className="text-xs text-amber-400 font-bold">🔥 {lang === 'ar' ? 'أكثر مبيعاً' : 'Best Seller'}</div>
                 <div className="text-white font-bold text-sm mt-0.5">{lang === 'ar' ? 'حذاء الجري Pro' : 'Pro Running Shoe'}</div>
-                <div className="text-orange-400 font-black text-lg">299 {t('sar')}</div>
+                <div className="text-amber-400 font-black text-lg">299 {t('sar')}</div>
               </div>
               <div className="absolute -bottom-6 -end-10 glass rounded-2xl px-4 py-3 shadow-xl border border-white/10">
                 <div className="flex items-center gap-2">
@@ -156,7 +156,7 @@ export default function HomeClient({ featured, bestSellers, categories, brands, 
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             {features.map((f, i) => (
               <div key={i} className="flex items-center gap-3 justify-center text-sm text-slate-600">
-                <span className="text-orange-500">{f.icon}</span>
+                <span className="text-amber-500">{f.icon}</span>
                 <span className="font-medium">{f.label}</span>
               </div>
             ))}
@@ -179,7 +179,7 @@ export default function HomeClient({ featured, bestSellers, categories, brands, 
                 <span className="text-4xl transition-transform duration-300 group-hover:scale-110 group-hover:-rotate-3">
                   {sport.icon}
                 </span>
-                <span className="text-xs font-bold text-slate-600 group-hover:text-orange-600 transition-colors text-center">
+                <span className="text-xs font-bold text-slate-600 group-hover:text-amber-600 transition-colors text-center">
                   {t(sport.key)}
                 </span>
               </Link>
@@ -202,7 +202,7 @@ export default function HomeClient({ featured, bestSellers, categories, brands, 
                   {cat.image ? (
                     <Image src={cat.image} alt={cat.name} fill className="object-cover group-hover:scale-110 transition-transform duration-500" />
                   ) : (
-                    <div className="w-full h-full bg-gradient-to-br from-orange-100 to-orange-200 flex items-center justify-center text-5xl opacity-60">
+                    <div className="w-full h-full bg-gradient-to-br from-amber-100 to-amber-200 flex items-center justify-center text-5xl opacity-60">
                       👕
                     </div>
                   )}
@@ -212,7 +212,7 @@ export default function HomeClient({ featured, bestSellers, categories, brands, 
                       {lang === 'ar' ? cat.nameAr || cat.name : cat.name || cat.nameAr}
                     </p>
                   </div>
-                  <div className="absolute inset-0 ring-2 ring-orange-500 ring-opacity-0 group-hover:ring-opacity-100 rounded-2xl transition-all duration-300" />
+                  <div className="absolute inset-0 ring-2 ring-amber-500 ring-opacity-0 group-hover:ring-opacity-100 rounded-2xl transition-all duration-300" />
                 </Link>
               ))}
             </div>
@@ -222,8 +222,8 @@ export default function HomeClient({ featured, bestSellers, categories, brands, 
         {/* ── Special offers ── */}
         {offers.length > 0 && (
           <section className="relative overflow-hidden rounded-3xl reveal">
-            <div className="absolute inset-0 bg-gradient-to-br from-orange-500 to-rose-600 opacity-[0.06]" />
-            <div className="absolute inset-0 border-2 border-orange-200 rounded-3xl pointer-events-none" />
+            <div className="absolute inset-0 bg-gradient-to-br from-amber-500 to-rose-600 opacity-[0.06]" />
+            <div className="absolute inset-0 border-2 border-amber-200 rounded-3xl pointer-events-none" />
             <div className="relative p-8">
               <div className="flex items-center justify-between mb-8">
                 <div>
@@ -275,7 +275,7 @@ export default function HomeClient({ featured, bestSellers, categories, brands, 
                       className="object-contain grayscale group-hover:grayscale-0 transition-all"
                     />
                   ) : (
-                    <span className="text-xs font-black text-slate-600 group-hover:text-orange-600 transition-colors text-center">
+                    <span className="text-xs font-black text-slate-600 group-hover:text-amber-600 transition-colors text-center">
                       {lang === 'ar' ? brand.nameAr || brand.name : brand.name || brand.nameAr}
                     </span>
                   )}
@@ -329,7 +329,7 @@ function SectionHeader({
       {href && hrefLabel && (
         <Link
           href={href}
-          className="flex items-center gap-1.5 text-sm font-semibold text-orange-500 hover:text-orange-600 transition-colors group flex-shrink-0"
+          className="flex items-center gap-1.5 text-sm font-semibold text-amber-500 hover:text-amber-600 transition-colors group flex-shrink-0"
         >
           {hrefLabel}
           <ArrowIcon size={15} className="group-hover:translate-x-0.5 transition-transform" />
