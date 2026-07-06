@@ -84,7 +84,10 @@ export default function ProductForm({ product, mode }: Props) {
 
     try {
       const formData = new FormData();
-      Object.entries(form).forEach(([k, v]) => formData.append(k, String(v)));
+      Object.entries(form).forEach(([k, v]) => {
+        const key = k === 'subcategory' ? 'subcategoryId' : k === 'brand' ? 'brandId' : k;
+        formData.append(key, String(v));
+      });
 
       if (form.hasSizes && sizes.length > 0) {
         formData.append('sizes', JSON.stringify(sizes));
