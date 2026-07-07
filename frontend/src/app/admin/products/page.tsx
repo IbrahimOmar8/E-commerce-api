@@ -4,7 +4,38 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { productsApi } from '@/lib/api';
 import type { Product } from '@/types';
-import { Plus, Search, Edit, Trash2, Star, Package } from 'lucide-react';
+import { Plus, Search, Edit, Trash2, Star, Package, Download } from 'lucide-react';
+
+function exportToCSV(products: Product[]) {
+  const headers = ['الاسم عربي', 'الاسم انجليزي', 'السعر', 'السعر بعد الخصم', 'الخصم%', 'المخزون', 'الرياضة', 'الجنس', 'الحالة', 'SKU'];
+  const rows = products.map(p => {
+    const stock = p.hasSizes ? p.sizes.reduce((s, sz) => s + sz.stock, 0) : p.stock;
+    return [
+      p.nameAr || '',
+      p.name || '',
+      p.price,
+      p.priceAfterDiscount || '',
+      p.discount || '',
+      stock,
+      p.sportAr || p.sport || '',
+      p.gender || '',
+      p.isActive ? 'نشط' : 'مخفي',
+      p.sku || '',
+    ];
+  });
+
+  const csv = [headers, ...rows]
+    .map(row => row.map(cell => `"${String(cell).replace(/"/g, '""')}"`).join(','))
+    .join('\n');
+
+  const blob = new Blob(['﻿' + csv], { type: 'text/csv;charset=utf-8;' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `products-${new Date().toISOString().slice(0, 10)}.csv`;
+  a.click();
+  URL.revokeObjectURL(url);
+}
 
 export default function AdminProductsPage() {
   const [products, setProducts] = useState<Product[]>([]);
@@ -14,6 +45,7 @@ export default function AdminProductsPage() {
   const [search, setSearch] = useState('');
   const [page, setPage] = useState(1);
   const [deleting, setDeleting] = useState<string | null>(null);
+  const [exporting, setExporting] = useState(false);
 
   const fetchProducts = useCallback(async () => {
     setLoading(true);
@@ -30,6 +62,18 @@ export default function AdminProductsPage() {
   }, [page, search]);
 
   useEffect(() => { fetchProducts(); }, [fetchProducts]);
+
+  const handleExport = async () => {
+    setExporting(true);
+    try {
+      const res = await productsApi.getAll({ limit: 1000, page: 1 });
+      exportToCSV(res.data || []);
+    } catch {
+      alert('خطأ في التصدير');
+    } finally {
+      setExporting(false);
+    }
+  };
 
   const handleDelete = async (id: string, name: string) => {
     if (!confirm(`هل أنت متأكد من حذف "${name}"؟`)) return;
@@ -51,10 +95,16 @@ export default function AdminProductsPage() {
           <h1 className="text-xl font-bold text-gray-900">المنتجات</h1>
           <p className="text-sm text-gray-500 mt-0.5">{total} منتج</p>
         </div>
-        <Link href="/admin/products/new"
-          className="flex items-center gap-2 bg-amber-500 hover:bg-amber-600 text-white px-5 py-2.5 rounded-xl text-sm font-semibold transition-colors">
-          <Plus size={16} /> إضافة منتج
-        </Link>
+        <div className="flex items-center gap-2">
+          <button onClick={handleExport} disabled={exporting}
+            className="flex items-center gap-2 border border-gray-200 bg-white hover:bg-gray-50 text-gray-700 px-4 py-2.5 rounded-xl text-sm font-semibold transition-colors disabled:opacity-50">
+            <Download size={15} /> {exporting ? 'جاري التصدير...' : 'تصدير CSV'}
+          </button>
+          <Link href="/admin/products/new"
+            className="flex items-center gap-2 bg-amber-500 hover:bg-amber-600 text-white px-5 py-2.5 rounded-xl text-sm font-semibold transition-colors">
+            <Plus size={16} /> إضافة منتج
+          </Link>
+        </div>
       </div>
 
       {/* Search */}

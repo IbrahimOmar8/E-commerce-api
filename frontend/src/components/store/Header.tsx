@@ -8,16 +8,17 @@ import { ShoppingCart, User, Search, Menu, X, Heart, LogOut, ChevronDown } from 
 import { useRouter } from 'next/navigation';
 
 export default function Header() {
-  const { itemCount } = useCartStore();
+  const items = useCartStore(state => state.items);
   const { user, logout } = useAuthStore();
   const { lang, setLang, t, isRTL } = useLanguage();
   const [mobileOpen, setMobileOpen] = useState(false);
-  const [count, setCount] = useState(0);
+  const [mounted, setMounted] = useState(false);
   const [search, setSearch] = useState('');
   const [scrolled, setScrolled] = useState(false);
   const router = useRouter();
 
-  useEffect(() => { setCount(itemCount()); }, [itemCount]);
+  useEffect(() => { setMounted(true); }, []);
+  const count = mounted ? items.reduce((sum, i) => sum + i.quantity, 0) : 0;
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 10);

@@ -80,7 +80,7 @@ function ProductsContent() {
   }, []);
 
   const updateFilter = (key: string, value: string | number) => {
-    setFilters(prev => ({ ...prev, [key]: value, page: 1 }));
+    setFilters(prev => ({ ...prev, [key]: value, ...(key !== 'page' ? { page: 1 } : {}) }));
   };
   const clearFilter = (key: string) => updateFilter(key, '');
 
