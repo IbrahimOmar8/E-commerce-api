@@ -92,7 +92,6 @@ export default function CheckoutPage() {
         discountCode: appliedCoupon || undefined,
         discountAmount,
         deliveryFee: delivery,
-        vat,
         totalAmount: total,
         paymentMethod: form.paymentMethod,
         notes: form.notes || undefined,
