@@ -160,12 +160,6 @@ export default function CheckoutPage() {
     </div>
   );
 
-  const PAYMENT_METHODS = [
-    { value: 'cod', label: 'الدفع عند الاستلام', icon: '💵', desc: 'ادفع نقداً عند استلام طلبك' },
-    { value: 'mada', label: 'مدى', icon: '💳', desc: 'بطاقة مدى السعودية' },
-    { value: 'stcpay', label: 'STC Pay', icon: '📱', desc: 'ادفع عبر تطبيق STC Pay' },
-    { value: 'applepay', label: 'Apple Pay', icon: '🍎', desc: 'ادفع بـ Apple Pay' },
-  ];
 
   return (
     <div className="max-w-6xl mx-auto px-4 py-8">
@@ -242,29 +236,15 @@ export default function CheckoutPage() {
 
           {/* Payment */}
           <div className="bg-white rounded-2xl p-6 border border-gray-100">
-            <h2 className="text-lg font-bold text-gray-900 mb-5">طريقة الدفع</h2>
-            <div className="grid sm:grid-cols-2 gap-3">
-              {PAYMENT_METHODS.map(m => (
-                <label key={m.value} className={`flex items-center gap-3 p-4 border-2 rounded-xl cursor-pointer transition-all ${
-                  form.paymentMethod === m.value ? 'border-amber-500 bg-amber-50' : 'border-gray-200 hover:border-amber-200'
-                }`}>
-                  <input type="radio" name="payment" value={m.value} checked={form.paymentMethod === m.value}
-                    onChange={() => update('paymentMethod', m.value)} className="accent-amber-500" />
-                  <div>
-                    <div className="flex items-center gap-2">
-                      <span>{m.icon}</span>
-                      <span className="font-semibold text-sm text-gray-800">{m.label}</span>
-                    </div>
-                    <p className="text-xs text-gray-500 mt-0.5">{m.desc}</p>
-                  </div>
-                </label>
-              ))}
-            </div>
-            {form.paymentMethod !== 'cod' && (
-              <div className="mt-4 bg-blue-50 border border-blue-200 rounded-xl p-4 text-sm text-blue-700">
-                سيتم توجيهك لبوابة الدفع الآمنة عند إتمام الطلب
+            <h2 className="text-lg font-bold text-gray-900 mb-4">طريقة الدفع</h2>
+            <div className="flex items-center gap-3 p-4 border-2 border-amber-500 bg-amber-50 rounded-xl">
+              <span className="text-2xl">💵</span>
+              <div>
+                <p className="font-bold text-gray-900">الدفع عند الاستلام</p>
+                <p className="text-xs text-gray-500 mt-0.5">ادفع نقداً عند استلام طلبك</p>
               </div>
-            )}
+              <span className="mr-auto text-amber-500 text-lg">✓</span>
+            </div>
           </div>
         </div>
 

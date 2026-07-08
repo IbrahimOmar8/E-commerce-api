@@ -144,7 +144,7 @@ export default function Footer() {
         <div className="border-t border-white/5 mt-12 pt-8 flex flex-col sm:flex-row justify-between items-center gap-4">
           <p className="text-xs text-slate-600">{t('allRights')}</p>
           <div className="flex items-center gap-2">
-            {['مدى', 'Visa', 'STC Pay', 'Apple Pay', 'COD'].map(m => (
+            {['الدفع عند الاستلام', 'COD'].map(m => (
               <span key={m} className="text-xs bg-white/5 border border-white/10 text-slate-500 px-2.5 py-1.5 rounded-lg font-medium">
                 {m}
               </span>

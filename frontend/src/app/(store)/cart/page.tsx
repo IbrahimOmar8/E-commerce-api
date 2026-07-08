@@ -235,9 +235,9 @@ export default function CartPage() {
 
             <div className="mt-4 pt-4 border-t border-slate-100">
               <div className="flex justify-center gap-2">
-                {['مدى', 'Visa', 'STC', 'COD'].map(m => (
-                  <span key={m} className="text-xs bg-slate-100 text-slate-500 px-2.5 py-1.5 rounded-lg font-medium">{m}</span>
-                ))}
+                <span className="text-xs bg-amber-50 text-amber-700 px-3 py-1.5 rounded-lg font-medium border border-amber-100">
+                  💵 الدفع عند الاستلام فقط
+                </span>
               </div>
             </div>
           </div>
