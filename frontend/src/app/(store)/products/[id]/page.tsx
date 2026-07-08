@@ -257,7 +257,7 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
             </div>
             <div className="text-center">
               <RotateCcw className="mx-auto mb-1 text-amber-500" size={20} />
-              <p className="text-xs text-gray-600">إرجاع 3 أيام</p>
+              <p className="text-xs text-gray-600">استبدال 2 يوم (عيب فقط)</p>
             </div>
             <div className="text-center">
               <Shield className="mx-auto mb-1 text-amber-500" size={20} />

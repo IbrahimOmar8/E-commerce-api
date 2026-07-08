@@ -112,8 +112,15 @@ export default function Footer() {
             <h4 className="font-bold text-white mb-5 text-sm uppercase tracking-wider">{t('contactUs')}</h4>
             <ul className="space-y-3 text-sm">
               <li className="flex items-center gap-3">
+                <a href="https://wa.me/966597427928" target="_blank" rel="noopener noreferrer"
+                  className="flex items-center gap-3 hover:text-green-400 transition-colors group">
+                  <span className="text-green-500">💬</span>
+                  <span className="ltr text-slate-400 group-hover:text-green-400">+966 59 742 7928</span>
+                </a>
+              </li>
+              <li className="flex items-center gap-3">
                 <span className="text-amber-500">📱</span>
-                <span className="ltr text-slate-400">+966 50 000 0000</span>
+                <a href="tel:+966597427928" className="ltr text-slate-400 hover:text-amber-400 transition-colors">+966 59 742 7928</a>
               </li>
               <li className="flex items-center gap-3">
                 <span className="text-amber-500">📧</span>
