@@ -9,7 +9,7 @@ export default function StoreInfoPage() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
   useEffect(() => {
-    const url = window.location.origin;
+    const url = window.location.origin + '/products';
     setStoreUrl(url);
   }, []);
 
