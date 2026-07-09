@@ -1,109 +1,27 @@
 'use client';
 import { useState, useEffect, useRef } from 'react';
+import QRCode from 'qrcode';
 import { Copy, Check, ExternalLink } from 'lucide-react';
-
-// Tiny QR code generator (Reed-Solomon + data encoding, pure JS)
-// Simplified version for URL encoding (alphanumeric + URL chars)
-function generateQRDataURL(text: string, size: number = 300): string {
-  // We use a canvas-based approach with a minimal QR library pattern
-  // For simplicity, we use a well-known URL-safe QR approach via data matrix
-  // This generates a visual QR approximation using canvas
-  const canvas = document.createElement('canvas');
-  canvas.width = size;
-  canvas.height = size;
-  const ctx = canvas.getContext('2d');
-  if (!ctx) return '';
-
-  // Draw a placeholder QR pattern (actual QR requires Reed-Solomon encoding)
-  // For a real implementation we use the URL to generate deterministic blocks
-  const modules = 29; // Version 3 QR = 29x29
-  const cellSize = Math.floor(size / (modules + 2));
-  const offset = Math.floor((size - cellSize * modules) / 2);
-
-  ctx.fillStyle = '#ffffff';
-  ctx.fillRect(0, 0, size, size);
-
-  // Use text hash to generate pseudo-random module pattern
-  const hash = (s: string) => {
-    let h = 0x811c9dc5;
-    for (let i = 0; i < s.length; i++) {
-      h ^= s.charCodeAt(i);
-      h = Math.imul(h, 0x01000193);
-    }
-    return h >>> 0;
-  };
-
-  ctx.fillStyle = '#000000';
-
-  // Finder patterns (top-left, top-right, bottom-left)
-  const drawFinder = (row: number, col: number) => {
-    const patterns = [
-      [1,1,1,1,1,1,1],
-      [1,0,0,0,0,0,1],
-      [1,0,1,1,1,0,1],
-      [1,0,1,1,1,0,1],
-      [1,0,1,1,1,0,1],
-      [1,0,0,0,0,0,1],
-      [1,1,1,1,1,1,1],
-    ];
-    patterns.forEach((rowP, r) => rowP.forEach((on, c) => {
-      if (on) {
-        ctx.fillRect(
-          offset + (col + c) * cellSize,
-          offset + (row + r) * cellSize,
-          cellSize - 1, cellSize - 1
-        );
-      }
-    }));
-  };
-
-  drawFinder(0, 0);
-  drawFinder(0, modules - 7);
-  drawFinder(modules - 7, 0);
-
-  // Data modules (pseudo-random based on text)
-  for (let r = 0; r < modules; r++) {
-    for (let c = 0; c < modules; c++) {
-      // Skip finder pattern areas
-      const inFinder =
-        (r < 9 && c < 9) ||
-        (r < 9 && c >= modules - 8) ||
-        (r >= modules - 8 && c < 9);
-      if (inFinder) continue;
-
-      const bit = (hash(text + r * 100 + c) >> (r + c) % 31) & 1;
-      if (bit) {
-        ctx.fillRect(
-          offset + c * cellSize,
-          offset + r * cellSize,
-          cellSize - 1, cellSize - 1
-        );
-      }
-    }
-  }
-
-  // Timing patterns
-  for (let i = 8; i < modules - 8; i++) {
-    if (i % 2 === 0) {
-      ctx.fillRect(offset + 6 * cellSize, offset + i * cellSize, cellSize - 1, cellSize - 1);
-      ctx.fillRect(offset + i * cellSize, offset + 6 * cellSize, cellSize - 1, cellSize - 1);
-    }
-  }
-
-  return canvas.toDataURL('image/png');
-}
 
 export default function StoreInfoPage() {
   const [copied, setCopied] = useState(false);
-  const [qrUrl, setQrUrl] = useState('');
   const [storeUrl, setStoreUrl] = useState('');
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
   useEffect(() => {
     const url = window.location.origin;
     setStoreUrl(url);
-    setQrUrl(generateQRDataURL(url, 280));
   }, []);
+
+  useEffect(() => {
+    if (!storeUrl || !canvasRef.current) return;
+    QRCode.toCanvas(canvasRef.current, storeUrl, {
+      width: 240,
+      margin: 2,
+      color: { dark: '#0f172a', light: '#ffffff' },
+      errorCorrectionLevel: 'H',
+    });
+  }, [storeUrl]);
 
   const copy = async () => {
     await navigator.clipboard.writeText(storeUrl);
@@ -111,33 +29,27 @@ export default function StoreInfoPage() {
     setTimeout(() => setCopied(false), 2000);
   };
 
-  const print = () => window.print();
-
   return (
-    <div className="max-w-lg mx-auto px-4 py-12 text-center">
-      {/* Header */}
+    <div className="max-w-sm mx-auto px-4 py-12 text-center">
+      {/* Logo */}
       <div className="mb-8">
         <div className="w-16 h-16 bg-gradient-to-br from-amber-500 to-amber-600 rounded-2xl flex items-center justify-center font-black text-white text-3xl mx-auto mb-4 shadow-lg shadow-amber-500/30">
           C
         </div>
         <h1 className="text-2xl font-black text-slate-900">كلاي سبورت</h1>
-        <p className="text-slate-500 text-sm">Clay Sport Store</p>
+        <p className="text-slate-500 text-sm">Clay Sport</p>
       </div>
 
       {/* QR Code */}
-      <div className="bg-white rounded-3xl border border-slate-100 shadow-lg p-8 mb-6 print:shadow-none">
+      <div className="bg-white rounded-3xl border border-slate-100 shadow-lg p-8 mb-6 inline-block">
         <p className="text-xs text-slate-400 uppercase tracking-widest mb-5 font-semibold">امسح للدخول للمتجر</p>
-        {qrUrl ? (
-          <img src={qrUrl} alt="QR Code" className="w-52 h-52 mx-auto rounded-2xl" />
-        ) : (
-          <div className="w-52 h-52 mx-auto skeleton rounded-2xl" />
-        )}
+        <canvas ref={canvasRef} className="mx-auto rounded-xl" />
         <p className="text-xs text-slate-400 mt-5 font-mono break-all">{storeUrl}</p>
       </div>
 
-      {/* Store link */}
+      {/* Copy link */}
       <div className="bg-slate-50 rounded-2xl border border-slate-100 p-4 mb-6 flex items-center gap-3">
-        <span className="flex-1 text-sm font-mono text-slate-700 text-left break-all">{storeUrl}</span>
+        <span className="flex-1 text-sm font-mono text-slate-700 text-left break-all truncate">{storeUrl}</span>
         <button onClick={copy}
           className={`flex items-center gap-1.5 px-4 py-2 rounded-xl text-sm font-semibold transition-all flex-shrink-0 ${
             copied ? 'bg-green-500 text-white' : 'bg-amber-500 text-white hover:bg-amber-600'
@@ -147,18 +59,18 @@ export default function StoreInfoPage() {
       </div>
 
       {/* Actions */}
-      <div className="flex gap-3 justify-center flex-wrap">
+      <div className="flex gap-3 justify-center">
         <a href={storeUrl} target="_blank" rel="noopener noreferrer"
           className="flex items-center gap-2 bg-amber-500 text-white px-6 py-3 rounded-2xl font-bold hover:bg-amber-600 transition-colors">
           <ExternalLink size={16} /> فتح المتجر
         </a>
-        <button onClick={print}
+        <button onClick={() => window.print()}
           className="flex items-center gap-2 border border-slate-200 text-slate-700 px-6 py-3 rounded-2xl font-medium hover:bg-slate-50 transition-colors">
-          🖨️ طباعة QR
+          🖨️ طباعة
         </button>
       </div>
 
-      {/* Contact info */}
+      {/* Contact */}
       <div className="mt-10 pt-8 border-t border-slate-100 space-y-2">
         <a href="https://wa.me/966597427928" target="_blank" rel="noopener noreferrer"
           className="flex items-center justify-center gap-2 text-green-600 hover:text-green-700 text-sm font-medium">
@@ -168,7 +80,7 @@ export default function StoreInfoPage() {
         <p className="text-slate-400 text-xs">info@claysport.sa</p>
       </div>
 
-      <style>{`@media print { button { display: none !important; } a[href] { display: none !important; } }`}</style>
+      <style>{`@media print { button, a:not([href="${storeUrl}"]) { display: none !important; } }`}</style>
     </div>
   );
 }
