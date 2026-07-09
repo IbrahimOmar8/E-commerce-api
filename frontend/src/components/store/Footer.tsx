@@ -51,6 +51,7 @@ export default function Footer() {
                 { icon: '📘', label: 'Facebook',  href: 'https://www.facebook.com/share/14hhRqcXbXV/' },
                 { icon: '📸', label: 'Instagram', href: 'https://www.instagram.com/cliaycliay?utm_source=qr&igsh=dHY4OWNhYWdmMnM1' },
                 { icon: '🎵', label: 'TikTok',    href: 'https://www.tiktok.com/@clay.sport2?_r=1&_t=ZS-97smyQUDik8' },
+                { icon: '🌐', label: 'Website',   href: '/' },
               ].map(s => (
                 <a
                   key={s.label}
