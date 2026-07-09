@@ -48,14 +48,15 @@ export default function Footer() {
             {/* Social */}
             <div className="mt-6 flex gap-2.5">
               {[
-                { icon: '𝕏', label: 'Twitter' },
-                { icon: '📸', label: 'Instagram' },
-                { icon: '▶', label: 'YouTube' },
-                { icon: '📘', label: 'Facebook' },
+                { icon: '📘', label: 'Facebook',  href: 'https://www.facebook.com/share/14hhRqcXbXV/' },
+                { icon: '📸', label: 'Instagram', href: 'https://www.instagram.com/cliaycliay?utm_source=qr&igsh=dHY4OWNhYWdmMnM1' },
+                { icon: '🎵', label: 'TikTok',    href: 'https://www.tiktok.com/@clay.sport2?_r=1&_t=ZS-97smyQUDik8' },
               ].map(s => (
                 <a
                   key={s.label}
-                  href="#"
+                  href={s.href}
+                  target="_blank"
+                  rel="noopener noreferrer"
                   aria-label={s.label}
                   className="w-9 h-9 bg-white/5 hover:bg-amber-500 border border-white/10 hover:border-amber-500 transition-all rounded-xl flex items-center justify-center text-sm"
                 >
