@@ -88,6 +88,8 @@ export const ordersApi = {
   updateStatus: (id: string, status: string) =>
     request(`/orders/${id}/status`, { method: 'PATCH', body: JSON.stringify({ status }) }),
   getMyOrders: () => request<{ success: boolean; data: import('@/types').Order[] }>('/orders/user'),
+  claimOrders: (orderNumbers: string[]) =>
+    request<{ success: boolean; claimed: number }>('/orders/claim', { method: 'POST', body: JSON.stringify({ orderNumbers }) }),
 };
 
 // ── Auth ──────────────────────────────────────────────────────────────────
@@ -100,7 +102,7 @@ export const authApi = {
     request<{ success: boolean; token: string; user: { id: string; username: string; fullName: string; role: string } }>(
       '/auth/user-login', { method: 'POST', body: JSON.stringify(body) }
     ),
-  signup: (body: { username: string; fullName: string; password: string }) =>
+  signup: (body: { username: string; fullName: string; password: string; phone?: string }) =>
     request('/auth/signup', { method: 'POST', body: JSON.stringify(body) }),
   verify: () => request<{ success: boolean; admin: { id: string; username: string; role: string } }>('/auth/verify'),
 };

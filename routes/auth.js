@@ -51,7 +51,7 @@ router.post('/create-admin', async (req, res) => {
 // User signup
 router.post('/signup', async (req, res) => {
   try {
-    const { username, fullName, password } = req.body;
+    const { username, fullName, password, phone } = req.body;
     if (!username || !fullName || !password)
       return res.status(400).json({ success: false, message: 'username, fullName, and password are required' });
 
@@ -59,7 +59,15 @@ router.post('/signup', async (req, res) => {
     if (existing) return res.status(400).json({ success: false, message: 'Username already exists' });
 
     const hashed = await bcrypt.hash(password, 10);
-    await prisma.user.create({ data: { username, fullName, password: hashed, email: username } });
+    await prisma.user.create({
+      data: {
+        username,
+        fullName,
+        password: hashed,
+        email: username,
+        phone: phone ? phone.replace(/\s/g, '') : null,
+      },
+    });
     res.status(201).json({ success: true, message: 'User registered successfully' });
   } catch (err) {
     console.error('Signup error:', err);

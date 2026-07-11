@@ -3,14 +3,14 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useAuthStore } from '@/store/auth';
-import { authApi } from '@/lib/api';
+import { authApi, ordersApi } from '@/lib/api';
 import { User, ShoppingBag, Heart, LogOut } from 'lucide-react';
 
 export default function AccountPage() {
   const { user, setAuth, logout } = useAuthStore();
   const router = useRouter();
   const [tab, setTab] = useState<'login' | 'signup'>('login');
-  const [form, setForm] = useState({ username: '', password: '', fullName: '' });
+  const [form, setForm] = useState({ username: '', password: '', fullName: '', phone: '' });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
@@ -26,6 +26,15 @@ export default function AccountPage() {
     try {
       const res = await authApi.userLogin({ username: form.username, password: form.password });
       setAuth({ id: res.user.id, username: res.user.username, fullName: res.user.fullName, role: 'user' }, res.token);
+
+      // Auto-claim any guest orders placed before login
+      try {
+        const pending: string[] = JSON.parse(localStorage.getItem('pending-orders') || '[]');
+        if (pending.length > 0) {
+          await ordersApi.claimOrders(pending);
+          localStorage.removeItem('pending-orders');
+        }
+      } catch (_) {}
     } catch (err) {
       setError(err instanceof Error ? err.message : 'بيانات غير صحيحة');
     } finally {
@@ -40,7 +49,12 @@ export default function AccountPage() {
     setLoading(true);
     setError('');
     try {
-      await authApi.signup({ username: form.username, fullName: form.fullName, password: form.password });
+      await authApi.signup({
+        username: form.username,
+        fullName: form.fullName,
+        password: form.password,
+        phone: form.phone || undefined,
+      });
       setSuccess('تم إنشاء حسابك! يمكنك الآن تسجيل الدخول.');
       setTab('login');
       setForm(p => ({ ...p, password: '' }));
@@ -138,6 +152,12 @@ export default function AccountPage() {
               <label className="block text-sm font-medium text-gray-700 mb-1.5">اسم المستخدم</label>
               <input value={form.username} onChange={e => setForm(p => ({ ...p, username: e.target.value }))}
                 placeholder="username" dir="ltr" className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-amber-500" />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1.5">رقم الجوال <span className="text-gray-400 font-normal">(اختياري — لربط طلباتك)</span></label>
+              <input value={form.phone} onChange={e => setForm(p => ({ ...p, phone: e.target.value }))}
+                placeholder="05xxxxxxxx" dir="ltr" type="tel"
+                className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-amber-500" />
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1.5">كلمة المرور (6 أحرف على الأقل)</label>

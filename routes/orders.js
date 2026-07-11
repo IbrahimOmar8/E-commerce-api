@@ -20,19 +20,75 @@ function optionalAuth(req, res, next) {
 
 const router = express.Router();
 
-// Get orders for logged-in user
+// Get orders for logged-in user (by userId OR matching phone)
 router.get('/user', verifyToken, async (req, res) => {
   try {
     if (!req.user || req.user.role !== 'user')
       return res.status(403).json({ success: false, message: 'Access denied' });
+
+    const userRecord = await prisma.user.findUnique({
+      where: { id: req.user.id },
+      select: { phone: true },
+    });
+
+    const normalizedPhone = userRecord?.phone?.replace(/\s/g, '') || null;
+
+    const where = normalizedPhone
+      ? {
+          OR: [
+            { userId: req.user.id },
+            {
+              userId: null,
+              customerInfo: { path: ['phone'], string_contains: normalizedPhone },
+            },
+          ],
+        }
+      : { userId: req.user.id };
+
     const orders = await prisma.order.findMany({
-      where: { userId: req.user.id },
+      where,
       orderBy: { createdAt: 'desc' },
     });
+
+    // Auto-link matched guest orders to this user for future queries
+    const guestOrderIds = orders
+      .filter(o => o.userId === null)
+      .map(o => o.id);
+    if (guestOrderIds.length > 0) {
+      prisma.order
+        .updateMany({ where: { id: { in: guestOrderIds } }, data: { userId: req.user.id } })
+        .catch(err => console.error('Auto-link error:', err));
+    }
+
     res.json({ success: true, data: orders });
   } catch (err) {
     console.error(err);
     res.status(500).json({ success: false, message: 'Error fetching user orders' });
+  }
+});
+
+// Claim guest orders by order numbers (called after login)
+router.post('/claim', verifyToken, async (req, res) => {
+  try {
+    if (!req.user || req.user.role !== 'user')
+      return res.status(403).json({ success: false, message: 'Access denied' });
+
+    const { orderNumbers } = req.body;
+    if (!Array.isArray(orderNumbers) || orderNumbers.length === 0)
+      return res.json({ success: true, claimed: 0 });
+
+    const result = await prisma.order.updateMany({
+      where: {
+        orderNumber: { in: orderNumbers.slice(0, 20) },
+        userId: null,
+      },
+      data: { userId: req.user.id },
+    });
+
+    res.json({ success: true, claimed: result.count });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ success: false, message: 'Error claiming orders' });
   }
 });
 

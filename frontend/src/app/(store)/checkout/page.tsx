@@ -100,6 +100,15 @@ export default function CheckoutPage() {
       clearCart();
       setOrder({ orderNumber: res.data.orderNumber });
       setStep('success');
+
+      // Save order number so it can be claimed when user logs in later
+      try {
+        const pending: string[] = JSON.parse(localStorage.getItem('pending-orders') || '[]');
+        if (!pending.includes(res.data.orderNumber)) {
+          pending.push(res.data.orderNumber);
+          localStorage.setItem('pending-orders', JSON.stringify(pending));
+        }
+      } catch (_) {}
     } catch (err) {
       alert(err instanceof Error ? err.message : 'حدث خطأ، حاول مرة أخرى');
     } finally {
