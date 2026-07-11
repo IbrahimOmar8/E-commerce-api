@@ -22,12 +22,14 @@ export default function AdminOrdersPage() {
   const [total, setTotal] = useState(0);
   const [pages, setPages] = useState(1);
   const [loading, setLoading] = useState(true);
+  const [fetchError, setFetchError] = useState('');
   const [search, setSearch] = useState('');
   const [status, setStatus] = useState(searchParams.get('status') || '');
   const [page, setPage] = useState(1);
 
   const fetchOrders = useCallback(async () => {
     setLoading(true);
+    setFetchError('');
     try {
       const params: Record<string, string | number> = { page, limit: 20 };
       if (search) params.search = search;
@@ -36,6 +38,10 @@ export default function AdminOrdersPage() {
       setOrders(res.data || []);
       setTotal(res.total || 0);
       setPages(res.pages || 1);
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : 'فشل تحميل الطلبات';
+      setFetchError(msg);
+      setOrders([]);
     } finally {
       setLoading(false);
     }
@@ -97,6 +103,17 @@ export default function AdminOrdersPage() {
       <div className="bg-white rounded-2xl border border-gray-100 overflow-hidden">
         {loading ? (
           <div className="p-8 text-center text-gray-400">جاري التحميل...</div>
+        ) : fetchError ? (
+          <div className="p-12 text-center">
+            <div className="text-4xl mb-3">⚠️</div>
+            <p className="text-red-600 font-semibold mb-1">فشل تحميل الطلبات</p>
+            <p className="text-gray-400 text-sm mb-4">{fetchError}</p>
+            {fetchError.toLowerCase().includes('access') || fetchError.toLowerCase().includes('token') || fetchError.toLowerCase().includes('401') || fetchError.toLowerCase().includes('403') ? (
+              <p className="text-amber-600 text-sm">يبدو أن جلستك انتهت — حاول <a href="/admin/login" className="underline font-semibold">تسجيل الدخول مجدداً</a></p>
+            ) : (
+              <button onClick={fetchOrders} className="text-sm text-amber-600 underline">إعادة المحاولة</button>
+            )}
+          </div>
         ) : orders.length === 0 ? (
           <div className="p-12 text-center">
             <div className="text-4xl mb-3">📦</div>

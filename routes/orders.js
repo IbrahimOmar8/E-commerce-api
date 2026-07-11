@@ -11,7 +11,9 @@ function optionalAuth(req, res, next) {
     const jwt = require('jsonwebtoken');
     try {
       req.user = jwt.verify(authHeader.replace('Bearer ', ''), process.env.JWT_SECRET || 'your-secret-key');
-    } catch (_) {}
+    } catch (err) {
+      console.warn('[optionalAuth] token rejected:', err.message);
+    }
   }
   next();
 }
@@ -188,11 +190,9 @@ router.post('/', optionalAuth, async (req, res) => {
       }
     }
 
-    const VAT_RATE = 0.15;
     const computedDelivery = Number(deliveryFee) || 0;
-    const vatBase = serverSubtotal - discountAmount + computedDelivery;
-    const vat = vatBase * VAT_RATE;
-    const totalAmount = vatBase + vat;
+    const vat = 0;
+    const totalAmount = serverSubtotal - discountAmount + computedDelivery;
 
     const now = new Date();
     const datePart = `${now.getFullYear()}${String(now.getMonth() + 1).padStart(2, '0')}${String(now.getDate()).padStart(2, '0')}`;
