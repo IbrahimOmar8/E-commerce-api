@@ -27,6 +27,7 @@ jspm_packages/
 # Build output
 dist/
 build/
+.next/
 
 # IDE files
 .vscode/
