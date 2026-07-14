@@ -243,7 +243,7 @@ router.put('/:id', verifyToken, upload.array('images', 10), async (req, res) => 
 
     const before = await prisma.product.findUnique({ where: { id: req.params.id }, select: { stock: true, hasSizes: true, sizes: true } });
     const wasOut = before
-      ? (before.hasSizes ? (before.sizes as {stock:number}[]).every(s => s.stock === 0) : before.stock === 0)
+      ? (before.hasSizes ? (Array.isArray(before.sizes) ? before.sizes : []).every(s => s.stock === 0) : before.stock === 0)
       : false;
 
     const product = await prisma.product.update({
@@ -254,7 +254,7 @@ router.put('/:id', verifyToken, upload.array('images', 10), async (req, res) => 
 
     // Notify waiting customers if restocked
     const isNowIn = product.hasSizes
-      ? (product.sizes as {stock:number}[]).some(s => s.stock > 0)
+      ? (Array.isArray(product.sizes) ? product.sizes : []).some(s => s.stock > 0)
       : product.stock > 0;
     if (wasOut && isNowIn) {
       const alerts = await prisma.stockAlert.findMany({ where: { productId: product.id } });
