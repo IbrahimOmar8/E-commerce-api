@@ -44,7 +44,23 @@ export default function OrdersPage() {
 
   useEffect(() => {
     if (!mounted) return;
-    if (!user) { router.push('/account'); return; }
+
+    if (!user) {
+      // Guest: fetch orders saved locally after checkout
+      try {
+        const pending: string[] = JSON.parse(localStorage.getItem('pending-orders') || '[]');
+        if (pending.length === 0) { setLoading(false); return; }
+        Promise.all(
+          pending.map(num => ordersApi.getByNumber(num).then(r => r.data).catch(() => null))
+        ).then(results => {
+          setOrders(results.filter(Boolean) as Order[]);
+        }).finally(() => setLoading(false));
+      } catch {
+        setLoading(false);
+      }
+      return;
+    }
+
     if (user.role !== 'user') {
       setLoading(false);
       setFetchError('not-user');
@@ -102,6 +118,19 @@ export default function OrdersPage() {
         <span className="text-slate-400 text-lg font-normal">({orders.length})</span>
       </div>
 
+      {/* Guest login prompt */}
+      {!user && (
+        <div className="bg-slate-50 border border-slate-200 rounded-2xl p-4 mb-6 flex items-center justify-between gap-4 flex-wrap">
+          <div>
+            <p className="font-bold text-slate-800 text-sm">سجّل دخول لحفظ طلباتك دائماً</p>
+            <p className="text-slate-400 text-xs mt-0.5">الطلبات المعروضة محفوظة على هذا الجهاز فقط</p>
+          </div>
+          <Link href="/account" className="bg-amber-500 text-white px-5 py-2 rounded-xl text-sm font-bold hover:bg-amber-600 transition-colors whitespace-nowrap">
+            تسجيل الدخول
+          </Link>
+        </div>
+      )}
+
       {/* Order number lookup */}
       <div className="bg-amber-50 border border-amber-100 rounded-2xl p-5 mb-6">
         <h3 className="font-bold text-amber-800 text-sm mb-3 flex items-center gap-2">
@@ -145,9 +174,18 @@ export default function OrdersPage() {
       {orders.length === 0 ? (
         <div className="text-center py-16">
           <Package size={56} className="mx-auto mb-4 text-slate-200" />
-          <h2 className="text-xl font-bold text-slate-700 mb-2">لا توجد طلبات مرتبطة بحسابك</h2>
-          <p className="text-slate-400 text-sm mb-2">إذا طلبت بدون تسجيل دخول، ابحث برقم الطلب أعلاه</p>
-          <p className="text-slate-400 mb-6 text-sm">أو ابدأ تسوقك الآن!</p>
+          {user ? (
+            <>
+              <h2 className="text-xl font-bold text-slate-700 mb-2">لا توجد طلبات مرتبطة بحسابك</h2>
+              <p className="text-slate-400 text-sm mb-2">إذا طلبت بدون تسجيل دخول، ابحث برقم الطلب أعلاه</p>
+            </>
+          ) : (
+            <>
+              <h2 className="text-xl font-bold text-slate-700 mb-2">لا توجد طلبات على هذا الجهاز</h2>
+              <p className="text-slate-400 text-sm mb-2">عند إتمام طلب تظهر هنا مباشرة، أو ابحث برقم الطلب أعلاه</p>
+            </>
+          )}
+          <p className="text-slate-400 mb-6 text-sm">ابدأ تسوقك الآن!</p>
           <Link href="/products" className="bg-amber-500 text-white px-8 py-3 rounded-2xl font-bold hover:bg-amber-600 transition-colors">
             تسوق الآن
           </Link>
