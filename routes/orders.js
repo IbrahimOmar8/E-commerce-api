@@ -67,6 +67,24 @@ router.get('/user', verifyToken, async (req, res) => {
   }
 });
 
+// Cancel order (user, pending status only)
+router.patch('/:id/cancel', verifyToken, async (req, res) => {
+  try {
+    if (!req.user || req.user.role !== 'user')
+      return res.status(403).json({ success: false, message: 'Access denied' });
+    const order = await prisma.order.findUnique({ where: { id: req.params.id } });
+    if (!order) return res.status(404).json({ success: false, message: 'الطلب غير موجود' });
+    if (order.userId !== req.user.id) return res.status(403).json({ success: false, message: 'Access denied' });
+    if (order.status !== 'pending')
+      return res.status(400).json({ success: false, message: 'يمكن إلغاء طلبات "قيد المراجعة" فقط' });
+    const updated = await prisma.order.update({ where: { id: req.params.id }, data: { status: 'cancelled' } });
+    res.json({ success: true, message: 'تم إلغاء الطلب', data: updated });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ success: false, message: 'Error cancelling order' });
+  }
+});
+
 // Claim guest orders by order numbers (called after login)
 router.post('/claim', verifyToken, async (req, res) => {
   try {

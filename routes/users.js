@@ -74,12 +74,18 @@ router.post('/me/addresses', verifyToken, async (req, res) => {
   try {
     if (!req.user || req.user.role !== 'user')
       return res.status(403).json({ success: false, message: 'Access denied' });
-    const { phone, address } = req.body;
-    if (!address || !address.street || !address.city)
-      return res.status(400).json({ success: false, message: 'Address street and city are required' });
+    const { label, name, phone, address } = req.body;
+    if (!address || !address.city)
+      return res.status(400).json({ success: false, message: 'City is required' });
     const user = await prisma.user.findUnique({ where: { id: req.user.id }, select: { useraddress: true } });
     if (!user) return res.status(404).json({ success: false, message: 'User not found' });
-    const newAddress = { id: randomUUID(), phone: phone || '', address: { street: address.street, city: address.city } };
+    const newAddress = {
+      id: randomUUID(),
+      label: label || 'عنوان',
+      name: name || '',
+      phone: phone || '',
+      address: { street: address.street || '', city: address.city, region: address.region || '' },
+    };
     const addresses = Array.isArray(user.useraddress) ? [...user.useraddress, newAddress] : [newAddress];
     await prisma.user.update({ where: { id: req.user.id }, data: { useraddress: addresses } });
     res.status(201).json({ success: true, message: 'Address created successfully', data: newAddress });
@@ -95,16 +101,20 @@ router.put('/me/addresses/:addressId', verifyToken, async (req, res) => {
     if (!req.user || req.user.role !== 'user')
       return res.status(403).json({ success: false, message: 'Access denied' });
     const { addressId } = req.params;
-    const { phone, address } = req.body;
+    const { label, name, phone, address } = req.body;
     const user = await prisma.user.findUnique({ where: { id: req.user.id }, select: { useraddress: true } });
     if (!user) return res.status(404).json({ success: false, message: 'User not found' });
     const addresses = Array.isArray(user.useraddress) ? user.useraddress : [];
     const idx = addresses.findIndex(a => a.id === addressId);
     if (idx === -1) return res.status(404).json({ success: false, message: 'Address not found' });
+    if (label !== undefined) addresses[idx].label = label;
+    if (name !== undefined) addresses[idx].name = name;
     if (phone !== undefined) addresses[idx].phone = phone;
     if (address) {
+      if (!addresses[idx].address) addresses[idx].address = {};
       if (address.street !== undefined) addresses[idx].address.street = address.street;
       if (address.city !== undefined) addresses[idx].address.city = address.city;
+      if (address.region !== undefined) addresses[idx].address.region = address.region;
     }
     await prisma.user.update({ where: { id: req.user.id }, data: { useraddress: addresses } });
     res.json({ success: true, message: 'Address updated successfully', data: addresses[idx] });

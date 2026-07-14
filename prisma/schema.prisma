@@ -155,3 +155,12 @@ model Review {
 
   @@unique([productId, userId])
 }
+
+model StockAlert {
+  id        String   @id @default(uuid())
+  productId String
+  phone     String
+  createdAt DateTime @default(now())
+
+  @@unique([productId, phone])
+}

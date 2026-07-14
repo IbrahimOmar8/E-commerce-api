@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { useCartStore } from '@/store/cart';
 import { productsApi, reviewsApi } from '@/lib/api';
 import type { Product, Review } from '@/types';
-import { ShoppingCart, Star, Heart, ArrowRight, Truck, RotateCcw, Shield } from 'lucide-react';
+import { ShoppingCart, Star, Heart, ArrowRight, Truck, RotateCcw, Shield, Bell } from 'lucide-react';
 import { GENDER_LABELS } from '@/types';
 
 export default function ProductPage({ params }: { params: Promise<{ id: string }> }) {
@@ -20,6 +20,9 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
   const [adding, setAdding] = useState(false);
   const [added, setAdded] = useState(false);
   const [sizeError, setSizeError] = useState(false);
+  const [related, setRelated] = useState<Product[]>([]);
+  const [notifyPhone, setNotifyPhone] = useState('');
+  const [notifyState, setNotifyState] = useState<'idle' | 'loading' | 'done' | 'error'>('idle');
   const { addItem } = useCartStore();
 
   useEffect(() => {
@@ -27,6 +30,14 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
       .then(([pRes, rRes]) => {
         setProduct(pRes.data);
         setReviews(rRes.data || []);
+        // Load related products from same subcategory
+        const sub = pRes.data.subcategory;
+        const catId = typeof sub === 'object' ? sub._id : sub;
+        if (catId) {
+          productsApi.getAll({ subcategory: catId, limit: 5, isActive: true })
+            .then(r => setRelated((r.data || []).filter(p => p._id !== pRes.data._id).slice(0, 4)))
+            .catch(() => {});
+        }
       })
       .finally(() => setLoading(false));
   }, [id]);
@@ -249,6 +260,46 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
             </button>
           </div>
 
+          {/* Back-in-stock notify */}
+          {totalStock === 0 && (
+            <div className="mt-4 bg-gray-50 rounded-2xl p-4">
+              {notifyState === 'done' ? (
+                <p className="text-green-600 font-semibold text-sm text-center">✓ سيتم إشعارك عند توفر المنتج</p>
+              ) : (
+                <>
+                  <p className="text-sm font-medium text-gray-700 mb-3 flex items-center gap-2">
+                    <Bell size={14} className="text-amber-500" /> نبّهني عند التوفر
+                  </p>
+                  <div className="flex gap-2">
+                    <input
+                      value={notifyPhone}
+                      onChange={e => setNotifyPhone(e.target.value)}
+                      placeholder="05xxxxxxxx"
+                      dir="ltr"
+                      className="flex-1 border border-gray-200 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-amber-500"
+                    />
+                    <button
+                      disabled={!notifyPhone.trim() || notifyState === 'loading'}
+                      onClick={async () => {
+                        setNotifyState('loading');
+                        try {
+                          await productsApi.notifyWhenAvailable(product._id, notifyPhone.trim());
+                          setNotifyState('done');
+                        } catch {
+                          setNotifyState('error');
+                          setTimeout(() => setNotifyState('idle'), 3000);
+                        }
+                      }}
+                      className="bg-amber-500 text-white px-4 py-2.5 rounded-xl text-sm font-bold hover:bg-amber-600 disabled:opacity-50 transition-colors">
+                      {notifyState === 'loading' ? '...' : 'أبلغني'}
+                    </button>
+                  </div>
+                  {notifyState === 'error' && <p className="text-red-500 text-xs mt-1">حدث خطأ، حاول مجدداً</p>}
+                </>
+              )}
+            </div>
+          )}
+
           {/* Benefits */}
           <div className="grid grid-cols-3 gap-3 mt-6 pt-6 border-t border-gray-100">
             <div className="text-center">
@@ -274,6 +325,37 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
           <p className="text-gray-600 leading-relaxed whitespace-pre-line">
             {product.descriptionAr || product.description}
           </p>
+        </div>
+      )}
+
+      {/* Related products */}
+      {related.length > 0 && (
+        <div className="mb-8">
+          <h2 className="text-xl font-bold text-gray-900 mb-5">منتجات مشابهة</h2>
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+            {related.map(p => {
+              const price = p.priceAfterDiscount > 0 ? p.priceAfterDiscount : p.price;
+              return (
+                <Link key={p._id} href={`/products/${p._id}`}
+                  className="bg-white rounded-2xl border border-gray-100 overflow-hidden hover:shadow-md transition-shadow group">
+                  <div className="aspect-square bg-gray-50 relative overflow-hidden">
+                    {p.images?.[0] ? (
+                      <Image src={p.images[0]} alt={p.nameAr || p.name} fill className="object-cover group-hover:scale-105 transition-transform duration-300" />
+                    ) : (
+                      <div className="w-full h-full flex items-center justify-center text-4xl">👟</div>
+                    )}
+                    {p.discount > 0 && (
+                      <span className="absolute top-2 right-2 bg-red-500 text-white text-xs font-bold px-2 py-0.5 rounded-full">-{p.discount}%</span>
+                    )}
+                  </div>
+                  <div className="p-3">
+                    <p className="text-sm font-semibold text-gray-800 line-clamp-2 leading-tight mb-1">{p.nameAr || p.name}</p>
+                    <p className="font-bold text-amber-600 text-sm">{price.toFixed(0)} ر.س</p>
+                  </div>
+                </Link>
+              );
+            })}
+          </div>
         </div>
       )}
 

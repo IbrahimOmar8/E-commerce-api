@@ -41,6 +41,8 @@ export const productsApi = {
       body,
     }).then(r => r.json()),
   delete: (id: string) => request(`/products/${id}`, { method: 'DELETE' }),
+  notifyWhenAvailable: (productId: string, phone: string) =>
+    request<{ success: boolean; message: string }>(`/products/${productId}/notify`, { method: 'POST', body: JSON.stringify({ phone }) }),
 };
 
 // ── Categories ────────────────────────────────────────────────────────────
@@ -90,6 +92,8 @@ export const ordersApi = {
   getMyOrders: () => request<{ success: boolean; data: import('@/types').Order[] }>('/orders/user'),
   claimOrders: (orderNumbers: string[]) =>
     request<{ success: boolean; claimed: number }>('/orders/claim', { method: 'POST', body: JSON.stringify({ orderNumbers }) }),
+  cancel: (id: string) =>
+    request<{ success: boolean; message: string }>(`/orders/${id}/cancel`, { method: 'PATCH' }),
 };
 
 // ── Auth ──────────────────────────────────────────────────────────────────
@@ -147,6 +151,14 @@ export const wishlistApi = {
     request<{ success: boolean; message: string }>(`/wishlist/${productId}`, { method: 'DELETE' }),
 };
 
+export interface SavedAddress {
+  id: string;
+  label: string;
+  name: string;
+  phone: string;
+  address: { street: string; city: string; region: string };
+}
+
 // ── Users (admin) ─────────────────────────────────────────────────────────
 export const usersApi = {
   getAll: (params?: Record<string, string | number>) => {
@@ -155,6 +167,12 @@ export const usersApi = {
   },
   setStatus: (id: string, isActive: boolean) =>
     request(`/users/${id}/status`, { method: 'PATCH', body: JSON.stringify({ isActive }) }),
+  getAddresses: () =>
+    request<{ success: boolean; data: SavedAddress[] }>('/users/me/addresses'),
+  addAddress: (body: Omit<SavedAddress, 'id'>) =>
+    request<{ success: boolean; data: SavedAddress }>('/users/me/addresses', { method: 'POST', body: JSON.stringify(body) }),
+  deleteAddress: (id: string) =>
+    request(`/users/me/addresses/${id}`, { method: 'DELETE' }),
 };
 
 // ── Admins ────────────────────────────────────────────────────────────────

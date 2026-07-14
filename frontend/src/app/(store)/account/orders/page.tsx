@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { useAuthStore } from '@/store/auth';
 import { ordersApi } from '@/lib/api';
 import type { Order } from '@/types';
-import { Package, Clock, CheckCircle, Truck, XCircle, ArrowRight, Search } from 'lucide-react';
+import { Package, Clock, CheckCircle, Truck, XCircle, ArrowRight, Search, Ban } from 'lucide-react';
 
 const STATUS_MAP: Record<string, { label: string; color: string; icon: React.ReactNode; step: number }> = {
   pending:    { label: 'قيد المراجعة',   color: 'text-yellow-600 bg-yellow-50 border-yellow-200', icon: <Clock size={16} />,        step: 1 },
@@ -39,6 +39,20 @@ export default function OrdersPage() {
   const [trackedOrder, setTrackedOrder] = useState<Order | null>(null);
   const [trackLoading, setTrackLoading] = useState(false);
   const [trackError, setTrackError] = useState('');
+  const [cancellingId, setCancellingId] = useState<string | null>(null);
+
+  const handleCancel = async (orderId: string) => {
+    if (!confirm('هل أنت متأكد من إلغاء هذا الطلب؟')) return;
+    setCancellingId(orderId);
+    try {
+      await ordersApi.cancel(orderId);
+      setOrders(prev => prev.map(o => o._id === orderId ? { ...o, status: 'cancelled' } : o));
+    } catch (err) {
+      alert(err instanceof Error ? err.message : 'تعذّر إلغاء الطلب');
+    } finally {
+      setCancellingId(null);
+    }
+  };
 
   useEffect(() => { setMounted(true); }, []);
 
@@ -279,8 +293,19 @@ export default function OrdersPage() {
 
                 {/* Footer */}
                 <div className="flex items-center justify-between px-5 py-3 bg-slate-50 border-t border-slate-100">
-                  <div className="text-xs text-slate-500">
-                    {order.paymentMethod === 'cod' ? '💵 الدفع عند الاستلام' : `💳 ${order.paymentMethod?.toUpperCase()}`}
+                  <div className="flex items-center gap-3">
+                    <span className="text-xs text-slate-500">
+                      {order.paymentMethod === 'cod' ? '💵 الدفع عند الاستلام' : `💳 ${order.paymentMethod?.toUpperCase()}`}
+                    </span>
+                    {order.status === 'pending' && user && (
+                      <button
+                        onClick={() => handleCancel(order._id)}
+                        disabled={cancellingId === order._id}
+                        className="flex items-center gap-1 text-xs text-red-500 hover:text-red-700 disabled:opacity-50 border border-red-200 hover:border-red-400 px-2 py-1 rounded-lg transition-colors">
+                        <Ban size={12} />
+                        {cancellingId === order._id ? 'جاري الإلغاء...' : 'إلغاء الطلب'}
+                      </button>
+                    )}
                   </div>
                   <div className="font-black text-amber-600">
                     {order.totalAmount?.toFixed(2)} ر.س

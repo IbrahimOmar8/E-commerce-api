@@ -3,15 +3,17 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useCartStore } from '@/store/cart';
-import { ordersApi, discountApi } from '@/lib/api';
+import { useAuthStore } from '@/store/auth';
+import { ordersApi, discountApi, usersApi, type SavedAddress } from '@/lib/api';
 import { SAUDI_REGIONS } from '@/types';
-import { CheckCircle, Loader } from 'lucide-react';
+import { CheckCircle, Loader, MapPin, Trash2 } from 'lucide-react';
 
 const DELIVERY_FEE = 25;
 const FREE_SHIPPING = 200;
 
 export default function CheckoutPage() {
   const { items, subtotal, clearCart } = useCartStore();
+  const { user } = useAuthStore();
   const router = useRouter();
   const [mounted, setMounted] = useState(false);
   const [step, setStep] = useState<'form' | 'success'>('form');
@@ -23,6 +25,9 @@ export default function CheckoutPage() {
   const [appliedCoupon, setAppliedCoupon] = useState('');
   const [discountError, setDiscountError] = useState('');
 
+  const [savedAddresses, setSavedAddresses] = useState<SavedAddress[]>([]);
+  const [saveAddress, setSaveAddress] = useState(false);
+
   const [form, setForm] = useState({
     name: '', phone: '', email: '',
     street: '', city: '', region: '',
@@ -31,6 +36,12 @@ export default function CheckoutPage() {
   const [errors, setErrors] = useState<Record<string, string>>({});
 
   useEffect(() => { setMounted(true); }, []);
+
+  useEffect(() => {
+    if (user?.role === 'user') {
+      usersApi.getAddresses().then(r => setSavedAddresses(r.data || [])).catch(() => {});
+    }
+  }, [user]);
   if (!mounted) return null;
   if (items.length === 0) {
     router.push('/cart');
@@ -100,6 +111,16 @@ export default function CheckoutPage() {
       clearCart();
       setOrder({ orderNumber: res.data.orderNumber });
       setStep('success');
+
+      // Save address if user requested
+      if (saveAddress && user?.role === 'user') {
+        usersApi.addAddress({
+          label: 'عنوان محفوظ',
+          name: form.name,
+          phone: form.phone,
+          address: { street: form.street, city: form.city, region: form.region },
+        }).catch(() => {});
+      }
 
       // Save order number so it can be claimed when user logs in later
       try {
@@ -210,7 +231,44 @@ export default function CheckoutPage() {
 
           {/* Address */}
           <div className="bg-white rounded-2xl p-6 border border-gray-100">
-            <h2 className="text-lg font-bold text-gray-900 mb-5">عنوان التوصيل</h2>
+            <h2 className="text-lg font-bold text-gray-900 mb-4">عنوان التوصيل</h2>
+
+            {/* Saved addresses picker */}
+            {savedAddresses.length > 0 && (
+              <div className="mb-5">
+                <p className="text-sm font-medium text-gray-600 mb-2 flex items-center gap-1.5"><MapPin size={14} /> عناوين محفوظة</p>
+                <div className="space-y-2">
+                  {savedAddresses.map(addr => (
+                    <div key={addr.id} className="flex items-center gap-2">
+                      <button
+                        type="button"
+                        onClick={() => setForm(p => ({
+                          ...p,
+                          name: addr.name || p.name,
+                          phone: addr.phone || p.phone,
+                          street: addr.address?.street || '',
+                          city: addr.address?.city || '',
+                          region: addr.address?.region || '',
+                        }))}
+                        className="flex-1 text-right text-sm bg-amber-50 hover:bg-amber-100 border border-amber-100 rounded-xl px-4 py-2.5 transition-colors">
+                        <span className="font-semibold text-amber-800">{addr.label}</span>
+                        <span className="text-gray-500 mr-2">{addr.address?.city}{addr.address?.region ? ` · ${addr.address.region}` : ''}</span>
+                      </button>
+                      <button
+                        type="button"
+                        onClick={async () => {
+                          await usersApi.deleteAddress(addr.id).catch(() => {});
+                          setSavedAddresses(p => p.filter(a => a.id !== addr.id));
+                        }}
+                        className="p-2 text-gray-400 hover:text-red-500 transition-colors">
+                        <Trash2 size={15} />
+                      </button>
+                    </div>
+                  ))}
+                </div>
+                <div className="border-t border-gray-100 mt-4 mb-4" />
+              </div>
+            )}
             <div className="grid sm:grid-cols-2 gap-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">المنطقة *</label>
@@ -240,6 +298,15 @@ export default function CheckoutPage() {
                   placeholder="أي تعليمات خاصة للتوصيل..." rows={2}
                   className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-amber-500 resize-none" />
               </div>
+              {user?.role === 'user' && (
+                <div className="sm:col-span-2">
+                  <label className="flex items-center gap-2 cursor-pointer select-none">
+                    <input type="checkbox" checked={saveAddress} onChange={e => setSaveAddress(e.target.checked)}
+                      className="w-4 h-4 accent-amber-500 rounded" />
+                    <span className="text-sm text-gray-600">حفظ هذا العنوان للطلبات القادمة</span>
+                  </label>
+                </div>
+              )}
             </div>
           </div>
 

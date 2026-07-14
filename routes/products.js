@@ -1,8 +1,17 @@
 const express = require('express');
+const https = require('https');
 const prisma = require('../lib/prisma');
 const verifyToken = require('../Middleware/auth');
 const cloudinary = require('cloudinary').v2;
 const multer = require('multer');
+
+function sendTelegramMessage(text) {
+  const token = process.env.TELEGRAM_BOT_TOKEN;
+  const chatId = process.env.TELEGRAM_CHAT_ID;
+  if (!token || !chatId) return;
+  const path = `/bot${token}/sendMessage?chat_id=${chatId}&text=${encodeURIComponent(text)}`;
+  https.request({ hostname: 'api.telegram.org', port: 443, path, method: 'GET' }, () => {}).on('error', () => {}).end();
+}
 
 cloudinary.config({
   cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
@@ -154,6 +163,26 @@ router.post('/', verifyToken, upload.array('images', 10), async (req, res) => {
   }
 });
 
+// Request back-in-stock notification (public)
+router.post('/:id/notify', async (req, res) => {
+  try {
+    const { phone } = req.body;
+    if (!phone) return res.status(400).json({ success: false, message: 'رقم الجوال مطلوب' });
+    const normalizedPhone = phone.replace(/\s/g, '');
+    const product = await prisma.product.findUnique({ where: { id: req.params.id }, select: { nameAr: true, name: true } });
+    if (!product) return res.status(404).json({ success: false, message: 'المنتج غير موجود' });
+    await prisma.stockAlert.upsert({
+      where: { productId_phone: { productId: req.params.id, phone: normalizedPhone } },
+      update: {},
+      create: { productId: req.params.id, phone: normalizedPhone },
+    });
+    res.json({ success: true, message: 'سيتم إشعارك عند توفر المنتج' });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ success: false, message: 'Error saving notification' });
+  }
+});
+
 // Update product (admin)
 router.put('/:id', verifyToken, upload.array('images', 10), async (req, res) => {
   try {
@@ -212,11 +241,30 @@ router.put('/:id', verifyToken, upload.array('images', 10), async (req, res) => 
     }
     delete data.existingImages;
 
+    const before = await prisma.product.findUnique({ where: { id: req.params.id }, select: { stock: true, hasSizes: true, sizes: true } });
+    const wasOut = before
+      ? (before.hasSizes ? (before.sizes as {stock:number}[]).every(s => s.stock === 0) : before.stock === 0)
+      : false;
+
     const product = await prisma.product.update({
       where: { id: req.params.id },
       data,
       include: { subcategory: true, brand: true },
     });
+
+    // Notify waiting customers if restocked
+    const isNowIn = product.hasSizes
+      ? (product.sizes as {stock:number}[]).some(s => s.stock > 0)
+      : product.stock > 0;
+    if (wasOut && isNowIn) {
+      const alerts = await prisma.stockAlert.findMany({ where: { productId: product.id } });
+      if (alerts.length > 0) {
+        const phones = alerts.map(a => a.phone).join('\n');
+        sendTelegramMessage(`🟢 منتج "${product.nameAr || product.name}" عاد للمخزون!\n${alerts.length} عميل ينتظر:\n${phones}`);
+        prisma.stockAlert.deleteMany({ where: { productId: product.id } }).catch(() => {});
+      }
+    }
+
     res.json({ success: true, data: product });
   } catch (err) {
     console.error(err);
