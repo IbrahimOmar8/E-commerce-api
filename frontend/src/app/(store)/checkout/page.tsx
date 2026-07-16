@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { useCartStore } from '@/store/cart';
 import { useAuthStore } from '@/store/auth';
 import { ordersApi, discountApi, usersApi, type SavedAddress } from '@/lib/api';
-import { SAUDI_REGIONS } from '@/types';
+import { SAUDI_REGIONS, SAUDI_CITIES } from '@/types';
 import { CheckCircle, Loader, MapPin, Trash2 } from 'lucide-react';
 
 const DELIVERY_FEE = 25;
@@ -27,6 +27,7 @@ export default function CheckoutPage() {
 
   const [savedAddresses, setSavedAddresses] = useState<SavedAddress[]>([]);
   const [saveAddress, setSaveAddress] = useState(false);
+  const [customCity, setCustomCity] = useState('');
 
   const [form, setForm] = useState({
     name: '', phone: '', email: '',
@@ -54,9 +55,12 @@ export default function CheckoutPage() {
   const total = sub - discountAmount + delivery;
 
   const update = (k: string, v: string) => {
-    setForm(p => ({ ...p, [k]: v }));
+    setForm(p => ({ ...p, [k]: v, ...(k === 'region' ? { city: '' } : {}) }));
     setErrors(p => ({ ...p, [k]: '' }));
+    if (k === 'region') setCustomCity('');
   };
+
+  const resolvedCity = form.city === '__other__' ? customCity.trim() : form.city;
 
   const validate = () => {
     const e: Record<string, string> = {};
@@ -64,7 +68,7 @@ export default function CheckoutPage() {
     if (!form.phone.trim()) e.phone = 'رقم الجوال مطلوب';
     else if (!/^(05|5)\d{8}$/.test(form.phone.replace(/\s/g, ''))) e.phone = 'رقم جوال سعودي غير صحيح';
     if (!form.region) e.region = 'المنطقة مطلوبة';
-    if (!form.city.trim()) e.city = 'المدينة مطلوبة';
+    if (!resolvedCity) e.city = 'المدينة مطلوبة';
     setErrors(e);
     return Object.keys(e).length === 0;
   };
@@ -88,7 +92,7 @@ export default function CheckoutPage() {
           name: form.name,
           phone: form.phone.replace(/\s/g, ''),
           email: form.email || undefined,
-          address: { street: form.street, city: form.city, region: form.region },
+          address: { street: form.street, city: resolvedCity, region: form.region },
         },
         items: items.map(i => ({
           product: i.product._id,
@@ -118,7 +122,7 @@ export default function CheckoutPage() {
           label: 'عنوان محفوظ',
           name: form.name,
           phone: form.phone,
-          address: { street: form.street, city: form.city, region: form.region },
+          address: { street: form.street, city: resolvedCity, region: form.region },
         }).catch(() => {});
       }
 
@@ -251,14 +255,20 @@ export default function CheckoutPage() {
                     <div key={addr.id} className="flex items-center gap-2">
                       <button
                         type="button"
-                        onClick={() => setForm(p => ({
-                          ...p,
-                          name: addr.name || p.name,
-                          phone: addr.phone || p.phone,
-                          street: addr.address?.street || '',
-                          city: addr.address?.city || '',
-                          region: addr.address?.region || '',
-                        }))}
+                        onClick={() => {
+                          const region = addr.address?.region || '';
+                          const city = addr.address?.city || '';
+                          const isKnown = region && SAUDI_CITIES[region]?.includes(city);
+                          setForm(p => ({
+                            ...p,
+                            name: addr.name || p.name,
+                            phone: addr.phone || p.phone,
+                            street: addr.address?.street || '',
+                            city: isKnown ? city : (city ? '__other__' : ''),
+                            region,
+                          }));
+                          if (!isKnown && city) setCustomCity(city);
+                        }}
                         className="flex-1 text-right text-sm bg-amber-50 hover:bg-amber-100 border border-amber-100 rounded-xl px-4 py-2.5 transition-colors">
                         <span className="font-semibold text-amber-800">{addr.label}</span>
                         <span className="text-gray-500 mr-2">{addr.address?.city}{addr.address?.region ? ` · ${addr.address.region}` : ''}</span>
@@ -290,9 +300,25 @@ export default function CheckoutPage() {
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">المدينة *</label>
-                <input value={form.city} onChange={e => update('city', e.target.value)}
-                  placeholder="الرياض / جدة / ..."
-                  className={`w-full border rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-amber-500 ${errors.city ? 'border-red-400' : 'border-gray-200'}`} />
+                {form.region && SAUDI_CITIES[form.region] ? (
+                  <div className="space-y-2">
+                    <select value={form.city} onChange={e => { update('city', e.target.value); setErrors(p => ({ ...p, city: '' })); }}
+                      className={`w-full border rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-amber-500 bg-white ${errors.city ? 'border-red-400' : 'border-gray-200'}`}>
+                      <option value="">اختر المدينة</option>
+                      {SAUDI_CITIES[form.region].map(c => <option key={c} value={c}>{c}</option>)}
+                      <option value="__other__">مدينة أخرى...</option>
+                    </select>
+                    {form.city === '__other__' && (
+                      <input value={customCity} onChange={e => { setCustomCity(e.target.value); setErrors(p => ({ ...p, city: '' })); }}
+                        placeholder="اكتب اسم المدينة"
+                        className={`w-full border rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-amber-500 ${errors.city ? 'border-red-400' : 'border-gray-200'}`} />
+                    )}
+                  </div>
+                ) : (
+                  <input value={form.city} onChange={e => update('city', e.target.value)}
+                    placeholder="الرياض / جدة / ..."
+                    className={`w-full border rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-amber-500 ${errors.city ? 'border-red-400' : 'border-gray-200'}`} />
+                )}
                 {errors.city && <p className="text-red-500 text-xs mt-1">{errors.city}</p>}
               </div>
               <div className="sm:col-span-2">
