@@ -60,15 +60,27 @@ export default function OrdersPage() {
     if (!mounted) return;
 
     if (!user) {
-      // Guest: fetch orders saved locally after checkout
+      // Guest: load full order data saved locally at checkout
       try {
-        const pending: string[] = JSON.parse(localStorage.getItem('pending-orders') || '[]');
-        if (pending.length === 0) { setLoading(false); return; }
-        Promise.all(
-          pending.map(num => ordersApi.getByNumber(num).then(r => r.data).catch(() => null))
-        ).then(results => {
-          setOrders(results.filter(Boolean) as Order[]);
-        }).finally(() => setLoading(false));
+        const stored: Order[] = JSON.parse(localStorage.getItem('guest-orders') || '[]');
+        setOrders(stored);
+        setLoading(false);
+        // Background refresh to get latest statuses
+        if (stored.length > 0) {
+          Promise.all(
+            stored.map(o =>
+              ordersApi.getByNumber(o.orderNumber)
+                .then(r => {
+                  const d = r.data as unknown as Record<string, unknown>;
+                  return { ...d, _id: (d.id as string) || (d._id as string) || o.orderNumber } as Order;
+                })
+                .catch(() => o)
+            )
+          ).then(fresh => {
+            setOrders(fresh);
+            localStorage.setItem('guest-orders', JSON.stringify(fresh));
+          });
+        }
       } catch {
         setLoading(false);
       }

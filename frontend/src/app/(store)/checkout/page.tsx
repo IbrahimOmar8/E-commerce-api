@@ -122,11 +122,20 @@ export default function CheckoutPage() {
         }).catch(() => {});
       }
 
-      // Save order number so it can be claimed when user logs in later
+      // Save full order data locally so guest can see it without login
       try {
+        const num = res.data.orderNumber;
+        const raw: Record<string, unknown> = JSON.parse(JSON.stringify(res.data));
+        raw._id = String(raw.id ?? raw._id ?? num);
+        const stored: Record<string, unknown>[] = JSON.parse(localStorage.getItem('guest-orders') || '[]');
+        if (!stored.find(o => o.orderNumber === num)) {
+          stored.unshift(raw);
+          localStorage.setItem('guest-orders', JSON.stringify(stored.slice(0, 20)));
+        }
+        // Also keep plain list for claim-on-login
         const pending: string[] = JSON.parse(localStorage.getItem('pending-orders') || '[]');
-        if (!pending.includes(res.data.orderNumber)) {
-          pending.push(res.data.orderNumber);
+        if (!pending.includes(num)) {
+          pending.push(num);
           localStorage.setItem('pending-orders', JSON.stringify(pending));
         }
       } catch (_) {}

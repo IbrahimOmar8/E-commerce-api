@@ -34,6 +34,7 @@ export default function AccountPage() {
           await ordersApi.claimOrders(pending);
           localStorage.removeItem('pending-orders');
         }
+        localStorage.removeItem('guest-orders');
       } catch (_) {}
     } catch (err) {
       setError(err instanceof Error ? err.message : 'بيانات غير صحيحة');
