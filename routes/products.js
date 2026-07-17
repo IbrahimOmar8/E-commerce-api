@@ -31,6 +31,15 @@ function uploadToCloud(buffer) {
 
 const router = express.Router();
 
+// Adds _id alias so the frontend (originally built for MongoDB) works with Prisma ids
+function toClient(obj) {
+  if (!obj || typeof obj !== 'object') return obj;
+  const out = { ...obj, _id: obj.id };
+  if (out.subcategory) out.subcategory = toClient(out.subcategory);
+  if (out.brand) out.brand = toClient(out.brand);
+  return out;
+}
+
 // Get all products with filtering and pagination
 router.get('/', async (req, res) => {
   try {
@@ -85,7 +94,7 @@ router.get('/', async (req, res) => {
     const pages = Math.ceil(total / Number(limit));
     res.json({
       success: true,
-      data: products,
+      data: products.map(toClient),
       total,
       pages,
       pagination: { current: Number(page), pages, total, limit: Number(limit) },
@@ -104,7 +113,7 @@ router.get('/:id', async (req, res) => {
       include: { subcategory: true, brand: true, reviews: { include: { user: { select: { username: true, fullName: true } } }, orderBy: { createdAt: 'desc' }, take: 10 } },
     });
     if (!product) return res.status(404).json({ success: false, message: 'Product not found' });
-    res.json({ success: true, data: product });
+    res.json({ success: true, data: toClient(product) });
   } catch (err) {
     console.error(err);
     res.status(500).json({ success: false, message: 'Error fetching product' });
@@ -155,7 +164,7 @@ router.post('/', verifyToken, upload.array('images', 10), async (req, res) => {
       },
       include: { subcategory: true, brand: true },
     });
-    res.status(201).json({ success: true, data: product });
+    res.status(201).json({ success: true, data: toClient(product) });
   } catch (err) {
     console.error('Create product error:', err);
     if (err.code === 'P2002') return res.status(400).json({ success: false, message: 'SKU already exists' });
@@ -265,7 +274,7 @@ router.put('/:id', verifyToken, upload.array('images', 10), async (req, res) => 
       }
     }
 
-    res.json({ success: true, data: product });
+    res.json({ success: true, data: toClient(product) });
   } catch (err) {
     console.error(err);
     if (err.code === 'P2025') return res.status(404).json({ success: false, message: 'Product not found' });

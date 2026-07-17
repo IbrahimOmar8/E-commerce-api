@@ -65,20 +65,17 @@ export default function OrdersPage() {
         const stored: Order[] = JSON.parse(localStorage.getItem('guest-orders') || '[]');
         setOrders(stored);
         setLoading(false);
-        // Background refresh to get latest statuses
+        // Background refresh — only update status from API (keep local item/address data)
         if (stored.length > 0) {
           Promise.all(
             stored.map(o =>
               ordersApi.getByNumber(o.orderNumber)
-                .then(r => {
-                  const d = r.data as unknown as Record<string, unknown>;
-                  return { ...d, _id: (d.id as string) || (d._id as string) || o.orderNumber } as Order;
-                })
+                .then(r => ({ ...o, status: r.data.status, updatedAt: r.data.updatedAt }))
                 .catch(() => o)
             )
-          ).then(fresh => {
-            setOrders(fresh);
-            localStorage.setItem('guest-orders', JSON.stringify(fresh));
+          ).then(refreshed => {
+            setOrders(refreshed as Order[]);
+            localStorage.setItem('guest-orders', JSON.stringify(refreshed));
           });
         }
       } catch {

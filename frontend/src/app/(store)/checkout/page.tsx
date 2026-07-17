@@ -126,17 +126,40 @@ export default function CheckoutPage() {
         }).catch(() => {});
       }
 
-      // Save full order data locally so guest can see it without login
+      // Save full order locally so guest can see it immediately without login
       try {
         const num = res.data.orderNumber;
-        const raw: Record<string, unknown> = JSON.parse(JSON.stringify(res.data));
-        raw._id = String(raw.id ?? raw._id ?? num);
-        const stored: Record<string, unknown>[] = JSON.parse(localStorage.getItem('guest-orders') || '[]');
-        if (!stored.find(o => o.orderNumber === num)) {
-          stored.unshift(raw);
+        const localOrder = {
+          _id: String((res.data as unknown as Record<string, unknown>).id ?? num),
+          orderNumber: num,
+          status: 'pending',
+          paymentMethod: form.paymentMethod,
+          totalAmount: total,
+          subtotal: sub,
+          discountCode: appliedCoupon || null,
+          discountAmount,
+          deliveryFee: delivery,
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
+          customerInfo: {
+            name: form.name,
+            phone: form.phone.replace(/\s/g, ''),
+            address: { street: form.street, city: resolvedCity, region: form.region },
+          },
+          items: items.map(i => ({
+            name: i.product.name,
+            nameAr: i.product.nameAr,
+            image: i.product.images?.[0] || '',
+            size: i.size || '',
+            quantity: i.quantity,
+            price: i.product.priceAfterDiscount > 0 ? i.product.priceAfterDiscount : i.product.price,
+          })),
+        };
+        const stored: unknown[] = JSON.parse(localStorage.getItem('guest-orders') || '[]');
+        if (!(stored as Record<string, unknown>[]).find(o => o.orderNumber === num)) {
+          stored.unshift(localOrder);
           localStorage.setItem('guest-orders', JSON.stringify(stored.slice(0, 20)));
         }
-        // Also keep plain list for claim-on-login
         const pending: string[] = JSON.parse(localStorage.getItem('pending-orders') || '[]');
         if (!pending.includes(num)) {
           pending.push(num);

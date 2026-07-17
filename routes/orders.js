@@ -20,6 +20,9 @@ function optionalAuth(req, res, next) {
 
 const router = express.Router();
 
+const toClient = o => o ? { ...o, _id: o.id } : o;
+const toClientArr = arr => Array.isArray(arr) ? arr.map(toClient) : arr;
+
 // Get orders for logged-in user (by userId OR matching phone)
 router.get('/user', verifyToken, async (req, res) => {
   try {
@@ -60,7 +63,7 @@ router.get('/user', verifyToken, async (req, res) => {
         .catch(err => console.error('Auto-link error:', err));
     }
 
-    res.json({ success: true, data: orders });
+    res.json({ success: true, data: toClientArr(orders) });
   } catch (err) {
     console.error(err);
     res.status(500).json({ success: false, message: 'Error fetching user orders' });
@@ -78,7 +81,7 @@ router.patch('/:id/cancel', verifyToken, async (req, res) => {
     if (order.status !== 'pending')
       return res.status(400).json({ success: false, message: 'يمكن إلغاء طلبات "قيد المراجعة" فقط' });
     const updated = await prisma.order.update({ where: { id: req.params.id }, data: { status: 'cancelled' } });
-    res.json({ success: true, message: 'تم إلغاء الطلب', data: updated });
+    res.json({ success: true, message: 'تم إلغاء الطلب', data: toClient(updated) });
   } catch (err) {
     console.error(err);
     res.status(500).json({ success: false, message: 'Error cancelling order' });
@@ -115,17 +118,7 @@ router.get('/track/:orderNumber', async (req, res) => {
   try {
     const order = await prisma.order.findUnique({ where: { orderNumber: req.params.orderNumber } });
     if (!order) return res.status(404).json({ success: false, message: 'Order not found' });
-    res.json({
-      success: true,
-      data: {
-        orderNumber: order.orderNumber,
-        status: order.status,
-        totalAmount: order.totalAmount,
-        items: order.items,
-        createdAt: order.createdAt,
-        customerName: order.customerInfo?.name,
-      },
-    });
+    res.json({ success: true, data: toClient(order) });
   } catch (err) {
     console.error(err);
     res.status(500).json({ success: false, message: 'Error tracking order' });
@@ -326,12 +319,7 @@ router.post('/', optionalAuth, async (req, res) => {
     res.status(201).json({
       success: true,
       message: 'Order created successfully',
-      data: {
-        orderNumber: order.orderNumber,
-        orderId: order.id,
-        totalAmount: order.totalAmount,
-        status: order.status,
-      },
+      data: toClient(order),
     });
   } catch (err) {
     console.error(err);
@@ -373,7 +361,7 @@ router.get('/', verifyToken, async (req, res) => {
     const pages = Math.ceil(total / Number(limit));
     res.json({
       success: true,
-      data: orders,
+      data: toClientArr(orders),
       total,
       pages,
       pagination: { current: Number(page), pages, total, limit: Number(limit) },
@@ -390,7 +378,7 @@ router.get('/:id', async (req, res) => {
   try {
     const order = await prisma.order.findUnique({ where: { id: req.params.id } });
     if (!order) return res.status(404).json({ success: false, message: 'Order not found' });
-    res.json({ success: true, data: order });
+    res.json({ success: true, data: toClient(order) });
   } catch (err) {
     console.error(err);
     res.status(500).json({ success: false, message: 'Error fetching order' });
@@ -432,7 +420,7 @@ router.patch('/:id/status', verifyToken, async (req, res) => {
     }
 
     const updated = await prisma.order.update({ where: { id: req.params.id }, data: { status } });
-    res.json({ success: true, message: 'Order status updated successfully', data: updated });
+    res.json({ success: true, message: 'Order status updated successfully', data: toClient(updated) });
   } catch (err) {
     console.error(err);
     if (err.code === 'P2025') return res.status(404).json({ success: false, message: 'Order not found' });
