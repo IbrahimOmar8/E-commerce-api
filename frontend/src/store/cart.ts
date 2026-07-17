@@ -13,6 +13,17 @@ interface CartStore {
   subtotal: () => number;
 }
 
+// Stable product ID: prefer _id (set by toClient on backend), fall back to raw Prisma id
+function pid(p: Product): string {
+  return p._id || (p as unknown as { id?: string }).id || '';
+}
+
+// Normalize a product to always have _id set (handles old localStorage data)
+function normalizeProduct(p: Product): Product {
+  const stableId = pid(p);
+  return stableId && !p._id ? { ...p, _id: stableId } : p;
+}
+
 function getEffectivePrice(product: Product, size?: string | null): number {
   if (size && product.sizes?.length) {
     const sizeData = product.sizes.find(s => s.size === size);
@@ -27,28 +38,30 @@ export const useCartStore = create<CartStore>()(
       items: [],
 
       addItem: (product, quantity, size = null, color = null) => {
-        const unitPrice = getEffectivePrice(product, size);
+        const p = normalizeProduct(product);
+        const key = pid(p);
+        const unitPrice = getEffectivePrice(p, size);
         set(state => {
           const existing = state.items.find(
-            i => i.product._id === product._id && i.size === size && i.color === color
+            i => pid(i.product) === key && i.size === size && i.color === color
           );
           if (existing) {
             return {
               items: state.items.map(i =>
-                i.product._id === product._id && i.size === size && i.color === color
+                pid(i.product) === key && i.size === size && i.color === color
                   ? { ...i, quantity: i.quantity + quantity }
                   : i
               ),
             };
           }
-          return { items: [...state.items, { product, quantity, size, color, unitPrice }] };
+          return { items: [...state.items, { product: p, quantity, size, color, unitPrice }] };
         });
       },
 
       removeItem: (productId, size = null, color = null) => {
         set(state => ({
           items: state.items.filter(
-            i => !(i.product._id === productId && i.size === size && i.color === color)
+            i => !(pid(i.product) === productId && i.size === size && i.color === color)
           ),
         }));
       },
@@ -60,7 +73,7 @@ export const useCartStore = create<CartStore>()(
         }
         set(state => ({
           items: state.items.map(i =>
-            i.product._id === productId && i.size === size && i.color === color ? { ...i, quantity } : i
+            pid(i.product) === productId && i.size === size && i.color === color ? { ...i, quantity } : i
           ),
         }));
       },
@@ -75,6 +88,23 @@ export const useCartStore = create<CartStore>()(
           return sum + price * i.quantity;
         }, 0),
     }),
-    { name: 'clay-sport-cart' }
+    {
+      name: 'clay-sport-cart',
+      version: 1,
+      migrate: (persisted, version) => {
+        const state = persisted as { items?: CartItem[] };
+        if (version < 1 && Array.isArray(state?.items)) {
+          // Normalize old items that had _id: undefined — copy id → _id
+          state.items = state.items.map(item => ({
+            ...item,
+            product: normalizeProduct(item.product),
+          }));
+        }
+        return state as CartStore;
+      },
+    }
   )
 );
+
+// Export pid so cart UI can get a stable product key
+export { pid as getProductId };
