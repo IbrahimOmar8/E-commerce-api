@@ -1,6 +1,5 @@
 'use client';
 import { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useAuthStore } from '@/store/auth';
 import { ordersApi } from '@/lib/api';
@@ -28,12 +27,26 @@ function DeliveryBadge({ region }: { region?: string | null }) {
   );
 }
 
+function mergeOrders(local: Order[], remote: Order[]): Order[] {
+  const map = new Map<string, Order>();
+  for (const o of local) {
+    const key = o.orderNumber || o._id;
+    if (key) map.set(key, o);
+  }
+  for (const o of remote) {
+    const key = o.orderNumber || o._id;
+    if (key) map.set(key, o); // remote wins (has fresher status)
+  }
+  return Array.from(map.values()).sort(
+    (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+  );
+}
+
 export default function OrdersPage() {
   const { user } = useAuthStore();
-  const router = useRouter();
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
-  const [fetchError, setFetchError] = useState('');
+  const [networkError, setNetworkError] = useState(false);
   const [mounted, setMounted] = useState(false);
   const [trackNum, setTrackNum] = useState('');
   const [trackedOrder, setTrackedOrder] = useState<Order | null>(null);
@@ -59,66 +72,56 @@ export default function OrdersPage() {
   useEffect(() => {
     if (!mounted) return;
 
+    // Always load from localStorage first (instant display for everyone)
+    let localOrders: Order[] = [];
+    try {
+      localOrders = JSON.parse(localStorage.getItem('guest-orders') || '[]');
+    } catch { localOrders = []; }
+    setOrders(localOrders);
+
     if (!user) {
-      // Guest: fetch orders saved locally after checkout
-      try {
-        const pending: string[] = JSON.parse(localStorage.getItem('pending-orders') || '[]');
-        if (pending.length === 0) { setLoading(false); return; }
-        Promise.all(
-          pending.map(num => ordersApi.getByNumber(num).then(r => r.data).catch(() => null))
-        ).then(results => {
-          setOrders(results.filter(Boolean) as Order[]);
-        }).finally(() => setLoading(false));
-      } catch {
+      // Guest: also try to refresh old pending-orders format (order numbers only)
+      let pending: string[] = [];
+      try { pending = JSON.parse(localStorage.getItem('pending-orders') || '[]'); } catch { pending = []; }
+
+      if (pending.length === 0) {
         setLoading(false);
+        return;
       }
+      Promise.all(
+        pending.map(num => ordersApi.getByNumber(num).then(r => r.data).catch(() => null))
+      ).then(results => {
+        const fetched = results.filter(Boolean) as Order[];
+        if (fetched.length > 0) {
+          setOrders(prev => mergeOrders(prev, fetched));
+        }
+      }).catch(() => {}).finally(() => setLoading(false));
       return;
     }
 
     if (user.role !== 'user') {
+      // Admin/non-customer: show guest orders from localStorage, no API fetch needed
       setLoading(false);
-      setFetchError('not-user');
       return;
     }
+
+    // Logged-in customer: fetch from API and merge with local
     ordersApi.getMyOrders()
-      .then(res => setOrders(res.data || []))
-      .catch(err => {
-        const msg = err instanceof Error ? err.message : '';
-        if (msg.toLowerCase().includes('token') || msg.includes('401') || msg.includes('403')) {
-          router.push('/account');
-        } else {
-          setFetchError('network');
-        }
+      .then(res => {
+        const remote: Order[] = res.data || [];
+        setOrders(prev => mergeOrders(prev, remote));
+      })
+      .catch(() => {
+        setNetworkError(true);
       })
       .finally(() => setLoading(false));
-  }, [mounted, user, router]);
+  }, [mounted, user]);
 
   if (!mounted) return null;
 
   if (loading) return (
     <div className="max-w-3xl mx-auto px-4 py-16 space-y-4">
       {[1, 2, 3].map(i => <div key={i} className="h-36 skeleton rounded-2xl" />)}
-    </div>
-  );
-
-  if (fetchError === 'not-user') return (
-    <div className="max-w-3xl mx-auto px-4 py-20 text-center">
-      <Package size={48} className="mx-auto mb-4 text-slate-200" />
-      <h2 className="text-xl font-bold text-slate-700 mb-2">هذه الصفحة للعملاء فقط</h2>
-      <p className="text-slate-400 mb-6">سجّل دخول بحساب عميل لعرض طلباتك</p>
-      <Link href="/account" className="bg-amber-500 text-white px-8 py-3 rounded-2xl font-bold hover:bg-amber-600 transition-colors">
-        تسجيل الدخول
-      </Link>
-    </div>
-  );
-
-  if (fetchError === 'network') return (
-    <div className="max-w-3xl mx-auto px-4 py-20 text-center">
-      <p className="text-slate-500 mb-4">تعذّر تحميل الطلبات</p>
-      <button onClick={() => { setFetchError(''); setLoading(true); ordersApi.getMyOrders().then(r => setOrders(r.data || [])).catch(() => setFetchError('network')).finally(() => setLoading(false)); }}
-        className="bg-amber-500 text-white px-6 py-2 rounded-xl font-bold hover:bg-amber-600">
-        إعادة المحاولة
-      </button>
     </div>
   );
 
@@ -142,6 +145,12 @@ export default function OrdersPage() {
           <Link href="/account" className="bg-amber-500 text-white px-5 py-2 rounded-xl text-sm font-bold hover:bg-amber-600 transition-colors whitespace-nowrap">
             تسجيل الدخول
           </Link>
+        </div>
+      )}
+
+      {networkError && (
+        <div className="bg-amber-50 border border-amber-200 rounded-2xl p-4 mb-6 text-sm text-amber-700">
+          تعذّر تحديث الطلبات من الخادم — تظهر البيانات المحفوظة محلياً
         </div>
       )}
 
@@ -212,7 +221,7 @@ export default function OrdersPage() {
             const isCancelled = order.status === 'cancelled';
 
             return (
-              <div key={order._id} className="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden">
+              <div key={order._id || order.orderNumber} className="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden">
                 {/* Order header */}
                 <div className="flex items-center justify-between px-5 py-4 border-b border-slate-50">
                   <div>
@@ -241,9 +250,6 @@ export default function OrdersPage() {
                           }`}>
                             {i < step ? '✓' : i + 1}
                           </div>
-                          {i < STEPS.length - 1 && (
-                            <div className="hidden sm:block absolute" />
-                          )}
                         </div>
                       ))}
                     </div>
@@ -297,7 +303,7 @@ export default function OrdersPage() {
                     <span className="text-xs text-slate-500">
                       {order.paymentMethod === 'cod' ? '💵 الدفع عند الاستلام' : `💳 ${order.paymentMethod?.toUpperCase()}`}
                     </span>
-                    {order.status === 'pending' && user && (
+                    {order.status === 'pending' && user?.role === 'user' && order._id && (
                       <button
                         onClick={() => handleCancel(order._id)}
                         disabled={cancellingId === order._id}
