@@ -79,28 +79,8 @@ export default function OrdersPage() {
     } catch { localOrders = []; }
     setOrders(localOrders);
 
-    if (!user) {
-      // Guest: also try to refresh old pending-orders format (order numbers only)
-      let pending: string[] = [];
-      try { pending = JSON.parse(localStorage.getItem('pending-orders') || '[]'); } catch { pending = []; }
-
-      if (pending.length === 0) {
-        setLoading(false);
-        return;
-      }
-      Promise.all(
-        pending.map(num => ordersApi.getByNumber(num).then(r => r.data).catch(() => null))
-      ).then(results => {
-        const fetched = results.filter(Boolean) as Order[];
-        if (fetched.length > 0) {
-          setOrders(prev => mergeOrders(prev, fetched));
-        }
-      }).catch(() => {}).finally(() => setLoading(false));
-      return;
-    }
-
-    if (user.role !== 'user') {
-      // Admin/non-customer: show guest orders from localStorage, no API fetch needed
+    if (!user || user.role !== 'user') {
+      // Guest or admin: localStorage only — no API calls
       setLoading(false);
       return;
     }
